@@ -31,6 +31,10 @@ export default function Tabs(props: TabsProps) {
 	const activeIndex = props.activeIndex ?? 0;
 	const activeTab = tabs[activeIndex] ?? tabs[0]!;
 
+	if (props._state && props._state.activeIndex === undefined) {
+		props._state.activeIndex = 0;
+	}
+
 	return (
 		<div style={{ border: "1px solid #ddd", borderRadius: "8px", overflow: "hidden" }}>
 			<div style={{ display: "flex", borderBottom: "1px solid #ddd" }}>

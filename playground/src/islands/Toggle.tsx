@@ -17,6 +17,10 @@ export default function Toggle(props: ToggleProps) {
 	const isOpen = props.open ?? true;
 	const label = props.label ?? "Toggle";
 
+	if (props._state && props._state.open === undefined) {
+		props._state.open = isOpen;
+	}
+
 	return (
 		<div
 			style={{

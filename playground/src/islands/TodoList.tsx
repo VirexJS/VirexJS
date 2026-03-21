@@ -19,13 +19,20 @@ interface TodoListProps {
 }
 
 export default function TodoList(props: TodoListProps) {
-	const items: Todo[] = (props.items as Todo[]) ?? [
+	const defaultItems: Todo[] = [
 		{ id: 1, text: "Learn VirexJS", done: true },
 		{ id: 2, text: "Build an app", done: false },
 		{ id: 3, text: "Ship to production", done: false },
 	];
+	const items: Todo[] = (props.items as Todo[]) ?? defaultItems;
 	const nextId = (props.nextId as number) ?? 4;
 	const remaining = items.filter((t) => !t.done).length;
+
+	// Bootstrap state on first hydration call
+	if (props._state) {
+		if (props._state.items === undefined) props._state.items = [...defaultItems];
+		if (props._state.nextId === undefined) props._state.nextId = 4;
+	}
 
 	return (
 		<div

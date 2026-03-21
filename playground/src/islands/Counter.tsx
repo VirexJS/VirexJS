@@ -17,6 +17,10 @@ interface CounterProps {
 
 export default function Counter(props: CounterProps) {
 	const count = props.count ?? props.initial ?? 0;
+	// Bootstrap state on first hydration call
+	if (props._state && props._state.count === undefined) {
+		props._state.count = count;
+	}
 
 	return (
 		<div

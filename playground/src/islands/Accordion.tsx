@@ -37,6 +37,10 @@ export default function Accordion(props: AccordionProps) {
 	];
 	const openIndex = (props.openIndex as number) ?? -1;
 
+	if (props._state && props._state.openIndex === undefined) {
+		props._state.openIndex = -1;
+	}
+
 	return (
 		<div style={{ border: "1px solid #ddd", borderRadius: "8px", overflow: "hidden" }}>
 			{items.map((item, i) => (

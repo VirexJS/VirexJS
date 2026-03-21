@@ -16,6 +16,11 @@ export default function Timer(props: TimerProps) {
 	const elapsed = (props.elapsed as number) ?? 0;
 	const running = (props.running as boolean) ?? false;
 
+	if (props._state) {
+		if (props._state.elapsed === undefined) props._state.elapsed = 0;
+		if (props._state.running === undefined) props._state.running = false;
+	}
+
 	const mins = Math.floor(elapsed / 60);
 	const secs = elapsed % 60;
 	const display = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;

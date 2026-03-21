@@ -22,6 +22,9 @@ const COLORS = [
 
 export default function ColorPicker(props: ColorPickerProps) {
 	const selected = props.color ?? "#3b82f6";
+	if (props._state && props._state.color === undefined) {
+		props._state.color = selected;
+	}
 
 	return (
 		<div
