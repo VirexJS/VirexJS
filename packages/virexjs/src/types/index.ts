@@ -102,6 +102,10 @@ export { defineAction, actionRedirect, actionJson, parseFormData } from "../serv
 export type { ActionContext, ActionHandler } from "../server/action";
 export { requestId } from "../server/request-id";
 export { healthCheck } from "../server/health";
+export { csrf } from "../server/csrf";
+export { bodyLimit } from "../server/body-limit";
+export { gracefulShutdown } from "../server/graceful";
+export type { ShutdownOptions, ShutdownHandle } from "../server/graceful";
 export type { StructuredData, ArticleLD, BreadcrumbLD, FAQLD } from "../render/json-ld";
 export type { MiddlewareContext, MiddlewareNext, MiddlewareFn } from "../server/middleware";
 export type { VirexConfig } from "../config/types";
