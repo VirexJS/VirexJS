@@ -80,7 +80,10 @@ export function createSSEStream(
 		},
 	});
 
-	function send(eventOrData: string | Record<string, unknown>, data?: string | Record<string, unknown>): void {
+	function send(
+		eventOrData: string | Record<string, unknown>,
+		data?: string | Record<string, unknown>,
+	): void {
 		if (!isOpen || !controller) return;
 
 		let eventName: string | undefined;
@@ -92,9 +95,7 @@ export function createSSEStream(
 			eventData = typeof data === "object" ? JSON.stringify(data) : data;
 		} else {
 			// send(data) form
-			eventData = typeof eventOrData === "object"
-				? JSON.stringify(eventOrData)
-				: eventOrData;
+			eventData = typeof eventOrData === "object" ? JSON.stringify(eventOrData) : eventOrData;
 		}
 
 		let message = "";

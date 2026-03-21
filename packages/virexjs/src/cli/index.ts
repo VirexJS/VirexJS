@@ -25,8 +25,6 @@ switch (command) {
 	case "-v":
 		console.log("virexjs 0.1.0");
 		break;
-	case "--help":
-	case "-h":
 	default:
 		printHelp();
 }

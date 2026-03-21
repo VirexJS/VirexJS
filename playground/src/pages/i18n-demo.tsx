@@ -1,5 +1,5 @@
-import type { PageProps, LoaderContext } from "virexjs";
-import { useHead, createI18n, defineTranslations, detectLocale } from "virexjs";
+import type { LoaderContext, PageProps } from "virexjs";
+import { createI18n, defineTranslations, detectLocale, useHead } from "virexjs";
 import Default from "../layouts/Default";
 
 const en = defineTranslations({

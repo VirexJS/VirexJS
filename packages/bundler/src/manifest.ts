@@ -11,10 +11,7 @@ export interface BuildManifest {
 /**
  * Generate and write a build manifest file.
  */
-export async function writeBuildManifest(
-	outDir: string,
-	manifest: BuildManifest,
-): Promise<void> {
+export async function writeBuildManifest(outDir: string, manifest: BuildManifest): Promise<void> {
 	const manifestPath = join(outDir, "manifest.json");
 	await Bun.write(manifestPath, JSON.stringify(manifest, null, 2));
 }

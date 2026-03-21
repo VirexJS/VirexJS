@@ -40,11 +40,7 @@ export function gracefulShutdown(
 	server: { stop: (closeActiveConnections?: boolean) => void },
 	options?: ShutdownOptions,
 ): ShutdownHandle {
-	const {
-		timeout = 10_000,
-		onShutdown,
-		signals = ["SIGINT", "SIGTERM"],
-	} = options ?? {};
+	const { timeout = 10_000, onShutdown, signals = ["SIGINT", "SIGTERM"] } = options ?? {};
 
 	let shuttingDown = false;
 

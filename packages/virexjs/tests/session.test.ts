@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
-import { session, createMemoryStore } from "../src/server/session";
-import { runMiddleware, type MiddlewareContext } from "../src/server/middleware";
+import { describe, expect, test } from "bun:test";
+import { type MiddlewareContext, runMiddleware } from "../src/server/middleware";
+import { createMemoryStore, session } from "../src/server/session";
 
 interface SessionAPI {
 	get: (k: string) => unknown;
@@ -32,11 +32,7 @@ async function runSession(
 	handler?: () => Promise<Response>,
 ): Promise<Response> {
 	const mw = session(options);
-	return runMiddleware(
-		[mw],
-		ctx,
-		handler ?? (async () => new Response("ok")),
-	);
+	return runMiddleware([mw], ctx, handler ?? (async () => new Response("ok")));
 }
 
 describe("session middleware", () => {
@@ -78,7 +74,7 @@ describe("session middleware", () => {
 		// Extract session cookie
 		const setCookie = res1.headers.get("Set-Cookie")!;
 		const sidMatch = setCookie.match(/vrx\.sid=([^;]+)/);
-		const cookie = `vrx.sid=${sidMatch![1]}`;
+		const cookie = `vrx.sid=${sidMatch?.[1]}`;
 
 		// Request 2: Read session data
 		const ctx2 = makeCtx(cookie);
@@ -105,7 +101,7 @@ describe("session middleware", () => {
 
 		const setCookie = res1.headers.get("Set-Cookie")!;
 		const sidMatch = setCookie.match(/vrx\.sid=([^;]+)/);
-		const cookie = `vrx.sid=${sidMatch![1]}`;
+		const cookie = `vrx.sid=${sidMatch?.[1]}`;
 
 		// Request 2: Destroy session
 		const ctx2 = makeCtx(cookie);

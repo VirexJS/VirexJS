@@ -1,8 +1,8 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
+import { flushHeadTags, resetHeadCollector } from "../src/render/head";
+import type { VNode } from "../src/render/jsx";
 import { h, renderToString } from "../src/render/jsx";
 import { useHead } from "../src/render/use-head";
-import { resetHeadCollector, flushHeadTags } from "../src/render/head";
-import type { VNode } from "../src/render/jsx";
 
 beforeEach(() => {
 	resetHeadCollector();

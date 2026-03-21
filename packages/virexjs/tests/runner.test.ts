@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
-import { PluginRunner } from "../src/plugin/runner";
+import { describe, expect, test } from "bun:test";
 import { definePlugin } from "../src/plugin/index";
+import { PluginRunner } from "../src/plugin/runner";
 
 // PluginRunner is primarily tested via plugin.test.ts.
 // This file ensures direct import and edge cases.
@@ -33,7 +33,9 @@ describe("PluginRunner direct import", () => {
 			definePlugin({ name: "no-hooks" }),
 			definePlugin({
 				name: "has-hooks",
-				configResolved() { calls.push("config"); },
+				configResolved() {
+					calls.push("config");
+				},
 			}),
 			definePlugin({ name: "also-no-hooks" }),
 		]);

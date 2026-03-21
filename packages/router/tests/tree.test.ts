@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { buildTree } from "../src/tree";
-import type { ScannedRoute, RouteNode } from "../src/types";
+import type { ScannedRoute } from "../src/types";
 
 function route(relativePath: string, segments: string[]): ScannedRoute {
 	return { relativePath, absolutePath: `/pages/${relativePath}`, segments };
@@ -25,9 +25,9 @@ describe("buildTree", () => {
 	test("single static route", () => {
 		const tree = buildTree([route("about.tsx", ["about"])]);
 		expect(tree.children).toHaveLength(1);
-		expect(tree.children[0]!.segment).toBe("about");
-		expect(tree.children[0]!.filePath).toBe("/pages/about.tsx");
-		expect(tree.children[0]!.isDynamic).toBe(false);
+		expect(tree.children[0]?.segment).toBe("about");
+		expect(tree.children[0]?.filePath).toBe("/pages/about.tsx");
+		expect(tree.children[0]?.isDynamic).toBe(false);
 	});
 
 	test("nested static routes", () => {
@@ -41,7 +41,7 @@ describe("buildTree", () => {
 		expect(blog.segment).toBe("blog");
 		expect(blog.filePath).toBe("/pages/blog/index.tsx");
 		expect(blog.children).toHaveLength(1);
-		expect(blog.children[0]!.segment).toBe("archive");
+		expect(blog.children[0]?.segment).toBe("archive");
 	});
 });
 
@@ -53,16 +53,16 @@ describe("dynamic routes", () => {
 		const slugNode = tree.children[0]!.children[0]!;
 		expect(slugNode.isDynamic).toBe(true);
 		expect(slugNode.params).toHaveLength(1);
-		expect(slugNode.params[0]!.name).toBe("slug");
-		expect(slugNode.params[0]!.type).toBe("single");
+		expect(slugNode.params[0]?.name).toBe("slug");
+		expect(slugNode.params[0]?.type).toBe("single");
 	});
 
 	test("catch-all segment", () => {
 		const tree = buildTree([route("docs/[...rest].tsx", ["docs", "[...rest]"])]);
 		const restNode = tree.children[0]!.children[0]!;
 		expect(restNode.isCatchAll).toBe(true);
-		expect(restNode.params[0]!.name).toBe("rest");
-		expect(restNode.params[0]!.type).toBe("catchAll");
+		expect(restNode.params[0]?.name).toBe("rest");
+		expect(restNode.params[0]?.type).toBe("catchAll");
 	});
 
 	test("multiple dynamic params", () => {
@@ -75,9 +75,9 @@ describe("dynamic routes", () => {
 		const postId = posts.children[0]!;
 
 		expect(id.isDynamic).toBe(true);
-		expect(id.params[0]!.name).toBe("id");
+		expect(id.params[0]?.name).toBe("id");
 		expect(postId.isDynamic).toBe(true);
-		expect(postId.params[0]!.name).toBe("postId");
+		expect(postId.params[0]?.name).toBe("postId");
 	});
 });
 
@@ -101,8 +101,8 @@ describe("priority sorting", () => {
 		]);
 
 		const blog = tree.children[0]!;
-		expect(blog.children[0]!.segment).toBe("archive"); // static first
-		expect(blog.children[1]!.isDynamic).toBe(true); // dynamic second
+		expect(blog.children[0]?.segment).toBe("archive"); // static first
+		expect(blog.children[1]?.isDynamic).toBe(true); // dynamic second
 	});
 
 	test("dynamic before catch-all", () => {
@@ -112,8 +112,8 @@ describe("priority sorting", () => {
 		]);
 
 		const docs = tree.children[0]!;
-		expect(docs.children[0]!.isDynamic).toBe(true); // dynamic first
-		expect(docs.children[1]!.isCatchAll).toBe(true); // catch-all last
+		expect(docs.children[0]?.isDynamic).toBe(true); // dynamic first
+		expect(docs.children[1]?.isCatchAll).toBe(true); // catch-all last
 	});
 
 	test("full priority order: static > group > dynamic > catch-all", () => {
@@ -125,10 +125,10 @@ describe("priority sorting", () => {
 		]);
 
 		const page = tree.children[0]!;
-		expect(page.children[0]!.segment).toBe("settings"); // static = 0
-		expect(page.children[1]!.isGroup).toBe(true); // group = 1
-		expect(page.children[2]!.isDynamic).toBe(true); // dynamic = 2
-		expect(page.children[3]!.isCatchAll).toBe(true); // catch-all = 3
+		expect(page.children[0]?.segment).toBe("settings"); // static = 0
+		expect(page.children[1]?.isGroup).toBe(true); // group = 1
+		expect(page.children[2]?.isDynamic).toBe(true); // dynamic = 2
+		expect(page.children[3]?.isCatchAll).toBe(true); // catch-all = 3
 	});
 
 	test("alphabetical within same priority", () => {
@@ -138,9 +138,9 @@ describe("priority sorting", () => {
 			route("blog.tsx", ["blog"]),
 		]);
 
-		expect(tree.children[0]!.segment).toBe("about");
-		expect(tree.children[1]!.segment).toBe("blog");
-		expect(tree.children[2]!.segment).toBe("contact");
+		expect(tree.children[0]?.segment).toBe("about");
+		expect(tree.children[1]?.segment).toBe("blog");
+		expect(tree.children[2]?.segment).toBe("contact");
 	});
 });
 

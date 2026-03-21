@@ -1,10 +1,10 @@
-import { describe, test, expect, afterAll } from "bun:test";
-import { generate } from "../src/cli/generate";
-import { existsSync, readFileSync, rmSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { afterAll, describe, expect, test } from "bun:test";
+import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { generate } from "../src/cli/generate";
 
-const testDir = join(tmpdir(), "virex-generate-test-" + Date.now());
+const testDir = join(tmpdir(), `virex-generate-test-${Date.now()}`);
 const originalCwd = process.cwd();
 
 // Setup a fake project structure

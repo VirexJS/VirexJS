@@ -1,14 +1,14 @@
-import { describe, test, expect } from "bun:test";
-import {
-	renderComponent,
-	createTestRequest,
-	createTestLoaderContext,
-	createTestMiddlewareContext,
-	assertHTML,
-} from "../src/testing/index";
-import { h } from "../src/render/jsx";
+import { describe, expect, test } from "bun:test";
 import { Head } from "../src/render/head";
 import type { VNode } from "../src/render/jsx";
+import { h } from "../src/render/jsx";
+import {
+	assertHTML,
+	createTestLoaderContext,
+	createTestMiddlewareContext,
+	createTestRequest,
+	renderComponent,
+} from "../src/testing/index";
 
 // ─── renderComponent ────────────────────────────────────────────────────────
 
@@ -23,10 +23,7 @@ describe("renderComponent", () => {
 
 	test("collects head tags", () => {
 		function Page(_props: Record<string, unknown>): VNode {
-			return h("div", null,
-				h(Head, null, h("title", null, "Test Page")),
-				h("p", null, "content"),
-			);
+			return h("div", null, h(Head, null, h("title", null, "Test Page")), h("p", null, "content"));
 		}
 		const { html, head } = renderComponent(Page, {});
 		expect(html).toBe("<div><p>content</p></div>");
@@ -140,7 +137,8 @@ describe("createTestMiddlewareContext", () => {
 // ─── assertHTML ─────────────────────────────────────────────────────────────
 
 describe("assertHTML", () => {
-	const html = '<div class="container"><h1>Hello World</h1><p>Test</p><a href="/about">About</a></div>';
+	const html =
+		'<div class="container"><h1>Hello World</h1><p>Test</p><a href="/about">About</a></div>';
 
 	test("contains tag", () => {
 		expect(() => assertHTML(html).contains("h1")).not.toThrow();

@@ -14,9 +14,8 @@ export default function About() {
 		<Default>
 			<h1>About VirexJS</h1>
 			<p style={{ color: "#666", fontSize: "18px", lineHeight: "1.6" }}>
-				VirexJS is a next-generation web framework that ships HTML, not JavaScript.
-				Built on Bun runtime, it delivers blazing-fast performance with zero client-side
-				JavaScript by default.
+				VirexJS is a next-generation web framework that ships HTML, not JavaScript. Built on Bun
+				runtime, it delivers blazing-fast performance with zero client-side JavaScript by default.
 			</p>
 
 			<h2>Core Principles</h2>

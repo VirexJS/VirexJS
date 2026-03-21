@@ -1,10 +1,10 @@
-import { describe, test, expect, beforeAll, afterAll } from "bun:test";
-import { processCSS } from "../src/css";
-import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { processCSS } from "../src/css";
 
-const testDir = join(tmpdir(), "virex-css-test-" + Date.now());
+const testDir = join(tmpdir(), `virex-css-test-${Date.now()}`);
 const srcDir = join(testDir, "src");
 const outDir = join(testDir, "out");
 
@@ -43,7 +43,9 @@ describe("processCSS", () => {
 	});
 
 	test("minifies CSS when minify is true", async () => {
-		writeFileSync(join(srcDir, "styles", "minify-test.css"), `
+		writeFileSync(
+			join(srcDir, "styles", "minify-test.css"),
+			`
 /* This is a comment */
 .container {
     max-width: 1200px;
@@ -53,7 +55,8 @@ describe("processCSS", () => {
 
 .empty-rule {
 }
-`);
+`,
+		);
 
 		const result = await processCSS({ srcDir, outDir, minify: true });
 		expect(result).not.toBeNull();
@@ -85,6 +88,6 @@ describe("processCSS", () => {
 		const r1 = await processCSS({ srcDir: dir1, outDir: out1, minify: false });
 		const r2 = await processCSS({ srcDir: dir2, outDir: out2, minify: false });
 
-		expect(r1!.filename).not.toBe(r2!.filename);
+		expect(r1?.filename).not.toBe(r2?.filename);
 	});
 });

@@ -1,6 +1,6 @@
-import { h } from "./jsx";
 import { Head } from "./head";
 import type { VNode } from "./jsx";
+import { h } from "./jsx";
 
 /** Options for useHead() — supports common head tags as structured data */
 export interface UseHeadOptions {
@@ -77,7 +77,8 @@ export function useHead(options: UseHeadOptions): VNode {
 	if (options.og) {
 		const og = options.og;
 		if (og.title) children.push(h("meta", { property: "og:title", content: og.title }));
-		if (og.description) children.push(h("meta", { property: "og:description", content: og.description }));
+		if (og.description)
+			children.push(h("meta", { property: "og:description", content: og.description }));
 		if (og.image) children.push(h("meta", { property: "og:image", content: og.image }));
 		if (og.type) children.push(h("meta", { property: "og:type", content: og.type }));
 		if (og.url) children.push(h("meta", { property: "og:url", content: og.url }));
@@ -89,7 +90,8 @@ export function useHead(options: UseHeadOptions): VNode {
 		const tw = options.twitter;
 		if (tw.card) children.push(h("meta", { name: "twitter:card", content: tw.card }));
 		if (tw.title) children.push(h("meta", { name: "twitter:title", content: tw.title }));
-		if (tw.description) children.push(h("meta", { name: "twitter:description", content: tw.description }));
+		if (tw.description)
+			children.push(h("meta", { name: "twitter:description", content: tw.description }));
 		if (tw.image) children.push(h("meta", { name: "twitter:image", content: tw.image }));
 		if (tw.site) children.push(h("meta", { name: "twitter:site", content: tw.site }));
 		if (tw.creator) children.push(h("meta", { name: "twitter:creator", content: tw.creator }));

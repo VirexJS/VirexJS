@@ -112,7 +112,7 @@ function defaultKeyGenerator(request: Request): string {
 	// Check common proxy headers
 	const forwarded = request.headers.get("X-Forwarded-For");
 	if (forwarded) {
-		return forwarded.split(",")[0]!.trim();
+		return forwarded.split(",")[0]?.trim() ?? "default";
 	}
 
 	const realIp = request.headers.get("X-Real-IP");

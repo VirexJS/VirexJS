@@ -1,5 +1,5 @@
-import { mkdirSync, writeFileSync, existsSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 /**
  * `virex generate` command — scaffold pages, components, API routes, and middleware.
@@ -176,9 +176,9 @@ function writeFileSafe(filePath: string, content: string): void {
 function toComponentName(name: string): string {
 	// "blog/[slug]" → "BlogSlug", "about" → "About"
 	return name
-		.split(/[\/\-_]/)
+		.split(/[/\-_]/)
 		.map((part) => {
-			const clean = part.replace(/[\[\]\.]/g, "");
+			const clean = part.replace(/[[\].]/g, "");
 			return clean.charAt(0).toUpperCase() + clean.slice(1);
 		})
 		.join("");

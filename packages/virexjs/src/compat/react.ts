@@ -8,18 +8,17 @@
  * Usage:
  *   import { useState, useEffect, createContext } from "virexjs/compat/react";
  */
-import { h, Fragment, renderToString } from "../render/jsx";
-import type { VNode, VElement } from "../render/jsx";
+
+import type { VElement, VNode } from "../render/jsx";
+import { Fragment, h, renderToString } from "../render/jsx";
 
 // ─── Core ───────────────────────────────────────────────────────────────────
 
 /** React.createElement compatibility — delegates to VirexJS's h() */
 export const createElement = h;
 
-export { Fragment };
-
 /** Render a VNode tree to string (React.renderToString equivalent) */
-export { renderToString };
+export { Fragment, renderToString };
 
 // ─── isValidElement ─────────────────────────────────────────────────────────
 
@@ -94,9 +93,7 @@ export const Children = {
  * React.memo compatibility — returns component as-is.
  * Server-side rendering doesn't benefit from memoization.
  */
-export function memo<T extends (props: Record<string, unknown>) => VNode>(
-	component: T,
-): T {
+export function memo<T extends (props: Record<string, unknown>) => VNode>(component: T): T {
 	return component;
 }
 
@@ -172,17 +169,17 @@ export function useState<T>(initial: T | (() => T)): [T, (value: T | ((prev: T) 
 
 /** SSR stub: useReducer returns [initialState, no-op dispatch] */
 export function useReducer<S, A>(
-	reducer: (state: S, action: A) => S,
+	_reducer: (state: S, action: A) => S,
 	initialState: S,
 ): [S, (action: A) => void] {
 	return [initialState, () => {}];
 }
 
 /** SSR stub: useEffect is a no-op (effects don't run on server) */
-export function useEffect(_effect: () => void | (() => void), _deps?: unknown[]): void {}
+export function useEffect(_effect: () => undefined | (() => void), _deps?: unknown[]): void {}
 
 /** SSR stub: useLayoutEffect is a no-op */
-export function useLayoutEffect(_effect: () => void | (() => void), _deps?: unknown[]): void {}
+export function useLayoutEffect(_effect: () => undefined | (() => void), _deps?: unknown[]): void {}
 
 /** SSR stub: useRef returns a ref object with .current */
 export function useRef<T>(initial: T): { current: T } {
@@ -195,7 +192,10 @@ export function useMemo<T>(factory: () => T, _deps?: unknown[]): T {
 }
 
 /** SSR stub: useCallback returns the callback as-is */
-export function useCallback<T extends (...args: unknown[]) => unknown>(callback: T, _deps?: unknown[]): T {
+export function useCallback<T extends (...args: unknown[]) => unknown>(
+	callback: T,
+	_deps?: unknown[],
+): T {
 	return callback;
 }
 

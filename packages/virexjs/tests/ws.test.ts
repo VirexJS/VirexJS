@@ -1,12 +1,16 @@
-import { describe, test, expect, afterAll } from "bun:test";
-import { defineWSRoute, createWSServer } from "../src/server/ws";
+import { afterAll, describe, expect, test } from "bun:test";
+import { createWSServer, defineWSRoute } from "../src/server/ws";
 
 describe("defineWSRoute", () => {
 	test("returns the route definition", () => {
 		const route = defineWSRoute({
 			path: "/ws/echo",
-			open(ws) { ws.send("connected"); },
-			message(ws, msg) { ws.send(`echo: ${msg}`); },
+			open(ws) {
+				ws.send("connected");
+			},
+			message(ws, msg) {
+				ws.send(`echo: ${msg}`);
+			},
 		});
 		expect(route.path).toBe("/ws/echo");
 		expect(typeof route.open).toBe("function");
@@ -30,9 +34,15 @@ describe("createWSServer", () => {
 			routes: [
 				defineWSRoute({
 					path: "/ws/test",
-					open() { events.push("open"); },
-					message(_ws, msg) { events.push(`msg:${msg}`); },
-					close() { events.push("close"); },
+					open() {
+						events.push("open");
+					},
+					message(_ws, msg) {
+						events.push(`msg:${msg}`);
+					},
+					close() {
+						events.push("close");
+					},
 				}),
 			],
 		});
@@ -61,7 +71,9 @@ describe("createWSServer", () => {
 			routes: [
 				defineWSRoute({
 					path: "/ws/echo",
-					message(ws, msg) { ws.send(`echo: ${msg}`); },
+					message(ws, msg) {
+						ws.send(`echo: ${msg}`);
+					},
 				}),
 			],
 		});
@@ -96,7 +108,9 @@ describe("createWSServer", () => {
 					upgrade(req) {
 						return req.headers.get("X-Token") === "secret";
 					},
-					message(ws, msg) { ws.send(msg); },
+					message(ws, msg) {
+						ws.send(msg);
+					},
 				}),
 			],
 		});

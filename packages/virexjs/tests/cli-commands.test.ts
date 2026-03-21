@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 
 // Test that CLI modules export the correct functions
 describe("CLI module exports", () => {
@@ -36,7 +36,10 @@ describe("CLI module exports", () => {
 describe("CLI index dispatches commands", () => {
 	test("index.ts is a valid module", async () => {
 		// Just verify it can be parsed without error
-		const filePath = new URL("../src/cli/index.ts", import.meta.url).pathname.replace(/^\/([A-Z]:)/, "$1");
+		const filePath = new URL("../src/cli/index.ts", import.meta.url).pathname.replace(
+			/^\/([A-Z]:)/,
+			"$1",
+		);
 		const content = await Bun.file(filePath).text();
 		expect(content).toContain("switch (command)");
 		expect(content).toContain('"dev"');

@@ -1,6 +1,6 @@
 import { join } from "node:path";
-import type { VirexConfig } from "./types";
 import { DEFAULT_CONFIG } from "./defaults";
+import type { VirexConfig } from "./types";
 
 /**
  * Load config from virex.config.ts in the current working directory.
@@ -36,10 +36,7 @@ function deepMerge(
 		const sourceVal = source[key];
 		const targetVal = target[key];
 
-		if (
-			isPlainObject(sourceVal) &&
-			isPlainObject(targetVal)
-		) {
+		if (isPlainObject(sourceVal) && isPlainObject(targetVal)) {
 			result[key] = deepMerge(
 				targetVal as Record<string, unknown>,
 				sourceVal as Record<string, unknown>,
@@ -56,5 +53,5 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export type { VirexConfig } from "./types";
 export { DEFAULT_CONFIG } from "./defaults";
+export type { VirexConfig } from "./types";

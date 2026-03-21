@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -17,10 +17,7 @@ import { join } from "node:path";
  *
  * Variables are also set on process.env.
  */
-export function loadEnv(
-	mode?: string,
-	cwd?: string,
-): Record<string, string> {
+export function loadEnv(mode?: string, cwd?: string): Record<string, string> {
 	const dir = cwd ?? process.cwd();
 	const result: Record<string, string> = {};
 
@@ -91,13 +88,20 @@ export function parseEnvFile(content: string): Record<string, string> {
 		if (!key || /\s/.test(key)) continue;
 
 		// Handle quoted values
-		if ((value.startsWith('"') && value.endsWith('"')) ||
-			(value.startsWith("'") && value.endsWith("'"))) {
+		if (
+			(value.startsWith('"') && value.endsWith('"')) ||
+			(value.startsWith("'") && value.endsWith("'"))
+		) {
 			value = value.slice(1, -1);
 		}
 
 		// Handle escape sequences in double-quoted values
-		if (rawLine.slice(eqIndex + 1).trim().startsWith('"')) {
+		if (
+			rawLine
+				.slice(eqIndex + 1)
+				.trim()
+				.startsWith('"')
+		) {
 			value = value
 				.replace(/\\n/g, "\n")
 				.replace(/\\r/g, "\r")
@@ -106,8 +110,16 @@ export function parseEnvFile(content: string): Record<string, string> {
 		}
 
 		// Strip inline comments (only for unquoted values)
-		if (!rawLine.slice(eqIndex + 1).trim().startsWith('"') &&
-			!rawLine.slice(eqIndex + 1).trim().startsWith("'")) {
+		if (
+			!rawLine
+				.slice(eqIndex + 1)
+				.trim()
+				.startsWith('"') &&
+			!rawLine
+				.slice(eqIndex + 1)
+				.trim()
+				.startsWith("'")
+		) {
 			const commentIndex = value.indexOf(" #");
 			if (commentIndex >= 0) {
 				value = value.slice(0, commentIndex).trim();

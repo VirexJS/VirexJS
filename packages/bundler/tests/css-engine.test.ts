@@ -1,5 +1,5 @@
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { generateUtilityCSS } from "../src/css-engine";
 
@@ -91,7 +91,10 @@ describe("generateUtilityCSS", () => {
 	});
 
 	test("handles multiple classes on same element", () => {
-		createFile("page.tsx", '<div className="flex items-center justify-between p-4 bg-white rounded-lg shadow">');
+		createFile(
+			"page.tsx",
+			'<div className="flex items-center justify-between p-4 bg-white rounded-lg shadow">',
+		);
 		const css = generateUtilityCSS(TEST_DIR);
 		expect(css).toContain(".flex{display:flex}");
 		expect(css).toContain(".items-center");

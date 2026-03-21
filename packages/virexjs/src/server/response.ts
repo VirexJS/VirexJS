@@ -12,7 +12,10 @@ export function redirect(url: string, status: 301 | 302 | 303 | 307 | 308 = 302)
 }
 
 /** Return a JSON response */
-export function json<T>(data: T, init?: { status?: number; headers?: Record<string, string> }): Response {
+export function json<T>(
+	data: T,
+	init?: { status?: number; headers?: Record<string, string> },
+): Response {
 	return new Response(JSON.stringify(data), {
 		status: init?.status ?? 200,
 		headers: {
@@ -23,7 +26,10 @@ export function json<T>(data: T, init?: { status?: number; headers?: Record<stri
 }
 
 /** Return an HTML response */
-export function html(body: string, init?: { status?: number; headers?: Record<string, string> }): Response {
+export function html(
+	body: string,
+	init?: { status?: number; headers?: Record<string, string> },
+): Response {
 	return new Response(body, {
 		status: init?.status ?? 200,
 		headers: {
@@ -39,7 +45,10 @@ export function notFound(message = "Not Found"): Response {
 }
 
 /** Return a plain text response */
-export function text(body: string, init?: { status?: number; headers?: Record<string, string> }): Response {
+export function text(
+	body: string,
+	init?: { status?: number; headers?: Record<string, string> },
+): Response {
 	return new Response(body, {
 		status: init?.status ?? 200,
 		headers: {

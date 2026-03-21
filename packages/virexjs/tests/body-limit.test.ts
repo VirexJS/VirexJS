@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { bodyLimit } from "../src/server/body-limit";
-import { runMiddleware, type MiddlewareContext } from "../src/server/middleware";
+import { type MiddlewareContext, runMiddleware } from "../src/server/middleware";
 
 function makeCtx(method: string, body?: string, contentLength?: string): MiddlewareContext {
 	const headers = new Headers();

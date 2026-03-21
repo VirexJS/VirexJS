@@ -1,4 +1,4 @@
-import { defineAPIRoute, json, notFound } from "virexjs";
+import { defineAPIRoute, json } from "virexjs";
 
 export const GET = defineAPIRoute(({ params }) => {
 	return json({ message: "Hello from VirexJS!", timestamp: Date.now() });

@@ -156,7 +156,7 @@ export function detectLocale(
 		}
 
 		// Check if any available locale starts with the base
-		const prefixMatch = availableLocales.find((l) => l.startsWith(base + "-"));
+		const prefixMatch = availableLocales.find((l) => l.startsWith(`${base}-`));
 		if (prefixMatch) {
 			return prefixMatch;
 		}
@@ -168,7 +168,10 @@ export function detectLocale(
 // ─── Internal helpers ───────────────────────────────────────────────────────
 
 /** Look up a dot-notation key in a translations object */
-function lookupKey(translations: Translations | undefined, key: string): TranslationValue | undefined {
+function lookupKey(
+	translations: Translations | undefined,
+	key: string,
+): TranslationValue | undefined {
 	if (!translations) return undefined;
 
 	const parts = key.split(".");
@@ -199,7 +202,9 @@ function parseAcceptLanguage(header: string): Array<{ lang: string; q: number }>
 		.split(",")
 		.map((part) => {
 			const trimmed = part.trim();
-			const [lang, ...rest] = trimmed.split(";");
+			const parts = trimmed.split(";");
+			const lang = parts[0] ?? "";
+			const rest = parts.slice(1);
 			let q = 1;
 			for (const param of rest) {
 				const match = param.trim().match(/^q=(\d*\.?\d+)$/);
@@ -207,7 +212,7 @@ function parseAcceptLanguage(header: string): Array<{ lang: string; q: number }>
 					q = Number.parseFloat(match[1]!);
 				}
 			}
-			return { lang: lang!.trim(), q };
+			return { lang: lang.trim(), q };
 		})
 		.sort((a, b) => b.q - a.q);
 }

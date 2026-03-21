@@ -1,10 +1,10 @@
-import { describe, test, expect, afterAll } from "bun:test";
-import { bundleIslands } from "../src/island-bundle";
-import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { afterAll, describe, expect, test } from "bun:test";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { bundleIslands } from "../src/island-bundle";
 
-const testDir = join(tmpdir(), "virex-island-bundle-test-" + Date.now());
+const testDir = join(tmpdir(), `virex-island-bundle-test-${Date.now()}`);
 
 afterAll(() => {
 	rmSync(testDir, { recursive: true, force: true });
@@ -28,11 +28,14 @@ describe("bundleIslands", () => {
 		mkdirSync(join(srcDir, "islands"), { recursive: true });
 		mkdirSync(outDir, { recursive: true });
 
-		writeFileSync(join(srcDir, "islands", "Counter.tsx"), `
+		writeFileSync(
+			join(srcDir, "islands", "Counter.tsx"),
+			`
 			export default function Counter(props: { initial?: number }) {
 				return { type: "span", props: { children: [String(props.initial ?? 0)] } };
 			}
-		`);
+		`,
+		);
 
 		const result = await bundleIslands({ srcDir, outDir, minify: false });
 		expect(result.bundles.size).toBe(1);
@@ -46,11 +49,14 @@ describe("bundleIslands", () => {
 		mkdirSync(join(srcDir, "islands"), { recursive: true });
 		mkdirSync(outDir, { recursive: true });
 
-		writeFileSync(join(srcDir, "islands", "Toggle.tsx"), `
+		writeFileSync(
+			join(srcDir, "islands", "Toggle.tsx"),
+			`
 			export default function Toggle() {
 				return { type: "button", props: { children: ["toggle"] } };
 			}
-		`);
+		`,
+		);
 
 		await bundleIslands({ srcDir, outDir });
 		expect(existsSync(join(outDir, "_virex", "islands"))).toBe(true);
@@ -62,11 +68,14 @@ describe("bundleIslands", () => {
 		mkdirSync(join(srcDir, "components"), { recursive: true });
 		mkdirSync(outDir, { recursive: true });
 
-		writeFileSync(join(srcDir, "components", "Alert.tsx"), `// "use island"
+		writeFileSync(
+			join(srcDir, "components", "Alert.tsx"),
+			`// "use island"
 			export default function Alert(props: { message: string }) {
 				return { type: "div", props: { children: [props.message] } };
 			}
-		`);
+		`,
+		);
 
 		const result = await bundleIslands({ srcDir, outDir, minify: false });
 		expect(result.bundles.has("Alert")).toBe(true);

@@ -1,5 +1,5 @@
-import { describe, test, expect } from "bun:test";
-import { defineAction, actionRedirect, actionJson, parseFormData } from "../src/server/action";
+import { describe, expect, test } from "bun:test";
+import { actionJson, actionRedirect, defineAction, parseFormData } from "../src/server/action";
 
 describe("defineAction", () => {
 	test("returns the handler function", () => {

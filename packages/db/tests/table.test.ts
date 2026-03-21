@@ -1,5 +1,5 @@
-import { describe, test, expect, beforeEach } from "bun:test";
-import { getDB, closeDB } from "../src/client";
+import { beforeEach, describe, expect, test } from "bun:test";
+import { closeDB } from "../src/client";
 import { defineTable } from "../src/table";
 
 beforeEach(() => {
@@ -30,7 +30,7 @@ describe("defineTable", () => {
 		users.insert({ name: "Bob" });
 		const found = users.findOne({ name: "Bob" });
 		expect(found).not.toBeNull();
-		expect(found!.name).toBe("Bob");
+		expect(found?.name).toBe("Bob");
 	});
 
 	test("findOne returns null when no match", () => {
@@ -84,7 +84,7 @@ describe("defineTable", () => {
 
 		const page = items.findMany({ limit: 3, offset: 2 });
 		expect(page).toHaveLength(3);
-		expect(page[0]!.title).toBe("Item 3");
+		expect(page[0]?.title).toBe("Item 3");
 	});
 
 	test("findMany with orderBy", () => {
@@ -98,9 +98,9 @@ describe("defineTable", () => {
 		items.insert({ title: "B" });
 
 		const sorted = items.findMany({ orderBy: "title ASC" });
-		expect(sorted[0]!.title).toBe("A");
-		expect(sorted[1]!.title).toBe("B");
-		expect(sorted[2]!.title).toBe("C");
+		expect(sorted[0]?.title).toBe("A");
+		expect(sorted[1]?.title).toBe("B");
+		expect(sorted[2]?.title).toBe("C");
 	});
 
 	test("update modifies a row", () => {
@@ -113,7 +113,7 @@ describe("defineTable", () => {
 		users.insert({ name: "Alice", email: "old@example.com" });
 		const updated = users.update({ name: "Alice" }, { email: "new@example.com" });
 		expect(updated).not.toBeNull();
-		expect(updated!.email).toBe("new@example.com");
+		expect(updated?.email).toBe("new@example.com");
 	});
 
 	test("update returns null when no match", () => {

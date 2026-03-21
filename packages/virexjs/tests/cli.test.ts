@@ -1,7 +1,7 @@
-import { describe, test, expect, afterEach } from "bun:test";
-import { rmSync, existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { afterEach, describe, expect, test } from "bun:test";
 import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync, rmSync } from "node:fs";
+import { join } from "node:path";
 
 const CLI_PATH = join(import.meta.dir, "../src/cli/index.ts");
 const TEST_PROJECT_DIR = join(import.meta.dir, "__test_init_project__");

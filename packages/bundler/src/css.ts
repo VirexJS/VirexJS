@@ -1,6 +1,6 @@
-import { readdirSync, statSync, readFileSync } from "node:fs";
-import { join, extname } from "node:path";
 import { createHash } from "node:crypto";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { extname, join } from "node:path";
 
 /**
  * Collect all CSS files imported in the project.
@@ -21,10 +21,8 @@ export async function processCSS(options: {
 	let concatenated = "";
 	for (const file of cssFiles) {
 		try {
-			concatenated += readFileSync(file, "utf-8") + "\n";
-		} catch {
-			continue;
-		}
+			concatenated += `${readFileSync(file, "utf-8")}\n`;
+		} catch {}
 	}
 
 	if (options.minify) {
@@ -63,7 +61,7 @@ function scanForCSS(dir: string, files: string[]): void {
 
 	for (const entry of entries) {
 		const fullPath = join(dir, entry);
-		let stat;
+		let stat: ReturnType<typeof statSync> | null = null;
 		try {
 			stat = statSync(fullPath);
 		} catch {

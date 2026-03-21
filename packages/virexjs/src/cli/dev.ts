@@ -1,9 +1,8 @@
-import { resolve } from "node:path";
 import { networkInterfaces } from "node:os";
+import { resolve } from "node:path";
+import { createHMRServer, generateHMRClientScript, startDevMode } from "@virexjs/bundler";
 import { loadConfig } from "../config/index";
 import { createServer } from "../server/index";
-import { startDevMode } from "@virexjs/bundler";
-import { createHMRServer, generateHMRClientScript } from "@virexjs/bundler";
 
 /**
  * `virex dev` command:
@@ -42,7 +41,7 @@ export async function dev(args: string[]): Promise<void> {
 	// Start file watcher
 	const watcher = startDevMode({
 		srcDir,
-		onFileChange: (filePath, event) => {
+		onFileChange: (filePath, _event) => {
 			if (hmrServer) {
 				if (filePath.endsWith(".css")) {
 					hmrServer.broadcast({ type: "css-update", href: filePath });

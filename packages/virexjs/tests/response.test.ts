@@ -1,5 +1,13 @@
-import { describe, test, expect } from "bun:test";
-import { redirect, json, html, notFound, text, setCookie, parseCookies } from "../src/server/response";
+import { describe, expect, test } from "bun:test";
+import {
+	html,
+	json,
+	notFound,
+	parseCookies,
+	redirect,
+	setCookie,
+	text,
+} from "../src/server/response";
 
 describe("redirect", () => {
 	test("returns 302 by default", () => {

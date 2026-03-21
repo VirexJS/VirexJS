@@ -1,5 +1,5 @@
-import { join } from "node:path";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { extractIslands } from "./island-extract";
 
 export interface IslandBundleResult {
@@ -51,7 +51,8 @@ export async function bundleIslands(options: {
 			});
 
 			if (result.success && result.outputs.length > 0) {
-				const output = result.outputs[0]!;
+				const output = result.outputs[0];
+				if (!output) continue;
 				const outputPath = output.path;
 				const size = output.size ?? 0;
 

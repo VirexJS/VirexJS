@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
+import { type MiddlewareContext, runMiddleware } from "../src/server/middleware";
 import { securityHeaders } from "../src/server/security";
-import { runMiddleware, type MiddlewareContext } from "../src/server/middleware";
 
 function makeCtx(): MiddlewareContext {
 	return {

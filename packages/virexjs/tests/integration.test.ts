@@ -1,27 +1,30 @@
-import { describe, test, expect, beforeEach } from "bun:test";
-import { h, renderToString } from "../src/render/jsx";
-import { Head, resetHeadCollector, flushHeadTags } from "../src/render/head";
-import { useHead } from "../src/render/use-head";
-import { ErrorBoundary } from "../src/render/error-boundary";
-import { JsonLd, createBreadcrumbs, createFAQ } from "../src/render/json-ld";
-import { createI18n, defineTranslations, detectLocale } from "../src/i18n/index";
-import { validate, string, number } from "../src/validation/index";
-import { createCache } from "../src/server/cache";
-import { createLogger } from "../src/server/logger";
-import { cors } from "../src/server/cors";
-import { rateLimit } from "../src/server/rate-limit";
-import { securityHeaders } from "../src/server/security";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { guard } from "../src/auth/guard";
 import { createJWT, verifyJWT } from "../src/auth/jwt";
-import { session, createMemoryStore } from "../src/server/session";
-import { createSSEStream } from "../src/server/sse";
-import { healthCheck } from "../src/server/health";
-import { requestId } from "../src/server/request-id";
-import { runMiddleware } from "../src/server/middleware";
+import { parseEnvFile } from "../src/config/env";
+import { createI18n, defineTranslations } from "../src/i18n/index";
 import { definePlugin, PluginRunner } from "../src/plugin/index";
-import { loadEnv, parseEnvFile } from "../src/config/env";
-import { renderComponent, createTestRequest, createTestLoaderContext, assertHTML } from "../src/testing/index";
+import { ErrorBoundary } from "../src/render/error-boundary";
+import { Head, resetHeadCollector } from "../src/render/head";
+import { createFAQ, JsonLd } from "../src/render/json-ld";
 import type { VNode } from "../src/render/jsx";
+import { h } from "../src/render/jsx";
+import { useHead } from "../src/render/use-head";
+import { createCache } from "../src/server/cache";
+import { cors } from "../src/server/cors";
+import { healthCheck } from "../src/server/health";
+import { runMiddleware } from "../src/server/middleware";
+import { rateLimit } from "../src/server/rate-limit";
+import { requestId } from "../src/server/request-id";
+import { securityHeaders } from "../src/server/security";
+import { createSSEStream } from "../src/server/sse";
+import {
+	assertHTML,
+	createTestLoaderContext,
+	createTestRequest,
+	renderComponent,
+} from "../src/testing/index";
+import { number, string, validate } from "../src/validation/index";
 
 beforeEach(() => {
 	resetHeadCollector();
@@ -48,14 +51,16 @@ describe("full page render pipeline", () => {
 				og: { title: t("title"), type: "website" },
 			});
 
-			return h("div", null,
+			return h(
+				"div",
+				null,
 				head,
-				h(Head, null,
-					h("link", { rel: "stylesheet", href: "/app.css" }),
-				),
+				h(Head, null, h("link", { rel: "stylesheet", href: "/app.css" })),
 				h(ErrorBoundary, {
 					fallback: (err: Error) => h("p", null, `Error: ${err.message}`),
-					children: h("main", null,
+					children: h(
+						"main",
+						null,
 						h("h1", null, t("title")),
 						h("p", null, t("greeting", { name: "World" })),
 					),
@@ -82,7 +87,9 @@ describe("full page render pipeline", () => {
 		}
 
 		function SafePage(_props: Record<string, unknown>): VNode {
-			return h("div", null,
+			return h(
+				"div",
+				null,
 				h(ErrorBoundary, {
 					fallback: (err: Error) => h("div", { className: "error" }, `Caught: ${err.message}`),
 					children: h(BrokenComponent, null),
@@ -98,12 +105,12 @@ describe("full page render pipeline", () => {
 	test("JsonLd + useHead together in head", () => {
 		function SEOPage(_props: Record<string, unknown>): VNode {
 			const head = useHead({ title: "FAQ Page" });
-			return h("div", null,
+			return h(
+				"div",
+				null,
 				head,
 				h(JsonLd, {
-					data: createFAQ([
-						{ question: "What is VirexJS?", answer: "A web framework." },
-					]),
+					data: createFAQ([{ question: "What is VirexJS?", answer: "A web framework." }]),
 				}),
 				h("p", null, "Content"),
 			);
@@ -136,10 +143,13 @@ describe("middleware chain integration", () => {
 			locals: {} as Record<string, unknown>,
 		};
 
-		const res = await runMiddleware(middlewares, ctx, async () =>
-			new Response(JSON.stringify({ ok: true }), {
-				headers: { "Content-Type": "application/json" },
-			}),
+		const res = await runMiddleware(
+			middlewares,
+			ctx,
+			async () =>
+				new Response(JSON.stringify({ ok: true }), {
+					headers: { "Content-Type": "application/json" },
+				}),
 		);
 
 		// All headers should be present
@@ -302,7 +312,7 @@ describe("plugin pipeline integration", () => {
 		const analyticsPlugin = definePlugin({
 			name: "analytics",
 			transformHTML(html) {
-				return html.replace("</body>", '<script>track()</script></body>');
+				return html.replace("</body>", "<script>track()</script></body>");
 			},
 		});
 
@@ -316,10 +326,7 @@ describe("plugin pipeline integration", () => {
 		const runner = new PluginRunner([analyticsPlugin, minifyPlugin]);
 		const ctx = { pathname: "/", params: {}, request: new Request("http://localhost/") };
 
-		const result = await runner.runTransformHTML(
-			"<body>\n  <h1>Hello</h1>\n</body>",
-			ctx,
-		);
+		const result = await runner.runTransformHTML("<body>\n  <h1>Hello</h1>\n</body>", ctx);
 
 		expect(result).toContain("track()");
 		expect(result).not.toContain("\n");
@@ -381,7 +388,9 @@ describe("health check integration", () => {
 describe("testing utilities integration", () => {
 	test("renderComponent + assertHTML", () => {
 		function Card(props: { title: string; href: string }): VNode {
-			return h("div", { className: "card" },
+			return h(
+				"div",
+				{ className: "card" },
 				h("h2", null, props.title),
 				h("a", { href: props.href }, "Read more"),
 			);

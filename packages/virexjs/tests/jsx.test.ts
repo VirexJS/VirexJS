@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
-import { h, renderToString, Fragment, registerIsland, clearIslands } from "../src/render/jsx";
+import { describe, expect, test } from "bun:test";
 import type { VElement } from "../src/render/jsx";
+import { clearIslands, Fragment, h, registerIsland, renderToString } from "../src/render/jsx";
 
 describe("h() — JSX factory", () => {
 	test("creates VElement for string type", () => {

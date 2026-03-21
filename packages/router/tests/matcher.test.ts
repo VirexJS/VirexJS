@@ -1,15 +1,18 @@
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { matchRoute } from "../src/matcher";
 import { scanPages } from "../src/scanner";
 import { buildTree } from "../src/tree";
-import { matchRoute } from "../src/matcher";
 
 const TEST_DIR = join(import.meta.dir, "__test_match_pages__");
 
 function createFile(relativePath: string): void {
 	const fullPath = join(TEST_DIR, relativePath);
-	const dir = fullPath.slice(0, fullPath.lastIndexOf("/") >= 0 ? fullPath.lastIndexOf("/") : fullPath.lastIndexOf("\\"));
+	const dir = fullPath.slice(
+		0,
+		fullPath.lastIndexOf("/") >= 0 ? fullPath.lastIndexOf("/") : fullPath.lastIndexOf("\\"),
+	);
 	mkdirSync(dir, { recursive: true });
 	writeFileSync(fullPath, "");
 }
@@ -33,8 +36,8 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/", tree);
 		expect(result).not.toBeNull();
-		expect(result!.path).toBe("/");
-		expect(result!.params).toEqual({});
+		expect(result?.path).toBe("/");
+		expect(result?.params).toEqual({});
 	});
 
 	test("/about matches about.tsx", () => {
@@ -42,7 +45,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/about", tree);
 		expect(result).not.toBeNull();
-		expect(result!.path).toBe("/about");
+		expect(result?.path).toBe("/about");
 	});
 
 	test("/blog matches blog/index.tsx", () => {
@@ -50,7 +53,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/blog", tree);
 		expect(result).not.toBeNull();
-		expect(result!.path).toBe("/blog");
+		expect(result?.path).toBe("/blog");
 	});
 
 	test("/blog/my-post matches blog/[slug].tsx with params", () => {
@@ -58,7 +61,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/blog/my-post", tree);
 		expect(result).not.toBeNull();
-		expect(result!.params).toEqual({ slug: "my-post" });
+		expect(result?.params).toEqual({ slug: "my-post" });
 	});
 
 	test("query string is parsed", () => {
@@ -66,8 +69,8 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/blog/my-post?page=2&sort=date", tree);
 		expect(result).not.toBeNull();
-		expect(result!.query).toEqual({ page: "2", sort: "date" });
-		expect(result!.params).toEqual({ slug: "my-post" });
+		expect(result?.query).toEqual({ page: "2", sort: "date" });
+		expect(result?.params).toEqual({ slug: "my-post" });
 	});
 
 	test("/nonexistent returns null", () => {
@@ -83,7 +86,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/blog/featured", tree);
 		expect(result).not.toBeNull();
-		expect(result!.route.filePath).toBe(join(TEST_DIR, "blog/featured.tsx"));
+		expect(result?.route.filePath).toBe(join(TEST_DIR, "blog/featured.tsx"));
 	});
 
 	test("catch-all matches any depth", () => {
@@ -91,7 +94,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/docs/getting-started/intro", tree);
 		expect(result).not.toBeNull();
-		expect(result!.params).toEqual({ rest: "getting-started/intro" });
+		expect(result?.params).toEqual({ rest: "getting-started/intro" });
 	});
 
 	test("URL-encoded params are decoded", () => {
@@ -99,7 +102,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/blog/hello%20world", tree);
 		expect(result).not.toBeNull();
-		expect(result!.params).toEqual({ slug: "hello world" });
+		expect(result?.params).toEqual({ slug: "hello world" });
 	});
 
 	test("trailing slash is normalized", () => {
@@ -107,7 +110,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/about/", tree);
 		expect(result).not.toBeNull();
-		expect(result!.path).toBe("/about");
+		expect(result?.path).toBe("/about");
 	});
 
 	test("root with trailing slash works", () => {
@@ -129,7 +132,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/", tree);
 		expect(result).not.toBeNull();
-		expect(result!.query).toEqual({});
+		expect(result?.query).toEqual({});
 	});
 
 	test("query with no value", () => {
@@ -137,7 +140,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/?debug", tree);
 		expect(result).not.toBeNull();
-		expect(result!.query).toEqual({ debug: "" });
+		expect(result?.query).toEqual({ debug: "" });
 	});
 
 	test("route group — (auth)/login.tsx matches /login", () => {
@@ -145,7 +148,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/login", tree);
 		expect(result).not.toBeNull();
-		expect(result!.path).toBe("/login");
+		expect(result?.path).toBe("/login");
 	});
 
 	test("route group — (auth)/register.tsx matches /register", () => {
@@ -167,7 +170,7 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/users/42/posts/99", tree);
 		expect(result).not.toBeNull();
-		expect(result!.params).toEqual({ userId: "42", postId: "99" });
+		expect(result?.params).toEqual({ userId: "42", postId: "99" });
 	});
 
 	test("catch-all single segment", () => {
@@ -175,6 +178,6 @@ describe("matchRoute", () => {
 		const tree = buildRouteTree();
 		const result = matchRoute("/docs/intro", tree);
 		expect(result).not.toBeNull();
-		expect(result!.params).toEqual({ rest: "intro" });
+		expect(result?.params).toEqual({ rest: "intro" });
 	});
 });

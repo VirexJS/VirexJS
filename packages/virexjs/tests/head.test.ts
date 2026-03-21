@@ -1,6 +1,6 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
+import { flushHeadTags, Head, resetHeadCollector } from "../src/render/head";
 import { h, renderToString } from "../src/render/jsx";
-import { Head, resetHeadCollector, flushHeadTags } from "../src/render/head";
 
 beforeEach(() => {
 	resetHeadCollector();
@@ -16,33 +16,21 @@ describe("Head component", () => {
 	});
 
 	test("collects meta tags", () => {
-		renderToString(
-			h(Head, null,
-				h("meta", { name: "description", content: "A great page" }),
-			),
-		);
+		renderToString(h(Head, null, h("meta", { name: "description", content: "A great page" })));
 		const html = flushHeadTags();
 		expect(html).toContain('name="description"');
 		expect(html).toContain('content="A great page"');
 	});
 
 	test("collects link tags", () => {
-		renderToString(
-			h(Head, null,
-				h("link", { rel: "stylesheet", href: "/style.css" }),
-			),
-		);
+		renderToString(h(Head, null, h("link", { rel: "stylesheet", href: "/style.css" })));
 		const html = flushHeadTags();
 		expect(html).toContain('rel="stylesheet"');
 		expect(html).toContain('href="/style.css"');
 	});
 
 	test("collects script tags", () => {
-		renderToString(
-			h(Head, null,
-				h("script", { src: "/app.js", defer: true }),
-			),
-		);
+		renderToString(h(Head, null, h("script", { src: "/app.js", defer: true })));
 		const html = flushHeadTags();
 		expect(html).toContain('src="/app.js"');
 		expect(html).toContain("defer");
@@ -50,7 +38,9 @@ describe("Head component", () => {
 
 	test("collects multiple tags", () => {
 		renderToString(
-			h(Head, null,
+			h(
+				Head,
+				null,
 				h("title", null, "Blog"),
 				h("meta", { name: "author", content: "VirexJS" }),
 				h("link", { rel: "icon", href: "/favicon.ico" }),
@@ -64,10 +54,7 @@ describe("Head component", () => {
 
 	test("renders nothing in body (returns null)", () => {
 		const result = renderToString(
-			h("div", null,
-				h(Head, null, h("title", null, "Hidden")),
-				"visible content",
-			),
+			h("div", null, h(Head, null, h("title", null, "Hidden")), "visible content"),
 		);
 		expect(result).toBe("<div>visible content</div>");
 		expect(flushHeadTags()).toContain("<title>Hidden</title>");
@@ -79,7 +66,9 @@ describe("Head component", () => {
 describe("deduplication", () => {
 	test("last title wins", () => {
 		renderToString(
-			h("div", null,
+			h(
+				"div",
+				null,
 				h(Head, null, h("title", null, "First")),
 				h(Head, null, h("title", null, "Second")),
 			),
@@ -91,7 +80,9 @@ describe("deduplication", () => {
 
 	test("meta tags deduped by name attribute", () => {
 		renderToString(
-			h("div", null,
+			h(
+				"div",
+				null,
 				h(Head, null, h("meta", { name: "description", content: "Old" })),
 				h(Head, null, h("meta", { name: "description", content: "New" })),
 			),
@@ -103,7 +94,9 @@ describe("deduplication", () => {
 
 	test("meta tags deduped by property attribute (og)", () => {
 		renderToString(
-			h("div", null,
+			h(
+				"div",
+				null,
 				h(Head, null, h("meta", { property: "og:title", content: "Old Title" })),
 				h(Head, null, h("meta", { property: "og:title", content: "New Title" })),
 			),
@@ -115,7 +108,9 @@ describe("deduplication", () => {
 
 	test("link tags deduped by href", () => {
 		renderToString(
-			h("div", null,
+			h(
+				"div",
+				null,
 				h(Head, null, h("link", { rel: "stylesheet", href: "/a.css" })),
 				h(Head, null, h("link", { rel: "stylesheet", href: "/a.css" })),
 				h(Head, null, h("link", { rel: "stylesheet", href: "/b.css" })),
@@ -130,7 +125,9 @@ describe("deduplication", () => {
 
 	test("different meta names are not deduped", () => {
 		renderToString(
-			h(Head, null,
+			h(
+				Head,
+				null,
 				h("meta", { name: "description", content: "desc" }),
 				h("meta", { name: "author", content: "auth" }),
 			),
@@ -142,7 +139,9 @@ describe("deduplication", () => {
 
 	test("charset meta is deduped", () => {
 		renderToString(
-			h("div", null,
+			h(
+				"div",
+				null,
 				h(Head, null, h("meta", { charset: "ascii" })),
 				h(Head, null, h("meta", { charset: "utf-8" })),
 			),
@@ -158,7 +157,9 @@ describe("deduplication", () => {
 describe("nested components", () => {
 	test("Head in child component collects tags", () => {
 		function Header() {
-			return h("header", null,
+			return h(
+				"header",
+				null,
 				h(Head, null, h("title", null, "From Header")),
 				h("h1", null, "Site"),
 			);
@@ -171,9 +172,7 @@ describe("nested components", () => {
 
 	test("Head in deeply nested components", () => {
 		function Inner() {
-			return h(Head, null,
-				h("meta", { name: "robots", content: "noindex" }),
-			);
+			return h(Head, null, h("meta", { name: "robots", content: "noindex" }));
 		}
 
 		function Outer() {
@@ -188,8 +187,12 @@ describe("nested components", () => {
 
 	test("multiple Head components across tree", () => {
 		function Layout(props: { children?: unknown }) {
-			return h("html", null,
-				h(Head, null,
+			return h(
+				"html",
+				null,
+				h(
+					Head,
+					null,
 					h("meta", { charset: "utf-8" }),
 					h("link", { rel: "stylesheet", href: "/global.css" }),
 				),
@@ -198,8 +201,12 @@ describe("nested components", () => {
 		}
 
 		function Page() {
-			return h("div", null,
-				h(Head, null,
+			return h(
+				"div",
+				null,
+				h(
+					Head,
+					null,
 					h("title", null, "My Page"),
 					h("meta", { name: "description", content: "About this page" }),
 				),
@@ -256,9 +263,7 @@ describe("edge cases", () => {
 
 	test("XSS prevention in meta content", () => {
 		renderToString(
-			h(Head, null,
-				h("meta", { name: "desc", content: '"><script>alert(1)</script>' }),
-			),
+			h(Head, null, h("meta", { name: "desc", content: '"><script>alert(1)</script>' })),
 		);
 		const html = flushHeadTags();
 		expect(html).toContain("&quot;");

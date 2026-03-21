@@ -1,5 +1,5 @@
-import { describe, test, expect } from "bun:test";
-import { parseSegment, segmentToURL, extractParams } from "../src/params";
+import { describe, expect, test } from "bun:test";
+import { extractParams, parseSegment, segmentToURL } from "../src/params";
 
 describe("parseSegment", () => {
 	test("static segment returns null", () => {

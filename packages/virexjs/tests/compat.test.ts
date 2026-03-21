@@ -1,24 +1,24 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import {
+	Children,
+	cloneElement,
+	createContext,
 	createElement,
 	Fragment,
-	isValidElement,
-	cloneElement,
-	Children,
-	memo,
 	forwardRef,
-	createContext,
-	useContext,
-	useState,
-	useReducer,
-	useEffect,
-	useLayoutEffect,
-	useRef,
-	useMemo,
-	useCallback,
-	useId,
-	resetIdCounter,
+	isValidElement,
+	memo,
 	renderToString,
+	resetIdCounter,
+	useCallback,
+	useContext,
+	useEffect,
+	useId,
+	useLayoutEffect,
+	useMemo,
+	useReducer,
+	useRef,
+	useState,
 } from "../src/compat/react";
 import type { VNode } from "../src/render/jsx";
 
@@ -192,7 +192,9 @@ describe("memo", () => {
 			return createElement("div", { className: "card" }, props.title as string);
 		}
 		const MemoCard = memo(Card);
-		const html = renderToString(createElement(MemoCard as (props: Record<string, unknown>) => VNode, { title: "Hello" }));
+		const html = renderToString(
+			createElement(MemoCard as (props: Record<string, unknown>) => VNode, { title: "Hello" }),
+		);
 		expect(html).toBe('<div class="card">Hello</div>');
 	});
 });
@@ -206,7 +208,11 @@ describe("forwardRef", () => {
 			receivedRef = ref;
 			return createElement("input", { type: props.type as string });
 		});
-		renderToString(createElement(MyInput as unknown as (props: Record<string, unknown>) => VNode, { type: "text" }));
+		renderToString(
+			createElement(MyInput as unknown as (props: Record<string, unknown>) => VNode, {
+				type: "text",
+			}),
+		);
 		expect(receivedRef).toBeNull();
 	});
 });
@@ -341,7 +347,9 @@ describe("integration", () => {
 			const id = useId();
 			const doubled = useMemo(() => count * 2);
 
-			return createElement("div", { id },
+			return createElement(
+				"div",
+				{ id },
 				createElement("span", { className: "count" }, String(count)),
 				createElement("span", { className: "doubled" }, String(doubled)),
 			);

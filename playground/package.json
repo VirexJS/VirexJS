@@ -1,12 +1,12 @@
 {
-  "name": "virexjs-playground",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "dependencies": {
-    "virexjs": "workspace:*",
-    "@virexjs/router": "workspace:*",
-    "@virexjs/bundler": "workspace:*",
-    "@virexjs/db": "workspace:*"
-  }
+	"name": "virexjs-playground",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"dependencies": {
+		"virexjs": "workspace:*",
+		"@virexjs/router": "workspace:*",
+		"@virexjs/bundler": "workspace:*",
+		"@virexjs/db": "workspace:*"
+	}
 }

@@ -1,14 +1,14 @@
-import { join, resolve } from "node:path";
 import { readdirSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { bundleIslands, extractIslands, generateHydrationRuntime } from "@virexjs/bundler";
+import { buildTree, matchRoute, scanPages } from "@virexjs/router";
 import type { VirexConfig } from "../config/types";
-import { scanPages, buildTree, matchRoute } from "@virexjs/router";
-import { extractIslands, generateHydrationRuntime, bundleIslands } from "@virexjs/bundler";
-import { registerIsland } from "../render/jsx";
-import { handlePageRequest, handleAPIRequest } from "./handler";
-import { serveStatic, serveBuiltAsset } from "./static";
-import { runMiddleware, type MiddlewareFn } from "./middleware";
-import { renderPage } from "../render/index";
 import { PluginRunner } from "../plugin/runner";
+import { renderPage } from "../render/index";
+import { registerIsland } from "../render/jsx";
+import { handleAPIRequest, handlePageRequest } from "./handler";
+import { type MiddlewareFn, runMiddleware } from "./middleware";
+import { serveBuiltAsset, serveStatic } from "./static";
 
 /**
  * Create and start the VirexJS HTTP server.
@@ -54,9 +54,7 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 	}
 
 	// Combine dev script with hydration script
-	const combinedDevScript = [options?.devScript, hydrationScript]
-		.filter(Boolean)
-		.join("\n");
+	const combinedDevScript = [options?.devScript, hydrationScript].filter(Boolean).join("\n");
 
 	// Scan and build route tree
 	const pageRoutes = scanPages(pagesDir);
@@ -99,137 +97,136 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 	});
 
 	async function handleRequest(request: Request): Promise<Response> {
-			const startTime = performance.now();
+		const startTime = performance.now();
 
-			// Ensure middleware is loaded
-			await middlewarePromise;
+		// Ensure middleware is loaded
+		await middlewarePromise;
 
-			const url = new URL(request.url);
-			let pathname = url.pathname;
+		const url = new URL(request.url);
+		let pathname = url.pathname;
 
-			// Strip basePath prefix if configured
-			const basePath = config.router.basePath;
-			if (basePath && pathname.startsWith(basePath)) {
-				pathname = pathname.slice(basePath.length) || "/";
-			} else if (basePath && !pathname.startsWith(basePath)) {
-				// Request outside basePath — 404
-				return addTimingHeader(
-					new Response("Not Found", { status: 404 }),
-					startTime,
-				);
+		// Strip basePath prefix if configured
+		const basePath = config.router.basePath;
+		if (basePath && pathname.startsWith(basePath)) {
+			pathname = pathname.slice(basePath.length) || "/";
+		} else if (basePath && !pathname.startsWith(basePath)) {
+			// Request outside basePath — 404
+			return addTimingHeader(new Response("Not Found", { status: 404 }), startTime);
+		}
+
+		// Trailing slash redirect (except root)
+		if (!config.router.trailingSlash && pathname.length > 1 && pathname.endsWith("/")) {
+			const target = (basePath ?? "") + pathname.slice(0, -1) + url.search;
+			return new Response(null, {
+				status: 301,
+				headers: { Location: target },
+			});
+		}
+
+		// 1. Static files from /public (with ETag support)
+		const staticResponse = await serveStatic(pathname, publicDir, request);
+		if (staticResponse) {
+			return addTimingHeader(staticResponse, startTime);
+		}
+
+		// 2. Built assets from /_virex/
+		if (pathname.startsWith("/_virex/")) {
+			const assetPath = pathname.slice(8);
+			const assetResponse = await serveBuiltAsset(assetPath, outDir);
+			if (assetResponse) {
+				return addTimingHeader(assetResponse, startTime);
 			}
+		}
 
-			// Trailing slash redirect (except root)
-			if (!config.router.trailingSlash && pathname.length > 1 && pathname.endsWith("/")) {
-				const target = (basePath ?? "") + pathname.slice(0, -1) + url.search;
-				return new Response(null, {
-					status: 301,
-					headers: { Location: target },
-				});
-			}
-
-			// 1. Static files from /public (with ETag support)
-			const staticResponse = await serveStatic(pathname, publicDir, request);
-			if (staticResponse) {
-				return addTimingHeader(staticResponse, startTime);
-			}
-
-			// 2. Built assets from /_virex/
-			if (pathname.startsWith("/_virex/")) {
-				const assetPath = pathname.slice(8);
-				const assetResponse = await serveBuiltAsset(assetPath, outDir);
-				if (assetResponse) {
-					return addTimingHeader(assetResponse, startTime);
-				}
-			}
-
-			// 3. API routes (src/api/)
-			if (pathname.startsWith("/api/") || pathname === "/api") {
-				const apiPath = pathname.replace(/^\/api\/?/, "/") || "/";
-				const apiMatch = matchRoute(apiPath, apiTree);
-				if (apiMatch?.route.filePath) {
-					const res = await handleAPIRequest(apiMatch.route.filePath, request, apiMatch.params);
-					return addTimingHeader(res, startTime);
-				}
-			}
-
-			// 4. Page routes — run through middleware chain
-			const pageMatch = matchRoute(pathname + url.search, routeTree);
-			if (pageMatch) {
-				const pageOptions = {
-					devScript: combinedDevScript || undefined,
-					errorPagePath: hasErrorPage ? customErrorPath : undefined,
-				};
-				let res: Response;
-				if (middlewares.length > 0) {
-					const ctx = {
-						request,
-						params: pageMatch.params,
-						locals: {},
-					};
-					res = await runMiddleware(middlewares, ctx, () =>
-						handlePageRequest(pageMatch, request, pageOptions),
-					);
-				} else {
-					res = await handlePageRequest(pageMatch, request, pageOptions);
-				}
-
-				// Run transformHTML plugin hooks on page responses
-				if (pluginRunner.count > 0) {
-					const contentType = res.headers.get("Content-Type") ?? "";
-					if (contentType.includes("text/html")) {
-						const originalHtml = await res.text();
-						const transformed = await pluginRunner.runTransformHTML(originalHtml, {
-							pathname,
-							params: pageMatch.params,
-							request,
-						});
-						res = new Response(transformed, {
-							status: res.status,
-							headers: res.headers,
-						});
-					}
-				}
-
+		// 3. API routes (src/api/)
+		if (pathname.startsWith("/api/") || pathname === "/api") {
+			const apiPath = pathname.replace(/^\/api\/?/, "/") || "/";
+			const apiMatch = matchRoute(apiPath, apiTree);
+			if (apiMatch?.route.filePath) {
+				const res = await handleAPIRequest(apiMatch.route.filePath, request, apiMatch.params);
 				return addTimingHeader(res, startTime);
 			}
+		}
 
-			// 5. Custom _404 page or default fallback
-			if (has404Page) {
-				try {
-					const mod = await import(custom404Path);
-					if (mod.default) {
-						const response = renderPage({
-							component: mod.default,
-							data: { data: {}, params: {}, url: new URL(request.url) },
-							devScript: combinedDevScript || undefined,
-						});
-						return addTimingHeader(
-							new Response(response.body, { status: 404, headers: response.headers }),
-							startTime,
-						);
-					}
-				} catch {
-					// Fall through to default 404
+		// 4. Page routes — run through middleware chain
+		const pageMatch = matchRoute(pathname + url.search, routeTree);
+		if (pageMatch) {
+			const pageOptions = {
+				devScript: combinedDevScript || undefined,
+				errorPagePath: hasErrorPage ? customErrorPath : undefined,
+			};
+			let res: Response;
+			if (middlewares.length > 0) {
+				const ctx = {
+					request,
+					params: pageMatch.params,
+					locals: {},
+				};
+				res = await runMiddleware(middlewares, ctx, () =>
+					handlePageRequest(pageMatch, request, pageOptions),
+				);
+			} else {
+				res = await handlePageRequest(pageMatch, request, pageOptions);
+			}
+
+			// Run transformHTML plugin hooks on page responses
+			if (pluginRunner.count > 0) {
+				const contentType = res.headers.get("Content-Type") ?? "";
+				if (contentType.includes("text/html")) {
+					const originalHtml = await res.text();
+					const transformed = await pluginRunner.runTransformHTML(originalHtml, {
+						pathname,
+						params: pageMatch.params,
+						request,
+					});
+					res = new Response(transformed, {
+						status: res.status,
+						headers: res.headers,
+					});
 				}
 			}
 
-			return addTimingHeader(
-				new Response(
-					`<!DOCTYPE html><html><head><title>404</title></head><body><h1>404 — Page Not Found</h1><p>The page <code>${escapeForHtml(pathname)}</code> does not exist.</p></body></html>`,
-					{ status: 404, headers: { "Content-Type": "text/html" } },
-				),
-				startTime,
-			);
+			return addTimingHeader(res, startTime);
+		}
+
+		// 5. Custom _404 page or default fallback
+		if (has404Page) {
+			try {
+				const mod = await import(custom404Path);
+				if (mod.default) {
+					const response = renderPage({
+						component: mod.default,
+						data: { data: {}, params: {}, url: new URL(request.url) },
+						devScript: combinedDevScript || undefined,
+					});
+					return addTimingHeader(
+						new Response(response.body, { status: 404, headers: response.headers }),
+						startTime,
+					);
+				}
+			} catch {
+				// Fall through to default 404
+			}
+		}
+
+		return addTimingHeader(
+			new Response(
+				`<!DOCTYPE html><html><head><title>404</title></head><body><h1>404 — Page Not Found</h1><p>The page <code>${escapeForHtml(pathname)}</code> does not exist.</p></body></html>`,
+				{ status: 404, headers: { "Content-Type": "text/html" } },
+			),
+			startTime,
+		);
 	}
 
 	// Run plugin lifecycle hooks
 	pluginRunner.runConfigResolved(config).catch(() => {});
-	pluginRunner.runServerCreated({
-		port: config.port,
-		hostname: config.hostname,
-		routeCount: pageRoutes.length,
-	}).catch(() => {});
+	pluginRunner
+		.runServerCreated({
+			port: config.port,
+			hostname: config.hostname,
+			routeCount: pageRoutes.length,
+		})
+		.catch(() => {});
 
 	return {
 		server,
@@ -243,10 +240,7 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
  * Dynamically load middleware files from the middleware directory.
  * Each file should export a default middleware function.
  */
-async function loadMiddleware(
-	middlewareDir: string,
-	middlewares: MiddlewareFn[],
-): Promise<void> {
+async function loadMiddleware(middlewareDir: string, middlewares: MiddlewareFn[]): Promise<void> {
 	let entries: string[];
 	try {
 		entries = readdirSync(middlewareDir);
@@ -271,7 +265,7 @@ async function loadMiddleware(
 }
 
 /** Add X-Response-Time header and optionally compress the response */
-function addTimingHeader(response: Response, startTime: number, request?: Request): Response {
+function addTimingHeader(response: Response, startTime: number, _request?: Request): Response {
 	const elapsed = (performance.now() - startTime).toFixed(1);
 	response.headers.set("X-Response-Time", `${elapsed}ms`);
 	return response;
@@ -300,8 +294,8 @@ async function maybeCompress(response: Response, request: Request): Promise<Resp
 	}
 
 	const contentType = response.headers.get("Content-Type") ?? "";
-	const baseType = contentType.split(";")[0]!.trim();
-	if (!COMPRESSIBLE_TYPES.has(baseType)) {
+	const baseType = contentType.split(";")[0] ?? "";
+	if (!COMPRESSIBLE_TYPES.has(baseType.trim())) {
 		return response;
 	}
 

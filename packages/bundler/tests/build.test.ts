@@ -1,10 +1,10 @@
-import { describe, test, expect, afterAll } from "bun:test";
-import { buildProduction } from "../src/build";
-import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { afterAll, describe, expect, test } from "bun:test";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { buildProduction } from "../src/build";
 
-const testDir = join(tmpdir(), "virex-build-test-" + Date.now());
+const testDir = join(tmpdir(), `virex-build-test-${Date.now()}`);
 const srcDir = join(testDir, "src");
 const outDir = join(testDir, "dist");
 const publicDir = join(testDir, "public");
@@ -15,21 +15,27 @@ beforeAll(() => {
 	mkdirSync(publicDir, { recursive: true });
 
 	// Simple index page
-	writeFileSync(join(srcDir, "pages", "index.tsx"), `
+	writeFileSync(
+		join(srcDir, "pages", "index.tsx"),
+		`
 		export default function Home() {
 			return { type: "div", props: { children: ["Hello World"] } };
 		}
-	`);
+	`,
+	);
 
 	// About page with meta
-	writeFileSync(join(srcDir, "pages", "about.tsx"), `
+	writeFileSync(
+		join(srcDir, "pages", "about.tsx"),
+		`
 		export function meta() {
 			return { title: "About" };
 		}
 		export default function About() {
 			return { type: "h1", props: { children: ["About Page"] } };
 		}
-	`);
+	`,
+	);
 
 	// Static file
 	writeFileSync(join(publicDir, "robots.txt"), "User-agent: *\nAllow: /\n");
@@ -94,14 +100,17 @@ describe("buildProduction", () => {
 
 	test("skips special pages (_404, _error)", async () => {
 		// Add a _404 page
-		writeFileSync(join(srcDir, "pages", "_404.tsx"), `
+		writeFileSync(
+			join(srcDir, "pages", "_404.tsx"),
+			`
 			export default function NotFound() {
 				return { type: "h1", props: { children: ["Not Found"] } };
 			}
-		`);
+		`,
+		);
 
 		const newOutDir = join(testDir, "dist-skip");
-		const result = await buildProduction({
+		const _result = await buildProduction({
 			srcDir,
 			outDir: newOutDir,
 			publicDir,

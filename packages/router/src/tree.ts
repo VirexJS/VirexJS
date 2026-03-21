@@ -1,5 +1,5 @@
-import type { RouteNode, ScannedRoute } from "./types";
 import { parseSegment, segmentToURL } from "./params";
+import type { RouteNode, ScannedRoute } from "./types";
 
 /**
  * Build a route tree (trie) from scanned routes.

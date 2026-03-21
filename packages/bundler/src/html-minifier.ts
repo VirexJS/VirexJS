@@ -18,13 +18,10 @@ export function minifyHTML(html: string): string {
 
 	// Preserve content in raw blocks
 	const preserved: string[] = [];
-	result = result.replace(
-		/<(pre|code|script|style|textarea)\b[^>]*>[\s\S]*?<\/\1>/gi,
-		(match) => {
-			preserved.push(match);
-			return `__VRX_RAW_${preserved.length - 1}__`;
-		},
-	);
+	result = result.replace(/<(pre|code|script|style|textarea)\b[^>]*>[\s\S]*?<\/\1>/gi, (match) => {
+		preserved.push(match);
+		return `__VRX_RAW_${preserved.length - 1}__`;
+	});
 
 	// Remove HTML comments (but keep conditional comments)
 	result = result.replace(/<!--(?!\[if)[\s\S]*?-->/g, "");
@@ -41,7 +38,7 @@ export function minifyHTML(html: string): string {
 	// Remove quotes from simple attribute values (alphanumeric, hyphen, underscore, period)
 	result = result.replace(/=("[^"]*"|'[^']*')/g, (match, quoted: string) => {
 		const value = quoted.slice(1, -1);
-		if (/^[a-zA-Z0-9_\-\.]+$/.test(value) && value.length > 0) {
+		if (/^[a-zA-Z0-9_\-.]+$/.test(value) && value.length > 0) {
 			return `=${value}`;
 		}
 		return match;
@@ -52,7 +49,7 @@ export function minifyHTML(html: string): string {
 
 	// Restore preserved blocks
 	result = result.replace(/__VRX_RAW_(\d+)__/g, (_match, index: string) => {
-		return preserved[Number.parseInt(index)]!;
+		return preserved[Number.parseInt(index, 10)] ?? "";
 	});
 
 	return result;
@@ -61,7 +58,10 @@ export function minifyHTML(html: string): string {
 /**
  * Get the minification savings as a percentage.
  */
-export function minificationStats(original: string, minified: string): {
+export function minificationStats(
+	original: string,
+	minified: string,
+): {
 	originalSize: number;
 	minifiedSize: number;
 	savings: number;
@@ -70,8 +70,6 @@ export function minificationStats(original: string, minified: string): {
 	const originalSize = new TextEncoder().encode(original).length;
 	const minifiedSize = new TextEncoder().encode(minified).length;
 	const savings = originalSize - minifiedSize;
-	const percentage = originalSize > 0
-		? ((savings / originalSize) * 100).toFixed(1)
-		: "0.0";
+	const percentage = originalSize > 0 ? ((savings / originalSize) * 100).toFixed(1) : "0.0";
 	return { originalSize, minifiedSize, savings, percentage: `${percentage}%` };
 }

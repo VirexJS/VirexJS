@@ -1,5 +1,5 @@
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { extractIslands } from "../src/island-extract";
 
@@ -7,7 +7,10 @@ const TEST_DIR = join(import.meta.dir, "__test_islands__");
 
 function createFile(relativePath: string, content = ""): void {
 	const fullPath = join(TEST_DIR, relativePath);
-	const dir = fullPath.slice(0, fullPath.lastIndexOf("/") >= 0 ? fullPath.lastIndexOf("/") : fullPath.lastIndexOf("\\"));
+	const dir = fullPath.slice(
+		0,
+		fullPath.lastIndexOf("/") >= 0 ? fullPath.lastIndexOf("/") : fullPath.lastIndexOf("\\"),
+	);
 	mkdirSync(dir, { recursive: true });
 	writeFileSync(fullPath, content);
 }
@@ -31,7 +34,7 @@ describe("extractIslands", () => {
 		const islands = extractIslands(TEST_DIR);
 		expect(islands.size).toBe(1);
 		expect(islands.has("Counter")).toBe(true);
-		expect(islands.get("Counter")!.name).toBe("Counter");
+		expect(islands.get("Counter")?.name).toBe("Counter");
 	});
 
 	test("multiple island files", () => {

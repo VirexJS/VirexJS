@@ -68,7 +68,7 @@ export async function serveStatic(
 	return new Response(file, {
 		headers: {
 			"Content-Type": contentType,
-			"ETag": etag,
+			ETag: etag,
 			"Cache-Control": "public, max-age=3600",
 		},
 	});
@@ -77,10 +77,7 @@ export async function serveStatic(
 /**
  * Serve a built asset with immutable cache headers.
  */
-export async function serveBuiltAsset(
-	path: string,
-	outDir: string,
-): Promise<Response | null> {
+export async function serveBuiltAsset(path: string, outDir: string): Promise<Response | null> {
 	const response = await serveStatic(path, outDir);
 	if (!response) {
 		return null;

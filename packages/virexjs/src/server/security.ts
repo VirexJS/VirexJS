@@ -64,8 +64,10 @@ export function securityHeaders(options: SecurityOptions = {}): MiddlewareFn {
 	if (referrerPolicy) headers.push(["Referrer-Policy", referrerPolicy]);
 	if (xssProtection) headers.push(["X-XSS-Protection", xssProtection]);
 	if (permissionsPolicy) headers.push(["Permissions-Policy", permissionsPolicy]);
-	if (crossOriginOpenerPolicy) headers.push(["Cross-Origin-Opener-Policy", crossOriginOpenerPolicy]);
-	if (crossOriginEmbedderPolicy) headers.push(["Cross-Origin-Embedder-Policy", crossOriginEmbedderPolicy]);
+	if (crossOriginOpenerPolicy)
+		headers.push(["Cross-Origin-Opener-Policy", crossOriginOpenerPolicy]);
+	if (crossOriginEmbedderPolicy)
+		headers.push(["Cross-Origin-Embedder-Policy", crossOriginEmbedderPolicy]);
 
 	return async (_ctx, next) => {
 		const response = await next();

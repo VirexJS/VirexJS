@@ -1,4 +1,4 @@
-export { getDB, closeDB } from "./client";
-export { defineTable } from "./table";
-export { defineMigration, migrate, rollback, getMigrationStatus } from "./migrate";
+export { closeDB, getDB } from "./client";
 export type { Migration, MigrationResult } from "./migrate";
+export { defineMigration, getMigrationStatus, migrate, rollback } from "./migrate";
+export { defineTable } from "./table";

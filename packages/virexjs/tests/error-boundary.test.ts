@@ -1,7 +1,7 @@
-import { describe, test, expect } from "bun:test";
-import { h, renderToString } from "../src/render/jsx";
+import { describe, expect, test } from "bun:test";
 import { ErrorBoundary } from "../src/render/error-boundary";
 import type { VNode } from "../src/render/jsx";
+import { h, renderToString } from "../src/render/jsx";
 
 // ─── Basic behavior ─────────────────────────────────────────────────────────
 
@@ -87,7 +87,7 @@ describe("onError callback", () => {
 		);
 
 		expect(loggedError).not.toBeNull();
-		expect(loggedError!.message).toBe("logged error");
+		expect((loggedError as unknown as Error).message).toBe("logged error");
 	});
 
 	test("does not call onError when no error", () => {
@@ -136,7 +136,9 @@ describe("nested boundaries", () => {
 		const html = renderToString(
 			h(ErrorBoundary, {
 				fallback: () => h("p", null, "outer fallback"),
-				children: h("div", null,
+				children: h(
+					"div",
+					null,
 					h("p", null, "before"),
 					h(ErrorBoundary, {
 						fallback: (err: Error) => h("span", null, `inner: ${err.message}`),
@@ -161,10 +163,7 @@ describe("nested boundaries", () => {
 		const html = renderToString(
 			h(ErrorBoundary, {
 				fallback: (err: Error) => h("p", null, `caught: ${err.message}`),
-				children: h("div", null,
-					h("p", null, "safe"),
-					h(Boom, null),
-				),
+				children: h("div", null, h("p", null, "safe"), h(Boom, null)),
 			}),
 		);
 
@@ -193,10 +192,7 @@ describe("complex children", () => {
 		const html = renderToString(
 			h(ErrorBoundary, {
 				fallback: () => h("p", null, "error"),
-				children: [
-					h("h1", null, "Title"),
-					h("p", null, "Body"),
-				],
+				children: [h("h1", null, "Title"), h("p", null, "Body")],
 			}),
 		);
 		expect(html).toBe("<h1>Title</h1><p>Body</p>");

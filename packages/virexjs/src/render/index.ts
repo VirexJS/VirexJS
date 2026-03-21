@@ -1,7 +1,7 @@
-import { renderToString, h } from "./jsx";
-import { renderMeta, type MetaData } from "./meta";
-import { resetHeadCollector, flushHeadTags } from "./head";
+import { flushHeadTags, resetHeadCollector } from "./head";
 import type { VNode } from "./jsx";
+import { h, renderToString } from "./jsx";
+import { type MetaData, renderMeta } from "./meta";
 
 /**
  * Full page render pipeline:
@@ -60,9 +60,7 @@ export function renderPage(options: {
 			controller.enqueue(encoder.encode(bodyHtml));
 
 			// 3. Send closing tags + dev script
-			controller.enqueue(
-				encoder.encode(`${devScriptTag}\n</body>\n</html>`),
-			);
+			controller.enqueue(encoder.encode(`${devScriptTag}\n</body>\n</html>`));
 
 			controller.close();
 		},
@@ -108,12 +106,12 @@ export function buildDocument(options: {
 </html>`;
 }
 
-export { renderToString, h, renderMeta };
-export { registerIsland, clearIslands, getIslandRegistry } from "./jsx";
-export { Head, resetHeadCollector, flushHeadTags } from "./head";
-export { ErrorBoundary } from "./error-boundary";
 export type { ErrorBoundaryProps } from "./error-boundary";
-export { useHead } from "./use-head";
-export type { UseHeadOptions } from "./use-head";
-export type { VNode, VElement } from "./jsx";
+export { ErrorBoundary } from "./error-boundary";
+export { flushHeadTags, Head, resetHeadCollector } from "./head";
+export type { VElement, VNode } from "./jsx";
+export { clearIslands, getIslandRegistry, registerIsland } from "./jsx";
 export type { MetaData } from "./meta";
+export type { UseHeadOptions } from "./use-head";
+export { useHead } from "./use-head";
+export { h, renderMeta, renderToString };

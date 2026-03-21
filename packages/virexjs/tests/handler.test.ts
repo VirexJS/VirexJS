@@ -1,43 +1,52 @@
-import { describe, test, expect } from "bun:test";
-import { handleAPIRequest } from "../src/server/handler";
+import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
+import { handleAPIRequest } from "../src/server/handler";
 
-const fixturesDir = join(import.meta.dir, "fixtures");
+const _fixturesDir = join(import.meta.dir, "fixtures");
 
 // Create inline test API modules via temp files
-import { mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 
-const testDir = join(tmpdir(), "virex-handler-test-" + Date.now());
+const testDir = join(tmpdir(), `virex-handler-test-${Date.now()}`);
 
 beforeAll(() => {
 	mkdirSync(testDir, { recursive: true });
 
 	// API route with GET and POST
-	writeFileSync(join(testDir, "hello.ts"), `
+	writeFileSync(
+		join(testDir, "hello.ts"),
+		`
 		export const GET = ({ params }) => Response.json({ hello: "world" });
 		export const POST = async ({ request }) => {
 			const body = await request.json();
 			return Response.json({ received: body }, { status: 201 });
 		};
-	`);
+	`,
+	);
 
 	// API route that throws
-	writeFileSync(join(testDir, "error.ts"), `
+	writeFileSync(
+		join(testDir, "error.ts"),
+		`
 		export const GET = () => { throw new Error("handler error"); };
-	`);
+	`,
+	);
 
 	// API with only GET
-	writeFileSync(join(testDir, "get-only.ts"), `
+	writeFileSync(
+		join(testDir, "get-only.ts"),
+		`
 		export const GET = () => Response.json({ only: "get" });
-	`);
+	`,
+	);
 });
 
 afterAll(() => {
 	rmSync(testDir, { recursive: true, force: true });
 });
 
-import { beforeAll, afterAll } from "bun:test";
+import { afterAll, beforeAll } from "bun:test";
 
 describe("handleAPIRequest", () => {
 	test("handles GET request", async () => {
@@ -93,9 +102,12 @@ describe("handleAPIRequest", () => {
 	});
 
 	test("passes params to handler", async () => {
-		writeFileSync(join(testDir, "with-params.ts"), `
+		writeFileSync(
+			join(testDir, "with-params.ts"),
+			`
 			export const GET = ({ params }) => Response.json({ id: params.id });
-		`);
+		`,
+		);
 
 		const res = await handleAPIRequest(
 			join(testDir, "with-params.ts"),

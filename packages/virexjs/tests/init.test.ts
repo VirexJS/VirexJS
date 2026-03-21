@@ -1,10 +1,10 @@
-import { describe, test, expect, afterAll } from "bun:test";
-import { init } from "../src/cli/init";
-import { existsSync, rmSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { afterAll, describe, expect, test } from "bun:test";
+import { existsSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { init } from "../src/cli/init";
 
-const testDir = join(tmpdir(), "virex-init-test-" + Date.now());
+const testDir = join(tmpdir(), `virex-init-test-${Date.now()}`);
 const originalCwd = process.cwd();
 
 afterAll(() => {

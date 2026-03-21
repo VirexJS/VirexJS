@@ -110,10 +110,11 @@ export function defineTable<T extends Record<string, ColumnDef>>(
 
 			const { clause, values: whereValues } = buildWhere(where);
 
-			const stmt = db.prepare(
-				`UPDATE "${name}" SET ${setClauses}${clause} RETURNING *`,
-			);
-			const row = stmt.get(...asBindings([...setValues, ...whereValues])) as Record<string, unknown> | null;
+			const stmt = db.prepare(`UPDATE "${name}" SET ${setClauses}${clause} RETURNING *`);
+			const row = stmt.get(...asBindings([...setValues, ...whereValues])) as Record<
+				string,
+				unknown
+			> | null;
 			return row ?? null;
 		},
 

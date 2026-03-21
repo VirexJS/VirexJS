@@ -1,27 +1,27 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "jsx": "react-jsx",
-    "jsxImportSource": "virexjs",
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noEmit": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "virexjs": ["./packages/virexjs/src/types/index.ts"],
-      "virexjs/*": ["./packages/virexjs/src/*"],
-      "@virexjs/router": ["./packages/router/src/index.ts"],
-      "@virexjs/bundler": ["./packages/bundler/src/index.ts"],
-      "@virexjs/db": ["./packages/db/src/index.ts"]
-    }
-  },
-  "exclude": ["node_modules", "dist", "playground/dist"]
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"jsx": "react-jsx",
+		"jsxImportSource": "virexjs",
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noEmit": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"baseUrl": ".",
+		"paths": {
+			"virexjs": ["./packages/virexjs/src/types/index.ts"],
+			"virexjs/*": ["./packages/virexjs/src/*"],
+			"@virexjs/router": ["./packages/router/src/index.ts"],
+			"@virexjs/bundler": ["./packages/bundler/src/index.ts"],
+			"@virexjs/db": ["./packages/db/src/index.ts"]
+		}
+	},
+	"exclude": ["node_modules", "dist", "playground/dist"]
 }

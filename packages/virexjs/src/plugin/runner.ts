@@ -1,6 +1,6 @@
 import type { VirexConfig } from "../config/types";
 import type { MiddlewareFn } from "../server/middleware";
-import type { VirexPlugin, ServerInfo, BuildResult, TransformHTMLContext } from "./types";
+import type { BuildResult, ServerInfo, TransformHTMLContext, VirexPlugin } from "./types";
 
 /**
  * Plugin runner — orchestrates lifecycle hooks across registered plugins.

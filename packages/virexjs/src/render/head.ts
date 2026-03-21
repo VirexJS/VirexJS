@@ -1,4 +1,4 @@
-import type { VNode, VElement } from "./jsx";
+import type { VElement, VNode } from "./jsx";
 import { renderToString } from "./jsx";
 
 /**

@@ -1,9 +1,9 @@
 import { readdirSync, statSync } from "node:fs";
-import { join, relative, extname, basename, sep } from "node:path";
+import { basename, extname, join, relative, sep } from "node:path";
 import type { ScannedRoute } from "./types";
 
 const VALID_EXTENSIONS = new Set([".tsx", ".ts"]);
-const IGNORED_PREFIXES = ["_"];
+const _IGNORED_PREFIXES = ["_"];
 
 /**
  * Recursively scan a pages directory and return all route files.
@@ -20,11 +20,7 @@ export function scanPages(pagesDir: string): ScannedRoute[] {
 	return routes;
 }
 
-function scanDirectory(
-	dir: string,
-	pagesDir: string,
-	routes: ScannedRoute[],
-): void {
+function scanDirectory(dir: string, pagesDir: string, routes: ScannedRoute[]): void {
 	let entries: string[];
 	try {
 		entries = readdirSync(dir);
@@ -34,7 +30,7 @@ function scanDirectory(
 
 	for (const entry of entries) {
 		const fullPath = join(dir, entry);
-		let stat;
+		let stat: ReturnType<typeof statSync> | null = null;
 		try {
 			stat = statSync(fullPath);
 		} catch {

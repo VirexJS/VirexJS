@@ -83,9 +83,10 @@ export function h(
 	const mergedProps = props ?? {};
 
 	// Flatten children from props.children or arguments
-	const allChildren = mergedProps.children !== undefined
-		? flattenChildren([mergedProps.children as unknown])
-		: flattenChildren(children);
+	const allChildren =
+		mergedProps.children !== undefined
+			? flattenChildren([mergedProps.children as unknown])
+			: flattenChildren(children);
 
 	// Fragment — just return children
 	if (type === Fragment) {
@@ -95,7 +96,10 @@ export function h(
 	// Function component — defer to renderToString (do not call eagerly,
 	// so that context providers can set values before children render)
 	if (typeof type === "function") {
-		const componentProps = { ...mergedProps, children: allChildren.length === 1 ? allChildren[0] : allChildren };
+		const componentProps = {
+			...mergedProps,
+			children: allChildren.length === 1 ? allChildren[0] : allChildren,
+		};
 		return { type: type as (props: Record<string, unknown>) => VNode, props: componentProps };
 	}
 
@@ -214,7 +218,7 @@ export function renderToString(node: VNode): string {
 		}
 
 		// Skip event handlers and ref
-		if (key.startsWith("on") && key.length > 2 && key[2]! === key[2]!.toUpperCase()) {
+		if (key.startsWith("on") && key.length > 2 && key[2]! === key[2]?.toUpperCase()) {
 			continue;
 		}
 		if (key === "ref") {

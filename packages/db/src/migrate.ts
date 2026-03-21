@@ -1,3 +1,4 @@
+import { Database } from "bun:sqlite";
 import { getDB } from "./client";
 
 /** Migration definition */
@@ -64,10 +65,11 @@ export function migrate(migrations: Migration[], dbPath?: string): MigrationResu
 		try {
 			db.run("BEGIN TRANSACTION");
 			db.run(migration.up);
-			db.run(
-				"INSERT INTO _virex_migrations (version, description, applied_at) VALUES (?, ?, ?)",
-				[migration.version, migration.description, new Date().toISOString()],
-			);
+			db.run("INSERT INTO _virex_migrations (version, description, applied_at) VALUES (?, ?, ?)", [
+				migration.version,
+				migration.description,
+				new Date().toISOString(),
+			]);
 			db.run("COMMIT");
 			applied.push(migration.version);
 		} catch (error) {
@@ -134,7 +136,10 @@ export function rollback(migrations: Migration[], count = 1, dbPath?: string): M
 /**
  * Get the current migration status.
  */
-export function getMigrationStatus(migrations: Migration[], dbPath?: string): {
+export function getMigrationStatus(
+	migrations: Migration[],
+	dbPath?: string,
+): {
 	current: string | null;
 	pending: string[];
 	applied: string[];
@@ -154,8 +159,7 @@ export function getMigrationStatus(migrations: Migration[], dbPath?: string): {
 
 // ─── Internal helpers ───────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ensureMigrationsTable(db: any): void {
+function ensureMigrationsTable(db: Database): void {
 	db.run(`
 		CREATE TABLE IF NOT EXISTS _virex_migrations (
 			version TEXT PRIMARY KEY,
@@ -165,14 +169,12 @@ function ensureMigrationsTable(db: any): void {
 	`);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getAppliedVersions(db: any): Set<string> {
+function getAppliedVersions(db: Database): Set<string> {
 	const rows = db.query("SELECT version FROM _virex_migrations").all() as { version: string }[];
 	return new Set(rows.map((r) => r.version));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getCurrentVersion(db: any): string | null {
+function getCurrentVersion(db: Database): string | null {
 	const row = db
 		.query("SELECT version FROM _virex_migrations ORDER BY rowid DESC LIMIT 1")
 		.get() as { version: string } | null;

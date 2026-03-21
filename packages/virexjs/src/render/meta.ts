@@ -53,14 +53,10 @@ export function renderMeta(meta: MetaData): string {
 
 	if (meta.twitter) {
 		if (meta.twitter.card) {
-			tags.push(
-				`<meta name="twitter:card" content="${escapeMetaContent(meta.twitter.card)}">`,
-			);
+			tags.push(`<meta name="twitter:card" content="${escapeMetaContent(meta.twitter.card)}">`);
 		}
 		if (meta.twitter.title) {
-			tags.push(
-				`<meta name="twitter:title" content="${escapeMetaContent(meta.twitter.title)}">`,
-			);
+			tags.push(`<meta name="twitter:title" content="${escapeMetaContent(meta.twitter.title)}">`);
 		}
 		if (meta.twitter.description) {
 			tags.push(
@@ -68,9 +64,7 @@ export function renderMeta(meta: MetaData): string {
 			);
 		}
 		if (meta.twitter.image) {
-			tags.push(
-				`<meta name="twitter:image" content="${escapeMetaContent(meta.twitter.image)}">`,
-			);
+			tags.push(`<meta name="twitter:image" content="${escapeMetaContent(meta.twitter.image)}">`);
 		}
 	}
 
@@ -78,5 +72,9 @@ export function renderMeta(meta: MetaData): string {
 }
 
 function escapeMetaContent(str: string): string {
-	return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+	return str
+		.replace(/&/g, "&amp;")
+		.replace(/"/g, "&quot;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;");
 }

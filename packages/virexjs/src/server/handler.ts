@@ -1,5 +1,5 @@
-import { dirname, join } from "node:path";
 import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
 import type { MatchResult } from "@virexjs/router";
 import { renderPage } from "../render/index";
 import type { VNode } from "../render/jsx";
@@ -7,16 +7,29 @@ import type { MetaData } from "../render/meta";
 
 interface PageModule {
 	default: (props: Record<string, unknown>) => VNode;
-	loader?: (ctx: { params: Record<string, string>; request: Request; headers: Headers }) => Promise<Record<string, unknown>> | Record<string, unknown>;
+	loader?: (ctx: {
+		params: Record<string, string>;
+		request: Request;
+		headers: Headers;
+	}) => Promise<Record<string, unknown>> | Record<string, unknown>;
 	meta?: (ctx: { data: Record<string, unknown>; params: Record<string, string> }) => MetaData;
 }
 
 interface APIModule {
 	GET?: (ctx: { request: Request; params: Record<string, string> }) => Response | Promise<Response>;
-	POST?: (ctx: { request: Request; params: Record<string, string> }) => Response | Promise<Response>;
+	POST?: (ctx: {
+		request: Request;
+		params: Record<string, string>;
+	}) => Response | Promise<Response>;
 	PUT?: (ctx: { request: Request; params: Record<string, string> }) => Response | Promise<Response>;
-	DELETE?: (ctx: { request: Request; params: Record<string, string> }) => Response | Promise<Response>;
-	PATCH?: (ctx: { request: Request; params: Record<string, string> }) => Response | Promise<Response>;
+	DELETE?: (ctx: {
+		request: Request;
+		params: Record<string, string>;
+	}) => Response | Promise<Response>;
+	PATCH?: (ctx: {
+		request: Request;
+		params: Record<string, string>;
+	}) => Response | Promise<Response>;
 }
 
 export interface PageRequestOptions {
@@ -41,7 +54,7 @@ export async function handlePageRequest(
 	options?: PageRequestOptions,
 ): Promise<Response> {
 	try {
-		const mod = await import(match.route.filePath!) as PageModule;
+		const mod = (await import(match.route.filePath!)) as PageModule;
 		const component = mod.default;
 
 		if (!component) {
@@ -121,24 +134,24 @@ export async function handleAPIRequest(
 	params: Record<string, string> = {},
 ): Promise<Response> {
 	try {
-		const mod = await import(filePath) as APIModule;
+		const mod = (await import(filePath)) as APIModule;
 		const method = request.method.toUpperCase() as keyof APIModule;
 		const handler = mod[method];
 
 		if (!handler) {
-			return new Response(
-				JSON.stringify({ error: `Method ${method} not allowed` }),
-				{ status: 405, headers: { "Content-Type": "application/json" } },
-			);
+			return new Response(JSON.stringify({ error: `Method ${method} not allowed` }), {
+				status: 405,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 
 		return await handler({ request, params });
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
-		return new Response(
-			JSON.stringify({ error: message }),
-			{ status: 500, headers: { "Content-Type": "application/json" } },
-		);
+		return new Response(JSON.stringify({ error: message }), {
+			status: 500,
+			headers: { "Content-Type": "application/json" },
+		});
 	}
 }
 

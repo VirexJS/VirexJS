@@ -1,8 +1,11 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { csrf } from "../src/server/csrf";
-import { runMiddleware, type MiddlewareContext } from "../src/server/middleware";
+import { type MiddlewareContext, runMiddleware } from "../src/server/middleware";
 
-function makeCtx(method: string, opts?: { cookie?: string; header?: string; query?: string }): MiddlewareContext {
+function makeCtx(
+	method: string,
+	opts?: { cookie?: string; header?: string; query?: string },
+): MiddlewareContext {
 	const headers = new Headers();
 	if (opts?.cookie) headers.set("Cookie", opts.cookie);
 	if (opts?.header) headers.set("X-CSRF-Token", opts.header);

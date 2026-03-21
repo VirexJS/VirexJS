@@ -1,21 +1,21 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import React, {
+	Children,
+	cloneElement,
+	createContext,
 	createElement,
 	Fragment,
-	isValidElement,
-	cloneElement,
-	Children,
-	memo,
 	forwardRef,
-	createContext,
-	useContext,
-	useState,
-	useRef,
-	useMemo,
-	useCallback,
-	useId,
-	resetIdCounter,
+	isValidElement,
+	memo,
 	renderToString,
+	resetIdCounter,
+	useCallback,
+	useContext,
+	useId,
+	useMemo,
+	useRef,
+	useState,
 } from "../src/compat/react";
 
 // The compat shim is primarily tested via compat.test.ts.

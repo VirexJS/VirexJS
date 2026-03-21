@@ -1,10 +1,10 @@
-import { describe, test, expect, afterAll } from "bun:test";
-import { writeBuildManifest, type BuildManifest } from "../src/manifest";
+import { afterAll, describe, expect, test } from "bun:test";
 import { mkdirSync, rmSync } from "node:fs";
-import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { type BuildManifest, writeBuildManifest } from "../src/manifest";
 
-const testDir = join(tmpdir(), "virex-manifest-test-" + Date.now());
+const testDir = join(tmpdir(), `virex-manifest-test-${Date.now()}`);
 
 afterAll(() => {
 	rmSync(testDir, { recursive: true, force: true });

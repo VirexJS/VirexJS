@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
+import { type MiddlewareContext, runMiddleware } from "../src/server/middleware";
 import { rateLimit } from "../src/server/rate-limit";
-import { runMiddleware, type MiddlewareContext } from "../src/server/middleware";
 
 function makeCtx(ip?: string): MiddlewareContext {
 	const headers = new Headers();
@@ -12,16 +12,12 @@ function makeCtx(ip?: string): MiddlewareContext {
 	};
 }
 
-async function runRL(
+async function _runRL(
 	options: Parameters<typeof rateLimit>[0],
 	ctx: MiddlewareContext,
 ): Promise<Response> {
 	const mw = rateLimit(options);
-	return runMiddleware(
-		[mw],
-		ctx,
-		async () => new Response("ok"),
-	);
+	return runMiddleware([mw], ctx, async () => new Response("ok"));
 }
 
 // ─── Basic rate limiting ────────────────────────────────────────────────────
@@ -138,8 +134,16 @@ describe("rate limit custom options", () => {
 		const headers1 = new Headers({ "X-API-Key": "key-a" });
 		const headers2 = new Headers({ "X-API-Key": "key-b" });
 
-		const ctx1 = { request: new Request("http://localhost/", { headers: headers1 }), params: {}, locals: {} };
-		const ctx2 = { request: new Request("http://localhost/", { headers: headers2 }), params: {}, locals: {} };
+		const ctx1 = {
+			request: new Request("http://localhost/", { headers: headers1 }),
+			params: {},
+			locals: {},
+		};
+		const ctx2 = {
+			request: new Request("http://localhost/", { headers: headers2 }),
+			params: {},
+			locals: {},
+		};
 
 		// key-a: 2 requests
 		await runMiddleware([mw], ctx1, async () => new Response("ok"));

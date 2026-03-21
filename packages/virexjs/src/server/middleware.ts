@@ -5,7 +5,10 @@ export interface MiddlewareContext {
 }
 
 export type MiddlewareNext = () => Promise<Response>;
-export type MiddlewareFn = (ctx: MiddlewareContext, next: MiddlewareNext) => Promise<Response | void>;
+export type MiddlewareFn = (
+	ctx: MiddlewareContext,
+	next: MiddlewareNext,
+) => Promise<Response | undefined>;
 
 /**
  * Helper to define a middleware function with full type inference.

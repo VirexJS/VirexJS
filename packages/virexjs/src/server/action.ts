@@ -94,7 +94,10 @@ export async function parseFormData(request: Request): Promise<Record<string, st
 	const contentType = request.headers.get("Content-Type") ?? "";
 	const result: Record<string, string> = {};
 
-	if (contentType.includes("multipart/form-data") || contentType.includes("application/x-www-form-urlencoded")) {
+	if (
+		contentType.includes("multipart/form-data") ||
+		contentType.includes("application/x-www-form-urlencoded")
+	) {
 		const formData = await request.formData();
 		for (const [key, value] of formData.entries()) {
 			if (typeof value === "string") {

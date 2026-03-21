@@ -1,5 +1,5 @@
-import { describe, test, expect } from "bun:test";
-import { runMiddleware, defineMiddleware, type MiddlewareContext } from "../src/server/middleware";
+import { describe, expect, test } from "bun:test";
+import { defineMiddleware, type MiddlewareContext, runMiddleware } from "../src/server/middleware";
 
 function createCtx(url = "http://localhost/"): MiddlewareContext {
 	return {

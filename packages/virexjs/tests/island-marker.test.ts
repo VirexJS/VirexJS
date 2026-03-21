@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
-import { isIsland, wrapIslandMarker } from "../src/render/island-marker";
+import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
+import { isIsland, wrapIslandMarker } from "../src/render/island-marker";
 
 describe("isIsland", () => {
 	test("file in islands directory returns true", () => {
@@ -32,7 +32,7 @@ describe("wrapIslandMarker", () => {
 
 		expect(result).toContain("<!--vrx-island:Counter:");
 		expect(result).toContain('"initial":0');
-		expect(result).toContain(':visible-->');
+		expect(result).toContain(":visible-->");
 		expect(result).toContain('data-vrx-island="Counter"');
 		expect(result).toContain("<button>Click</button>");
 		expect(result).toContain("<!--/vrx-island-->");

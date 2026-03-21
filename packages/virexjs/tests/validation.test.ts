@@ -1,5 +1,5 @@
-import { describe, test, expect } from "bun:test";
-import { validate, parseBody, string, number, boolean } from "../src/validation/index";
+import { describe, expect, test } from "bun:test";
+import { boolean, number, parseBody, string, validate } from "../src/validation/index";
 
 // ─── string validators ─────────────────────────────────────────────────────
 
@@ -13,8 +13,8 @@ describe("string validators", () => {
 	test("required fails for empty", () => {
 		const result = validate({ name: string().required() }, { name: "" });
 		expect(result.success).toBe(false);
-		expect(result.errors[0]!.field).toBe("name");
-		expect(result.errors[0]!.rule).toBe("required");
+		expect(result.errors[0]?.field).toBe("name");
+		expect(result.errors[0]?.rule).toBe("required");
 	});
 
 	test("required fails for undefined", () => {
@@ -73,7 +73,7 @@ describe("string validators", () => {
 			{ name: string().required("Name is required").min(2, "Too short") },
 			{ name: "" },
 		);
-		expect(result.errors[0]!.message).toBe("Name is required");
+		expect(result.errors[0]?.message).toBe("Name is required");
 	});
 
 	test("default value", () => {
@@ -152,7 +152,7 @@ describe("chained validators", () => {
 		const result = validate(schema, { name: "" });
 		// Should only report "required", not "min"
 		expect(result.errors).toHaveLength(1);
-		expect(result.errors[0]!.rule).toBe("required");
+		expect(result.errors[0]?.rule).toBe("required");
 	});
 });
 

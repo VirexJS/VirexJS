@@ -1,10 +1,10 @@
-import { describe, test, expect, afterEach } from "bun:test";
-import { startDevMode } from "../src/dev";
-import { mkdirSync, writeFileSync, rmSync } from "node:fs";
-import { join } from "node:path";
+import { afterEach, describe, expect, test } from "bun:test";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { startDevMode } from "../src/dev";
 
-const testDir = join(tmpdir(), "virex-dev-test-" + Date.now());
+const testDir = join(tmpdir(), `virex-dev-test-${Date.now()}`);
 
 afterEach(() => {
 	rmSync(testDir, { recursive: true, force: true });
@@ -62,7 +62,9 @@ describe("startDevMode", () => {
 
 		dev.stop();
 		// .md and .json should be ignored
-		const sourceChanges = changes.filter((f) => f.endsWith(".ts") || f.endsWith(".tsx") || f.endsWith(".css"));
+		const sourceChanges = changes.filter(
+			(f) => f.endsWith(".ts") || f.endsWith(".tsx") || f.endsWith(".css"),
+		);
 		expect(sourceChanges).toHaveLength(0);
 	});
 

@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -32,49 +32,72 @@ export async function init(args: string[]): Promise<void> {
 	}
 
 	// package.json
-	writeFile(projectDir, "package.json", JSON.stringify({
-		name: projectName,
-		version: "0.1.0",
-		type: "module",
-		scripts: {
-			dev: "virex dev",
-			build: "virex build",
-			preview: "virex preview",
-		},
-		dependencies: {
-			virexjs: "^0.1.0",
-		},
-		devDependencies: {
-			"@types/bun": "latest",
-			typescript: "^5.7.0",
-		},
-	}, null, 2));
+	writeFile(
+		projectDir,
+		"package.json",
+		JSON.stringify(
+			{
+				name: projectName,
+				version: "0.1.0",
+				type: "module",
+				scripts: {
+					dev: "virex dev",
+					build: "virex build",
+					preview: "virex preview",
+				},
+				dependencies: {
+					virexjs: "^0.1.0",
+				},
+				devDependencies: {
+					"@types/bun": "latest",
+					typescript: "^5.7.0",
+				},
+			},
+			null,
+			2,
+		),
+	);
 
 	// tsconfig.json
-	writeFile(projectDir, "tsconfig.json", JSON.stringify({
-		compilerOptions: {
-			target: "ESNext",
-			module: "ESNext",
-			moduleResolution: "bundler",
-			jsx: "react-jsx",
-			jsxImportSource: "virexjs",
-			strict: true,
-			noEmit: true,
-			skipLibCheck: true,
-		},
-	}, null, 2));
+	writeFile(
+		projectDir,
+		"tsconfig.json",
+		JSON.stringify(
+			{
+				compilerOptions: {
+					target: "ESNext",
+					module: "ESNext",
+					moduleResolution: "bundler",
+					jsx: "react-jsx",
+					jsxImportSource: "virexjs",
+					strict: true,
+					noEmit: true,
+					skipLibCheck: true,
+				},
+			},
+			null,
+			2,
+		),
+	);
 
 	// virex.config.ts
-	writeFile(projectDir, "virex.config.ts", `import { defineConfig } from "virexjs";
+	writeFile(
+		projectDir,
+		"virex.config.ts",
+		`import { defineConfig } from "virexjs";
 
 export default defineConfig({
 \tport: 3000,
 \trender: "server",
 });
-`);
+`,
+	);
 
 	// src/pages/index.tsx
-	writeFile(projectDir, "src/pages/index.tsx", `import type { PageProps, MetaData } from "virexjs";
+	writeFile(
+		projectDir,
+		"src/pages/index.tsx",
+		`import type { PageProps, MetaData } from "virexjs";
 
 export function meta(): MetaData {
 \treturn {
@@ -96,10 +119,14 @@ export default function Home(props: PageProps) {
 \t\t</div>
 \t);
 }
-`);
+`,
+	);
 
 	// src/pages/about.tsx
-	writeFile(projectDir, "src/pages/about.tsx", `import type { MetaData } from "virexjs";
+	writeFile(
+		projectDir,
+		"src/pages/about.tsx",
+		`import type { MetaData } from "virexjs";
 
 export function meta(): MetaData {
 \treturn { title: "About — ${projectName}" };
@@ -114,15 +141,20 @@ export default function About() {
 \t\t</div>
 \t);
 }
-`);
+`,
+	);
 
 	// src/api/hello.ts
-	writeFile(projectDir, "src/api/hello.ts", `import { defineAPIRoute } from "virexjs";
+	writeFile(
+		projectDir,
+		"src/api/hello.ts",
+		`import { defineAPIRoute } from "virexjs";
 
 export const GET = defineAPIRoute(() => {
 \treturn Response.json({ message: "Hello from VirexJS!", timestamp: Date.now() });
 });
-`);
+`,
+	);
 
 	// public/robots.txt
 	writeFile(projectDir, "public/robots.txt", "User-agent: *\nAllow: /\n");

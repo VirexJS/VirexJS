@@ -1,9 +1,9 @@
-import { describe, test, expect, mock } from "bun:test";
-import { PluginRunner } from "../src/plugin/runner";
-import { definePlugin } from "../src/plugin/index";
-import type { VirexPlugin } from "../src/plugin/types";
-import type { VirexConfig } from "../src/config/types";
+import { describe, expect, test } from "bun:test";
 import { DEFAULT_CONFIG } from "../src/config/defaults";
+import type { VirexConfig } from "../src/config/types";
+import { definePlugin } from "../src/plugin/index";
+import { PluginRunner } from "../src/plugin/runner";
+import type { VirexPlugin } from "../src/plugin/types";
 
 function makeConfig(overrides?: Partial<VirexConfig>): VirexConfig {
 	return { ...DEFAULT_CONFIG, ...overrides } as VirexConfig;
@@ -38,18 +38,12 @@ describe("definePlugin", () => {
 
 describe("PluginRunner", () => {
 	test("count returns number of plugins", () => {
-		const runner = new PluginRunner([
-			{ name: "a" },
-			{ name: "b" },
-		]);
+		const runner = new PluginRunner([{ name: "a" }, { name: "b" }]);
 		expect(runner.count).toBe(2);
 	});
 
 	test("names returns plugin names", () => {
-		const runner = new PluginRunner([
-			{ name: "alpha" },
-			{ name: "beta" },
-		]);
+		const runner = new PluginRunner([{ name: "alpha" }, { name: "beta" }]);
 		expect(runner.names).toEqual(["alpha", "beta"]);
 	});
 
@@ -281,7 +275,7 @@ describe("transformHTML", () => {
 			definePlugin({
 				name: "good-transform",
 				transformHTML(html) {
-					return html + "<!-- ok -->";
+					return `${html}<!-- ok -->`;
 				},
 			}),
 		]);

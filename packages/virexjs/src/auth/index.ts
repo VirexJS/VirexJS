@@ -1,4 +1,4 @@
-export { createJWT, verifyJWT, decodeJWT, JWTError } from "./jwt";
-export type { JWTPayload, JWTOptions } from "./jwt";
-export { guard } from "./guard";
 export type { GuardOptions } from "./guard";
+export { guard } from "./guard";
+export type { JWTOptions, JWTPayload } from "./jwt";
+export { createJWT, decodeJWT, JWTError, verifyJWT } from "./jwt";

@@ -1,11 +1,15 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { gracefulShutdown } from "../src/server/graceful";
 
 function mockServer() {
 	let stopped = false;
 	return {
-		stop(closeActive?: boolean) { stopped = true; },
-		get isStopped() { return stopped; },
+		stop(_closeActive?: boolean) {
+			stopped = true;
+		},
+		get isStopped() {
+			return stopped;
+		},
 	};
 }
 
@@ -33,7 +37,9 @@ describe("gracefulShutdown", () => {
 
 		const handle = gracefulShutdown(server, {
 			signals: [],
-			onShutdown: () => { called = true; },
+			onShutdown: () => {
+				called = true;
+			},
 		});
 
 		await handle.shutdown();
@@ -69,7 +75,9 @@ describe("gracefulShutdown", () => {
 		const server = mockServer();
 		const handle = gracefulShutdown(server, {
 			signals: [],
-			onShutdown: () => { throw new Error("cleanup failed"); },
+			onShutdown: () => {
+				throw new Error("cleanup failed");
+			},
 		});
 
 		await handle.shutdown(); // should not throw

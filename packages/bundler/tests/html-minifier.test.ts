@@ -1,5 +1,5 @@
-import { describe, test, expect } from "bun:test";
-import { minifyHTML, minificationStats } from "../src/html-minifier";
+import { describe, expect, test } from "bun:test";
+import { minificationStats, minifyHTML } from "../src/html-minifier";
 
 describe("minifyHTML", () => {
 	test("removes HTML comments", () => {
@@ -26,7 +26,7 @@ describe("minifyHTML", () => {
 	});
 
 	test("collapses runs of whitespace", () => {
-		const html = "<div   class=\"test\"   id=\"main\"  >";
+		const html = '<div   class="test"   id="main"  >';
 		const result = minifyHTML(html);
 		expect(result).not.toMatch(/\s{2,}/);
 	});
@@ -45,27 +45,27 @@ describe("minifyHTML", () => {
 	});
 
 	test("preserves pre content", () => {
-		const html = '<pre>  code   with   spaces  </pre>';
+		const html = "<pre>  code   with   spaces  </pre>";
 		expect(minifyHTML(html)).toContain("  code   with   spaces  ");
 	});
 
 	test("preserves script content", () => {
-		const html = '<script>  var x = 1;  var y = 2;  </script>';
+		const html = "<script>  var x = 1;  var y = 2;  </script>";
 		expect(minifyHTML(html)).toContain("  var x = 1;  var y = 2;  ");
 	});
 
 	test("preserves style content", () => {
-		const html = '<style>  .cls { color: red; }  </style>';
+		const html = "<style>  .cls { color: red; }  </style>";
 		expect(minifyHTML(html)).toContain("  .cls { color: red; }  ");
 	});
 
 	test("preserves code content", () => {
-		const html = '<code>  let x = 1  </code>';
+		const html = "<code>  let x = 1  </code>";
 		expect(minifyHTML(html)).toContain("  let x = 1  ");
 	});
 
 	test("preserves textarea content", () => {
-		const html = '<textarea>  default text  </textarea>';
+		const html = "<textarea>  default text  </textarea>";
 		expect(minifyHTML(html)).toContain("  default text  ");
 	});
 

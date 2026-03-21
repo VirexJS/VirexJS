@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
-import { loadConfig } from "../config/index";
 import { buildProduction } from "@virexjs/bundler";
+import { loadConfig } from "../config/index";
 import { PluginRunner } from "../plugin/runner";
 
 /**

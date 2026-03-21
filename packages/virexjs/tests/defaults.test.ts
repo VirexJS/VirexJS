@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { DEFAULT_CONFIG } from "../src/config/defaults";
 
 describe("DEFAULT_CONFIG", () => {

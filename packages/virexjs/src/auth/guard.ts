@@ -1,4 +1,4 @@
-import type { MiddlewareFn, MiddlewareContext } from "../server/middleware";
+import type { MiddlewareContext, MiddlewareFn } from "../server/middleware";
 
 /**
  * Route guard — protect routes based on conditions.

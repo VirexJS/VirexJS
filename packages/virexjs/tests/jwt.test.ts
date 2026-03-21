@@ -1,5 +1,5 @@
-import { describe, test, expect } from "bun:test";
-import { createJWT, verifyJWT, decodeJWT, JWTError } from "../src/auth/jwt";
+import { describe, expect, test } from "bun:test";
+import { createJWT, decodeJWT, JWTError, verifyJWT } from "../src/auth/jwt";
 
 const SECRET = "test-secret-key-for-virexjs";
 
@@ -79,7 +79,9 @@ describe("verifyJWT", () => {
 		const parts = token.split(".");
 		// Tamper with payload
 		const tamperedPayload = btoa(JSON.stringify({ admin: true, iat: 0 }))
-			.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+			.replace(/\+/g, "-")
+			.replace(/\//g, "_")
+			.replace(/=+$/, "");
 		const tampered = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
 		expect(verifyJWT(tampered, SECRET)).rejects.toThrow("Invalid signature");
 	});
@@ -91,11 +93,14 @@ describe("verifyJWT", () => {
 	});
 
 	test("returns all custom claims", async () => {
-		const token = await createJWT({
-			userId: "u1",
-			role: "editor",
-			permissions: ["read", "write"],
-		}, SECRET);
+		const token = await createJWT(
+			{
+				userId: "u1",
+				role: "editor",
+				permissions: ["read", "write"],
+			},
+			SECRET,
+		);
 		const payload = await verifyJWT(token, SECRET);
 		expect(payload.userId).toBe("u1");
 		expect(payload.role).toBe("editor");

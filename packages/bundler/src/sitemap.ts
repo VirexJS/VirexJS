@@ -38,10 +38,10 @@ function pageToURL(page: string): string {
 	const bracketMatch = page.match(/\s\[(.+)\]$/);
 	if (bracketMatch) {
 		const basePage = page.replace(/\s\[.+\]$/, "");
-		const resolvedPath = bracketMatch[1]!;
+		const resolvedPath = bracketMatch[1] ?? "";
 		// Get directory part of the page
 		const dir = basePage.includes("/") ? basePage.slice(0, basePage.lastIndexOf("/")) : "";
-		return `/${dir ? dir + "/" : ""}${resolvedPath}`;
+		return `/${dir ? `${dir}/` : ""}${resolvedPath}`;
 	}
 
 	// Strip extension
@@ -53,5 +53,9 @@ function pageToURL(page: string): string {
 }
 
 function escapeXml(str: string): string {
-	return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+	return str
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;");
 }

@@ -1,6 +1,6 @@
-import { renderToString, h } from "../render/jsx";
-import { resetHeadCollector, flushHeadTags } from "../render/head";
-import type { VNode, VElement } from "../render/jsx";
+import { flushHeadTags, resetHeadCollector } from "../render/head";
+import type { VNode } from "../render/jsx";
+import { renderToString } from "../render/jsx";
 
 /**
  * VirexJS test utilities.

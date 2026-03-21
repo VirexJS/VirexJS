@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { healthCheck } from "../src/server/health";
-import { runMiddleware, type MiddlewareContext } from "../src/server/middleware";
+import { type MiddlewareContext, runMiddleware } from "../src/server/middleware";
 
 function makeCtx(path: string): MiddlewareContext {
 	return {
@@ -75,7 +75,9 @@ describe("healthCheck", () => {
 	test("throwing check is unhealthy", async () => {
 		const mw = healthCheck({
 			checks: {
-				db: () => { throw new Error("connection failed"); },
+				db: () => {
+					throw new Error("connection failed");
+				},
 			},
 		});
 		const res = await runMiddleware([mw], makeCtx("/health"), async () => new Response("page"));

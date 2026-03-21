@@ -1,8 +1,8 @@
-import { describe, test, expect, beforeEach, afterAll } from "bun:test";
-import { parseEnvFile, loadEnv } from "../src/config/env";
-import { mkdirSync, writeFileSync, rmSync } from "node:fs";
-import { join } from "node:path";
+import { afterAll, beforeEach, describe, expect, test } from "bun:test";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { loadEnv, parseEnvFile } from "../src/config/env";
 
 // ─── parseEnvFile ───────────────────────────────────────────────────────────
 
@@ -89,7 +89,7 @@ describe("parseEnvFile", () => {
 // ─── loadEnv ────────────────────────────────────────────────────────────────
 
 describe("loadEnv", () => {
-	const testDir = join(tmpdir(), "virex-env-test-" + Date.now());
+	const testDir = join(tmpdir(), `virex-env-test-${Date.now()}`);
 
 	beforeEach(() => {
 		mkdirSync(testDir, { recursive: true });

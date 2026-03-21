@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { cors } from "../src/server/cors";
-import { runMiddleware, type MiddlewareContext } from "../src/server/middleware";
+import { type MiddlewareContext, runMiddleware } from "../src/server/middleware";
 
 function makeCtx(method: string, origin?: string): MiddlewareContext {
 	const headers = new Headers();
@@ -66,20 +66,12 @@ describe("cors specific origin", () => {
 
 describe("cors origin array", () => {
 	test("allows origin in array", async () => {
-		const res = await runCors(
-			{ origin: ["http://a.com", "http://b.com"] },
-			"GET",
-			"http://b.com",
-		);
+		const res = await runCors({ origin: ["http://a.com", "http://b.com"] }, "GET", "http://b.com");
 		expect(res.headers.get("Access-Control-Allow-Origin")).toBe("http://b.com");
 	});
 
 	test("rejects origin not in array", async () => {
-		const res = await runCors(
-			{ origin: ["http://a.com", "http://b.com"] },
-			"GET",
-			"http://c.com",
-		);
+		const res = await runCors({ origin: ["http://a.com", "http://b.com"] }, "GET", "http://c.com");
 		expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
 	});
 });
@@ -148,11 +140,7 @@ describe("cors custom methods and headers", () => {
 	});
 
 	test("exposed headers on actual request", async () => {
-		const res = await runCors(
-			{ exposedHeaders: ["X-Total-Count"] },
-			"GET",
-			"http://example.com",
-		);
+		const res = await runCors({ exposedHeaders: ["X-Total-Count"] }, "GET", "http://example.com");
 		expect(res.headers.get("Access-Control-Expose-Headers")).toBe("X-Total-Count");
 	});
 });

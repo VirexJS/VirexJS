@@ -1,6 +1,6 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
+import { type MiddlewareContext, runMiddleware } from "../src/server/middleware";
 import { requestId } from "../src/server/request-id";
-import { runMiddleware, type MiddlewareContext } from "../src/server/middleware";
 
 function makeCtx(existingId?: string): MiddlewareContext {
 	const headers = new Headers();
@@ -20,7 +20,7 @@ describe("requestId", () => {
 
 		const id = res.headers.get("X-Request-ID");
 		expect(id).toBeTruthy();
-		expect(id!.length).toBe(36); // UUID-like format
+		expect(id?.length).toBe(36); // UUID-like format
 		expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
 	});
 

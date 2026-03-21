@@ -1,4 +1,4 @@
-import type { PageProps, LoaderContext } from "virexjs";
+import type { LoaderContext, PageProps } from "virexjs";
 import { useHead } from "virexjs";
 import Default from "../../layouts/Default";
 
@@ -12,17 +12,20 @@ const MOCK_POSTS: Record<string, BlogPostData> = {
 	"hello-world": {
 		title: "Hello World",
 		date: "2024-01-15",
-		content: "Welcome to VirexJS! This is a next-generation web framework built on Bun runtime. It ships HTML, not JavaScript, making your pages incredibly fast.",
+		content:
+			"Welcome to VirexJS! This is a next-generation web framework built on Bun runtime. It ships HTML, not JavaScript, making your pages incredibly fast.",
 	},
 	"getting-started": {
 		title: "Getting Started",
 		date: "2024-01-10",
-		content: "To get started with VirexJS, create a new project and define your pages in the src/pages directory. Each file becomes a route automatically thanks to file-based routing.",
+		content:
+			"To get started with VirexJS, create a new project and define your pages in the src/pages directory. Each file becomes a route automatically thanks to file-based routing.",
 	},
 	"islands-architecture": {
 		title: "Islands Architecture",
 		date: "2024-01-05",
-		content: "VirexJS uses an islands architecture. By default, all pages are rendered as pure HTML on the server. Only components marked as islands get hydrated on the client, keeping the JavaScript bundle minimal.",
+		content:
+			"VirexJS uses an islands architecture. By default, all pages are rendered as pure HTML on the server. Only components marked as islands get hydrated on the client, keeping the JavaScript bundle minimal.",
 	},
 };
 

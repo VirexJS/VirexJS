@@ -1,5 +1,5 @@
-import { describe, test, expect, afterEach } from "bun:test";
-import { getDB, closeDB } from "../src/client";
+import { afterEach, describe, expect, test } from "bun:test";
+import { closeDB, getDB } from "../src/client";
 
 afterEach(() => {
 	closeDB();

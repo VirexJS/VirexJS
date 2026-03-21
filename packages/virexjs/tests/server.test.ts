@@ -1,8 +1,8 @@
-import { describe, test, expect, afterAll } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
-import { createServer } from "../src/server/index";
 import { DEFAULT_CONFIG } from "../src/config/defaults";
 import type { VirexConfig } from "../src/config/types";
+import { createServer } from "../src/server/index";
 
 const playgroundDir = resolve(import.meta.dir, "../../../playground");
 

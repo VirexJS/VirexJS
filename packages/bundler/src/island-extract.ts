@@ -1,5 +1,5 @@
-import { readdirSync, statSync, readFileSync } from "node:fs";
-import { join, basename, extname, sep } from "node:path";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { basename, extname, join, sep } from "node:path";
 
 /**
  * Scan source files to find island components.
@@ -8,9 +8,7 @@ import { join, basename, extname, sep } from "node:path";
  *
  * Returns a registry mapping island names to file paths.
  */
-export function extractIslands(
-	srcDir: string,
-): Map<string, { filePath: string; name: string }> {
+export function extractIslands(srcDir: string): Map<string, { filePath: string; name: string }> {
 	const islands = new Map<string, { filePath: string; name: string }>();
 	const islandsDir = join(srcDir, "islands");
 
@@ -36,7 +34,7 @@ function scanIslandsDirectory(
 
 	for (const entry of entries) {
 		const fullPath = join(dir, entry);
-		let stat;
+		let stat: ReturnType<typeof statSync> | null = null;
 		try {
 			stat = statSync(fullPath);
 		} catch {
@@ -71,7 +69,7 @@ function scanForDirectives(
 
 	for (const entry of entries) {
 		const fullPath = join(dir, entry);
-		let stat;
+		let stat: ReturnType<typeof statSync> | null = null;
 		try {
 			stat = statSync(fullPath);
 		} catch {
@@ -96,14 +94,16 @@ function scanForDirectives(
 		try {
 			const content = readFileSync(fullPath, "utf-8");
 			const firstLine = content.trimStart().split("\n")[0] ?? "";
-			if (firstLine.includes('"use island"') || firstLine.includes("'use island'") || firstLine.includes("// \"use island\"")) {
+			if (
+				firstLine.includes('"use island"') ||
+				firstLine.includes("'use island'") ||
+				firstLine.includes('// "use island"')
+			) {
 				const name = basename(entry, extname(entry));
 				if (!islands.has(name)) {
 					islands.set(name, { filePath: fullPath, name });
 				}
 			}
-		} catch {
-			continue;
-		}
+		} catch {}
 	}
 }

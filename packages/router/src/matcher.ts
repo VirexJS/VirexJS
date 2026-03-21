@@ -1,4 +1,4 @@
-import type { RouteNode, MatchResult } from "./types";
+import type { MatchResult, RouteNode } from "./types";
 
 /**
  * Match a URL path against the route tree.
@@ -49,11 +49,7 @@ interface WalkResult {
 	params: Record<string, string>;
 }
 
-function walkTree(
-	node: RouteNode,
-	segments: string[],
-	depth: number,
-): WalkResult | null {
+function walkTree(node: RouteNode, segments: string[], depth: number): WalkResult | null {
 	// We've consumed all segments — check if this node has a file
 	if (depth === segments.length) {
 		if (node.filePath !== null) {

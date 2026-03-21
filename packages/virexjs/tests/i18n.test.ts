@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { createI18n, defineTranslations, detectLocale } from "../src/i18n/index";
 
 // ─── defineTranslations ─────────────────────────────────────────────────────

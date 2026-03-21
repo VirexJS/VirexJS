@@ -1,7 +1,6 @@
-import { join, dirname } from "node:path";
-import { readdirSync, mkdirSync, cpSync, existsSync } from "node:fs";
-import { scanPages } from "@virexjs/router";
-import { parseSegment } from "@virexjs/router";
+import { cpSync, existsSync, mkdirSync, readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { parseSegment, scanPages } from "@virexjs/router";
 import { processCSS } from "./css";
 import { writeBuildManifest } from "./manifest";
 import { generateSitemap } from "./sitemap";
@@ -67,12 +66,12 @@ export async function buildProduction(options: {
 					// SSG: render each path returned by getStaticPaths
 					const paths: { params: Record<string, string> }[] = await mod.getStaticPaths();
 					for (const pathEntry of paths) {
-						const rendered = await renderStaticPage(
-							mod, route, pathEntry.params, outDir,
-						);
+						const rendered = await renderStaticPage(mod, route, pathEntry.params, outDir);
 						if (rendered) {
 							totalSize += rendered;
-							pageNames.push(`${route.relativePath} [${Object.values(pathEntry.params).join("/")}]`);
+							pageNames.push(
+								`${route.relativePath} [${Object.values(pathEntry.params).join("/")}]`,
+							);
 						}
 					}
 					continue;
@@ -131,9 +130,10 @@ export async function buildProduction(options: {
 			const fullHtml = buildDocument({ head: headHtml, body: bodyHtml });
 
 			// Determine output path
-			const outputPath = route.segments.length === 0
-				? join(outDir, "index.html")
-				: join(outDir, ...route.segments, "index.html");
+			const outputPath =
+				route.segments.length === 0
+					? join(outDir, "index.html")
+					: join(outDir, ...route.segments, "index.html");
 
 			const outputDir = dirname(outputPath);
 			mkdirSync(outputDir, { recursive: true });
@@ -248,7 +248,9 @@ async function renderStaticPage(
 
 		const bodyHtml = renderToString(vnode as Parameters<typeof renderToString>[0]);
 		let headHtml = "";
-		const metaFn = mod.meta as ((ctx: Record<string, unknown>) => Record<string, unknown>) | undefined;
+		const metaFn = mod.meta as
+			| ((ctx: Record<string, unknown>) => Record<string, unknown>)
+			| undefined;
 		if (metaFn) {
 			headHtml = renderMeta(metaFn({ data, params }));
 		}

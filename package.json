@@ -1,21 +1,24 @@
 {
-  "name": "virexjs-monorepo",
-  "private": true,
-  "workspaces": ["packages/*", "playground"],
-  "scripts": {
-    "dev": "cd playground && bun run ../packages/virexjs/src/cli/index.ts dev",
-    "build": "cd playground && bun run ../packages/virexjs/src/cli/index.ts build",
-    "test": "bun test --recursive packages/",
-    "test:router": "bun test packages/router/",
-    "test:bundler": "bun test packages/bundler/",
-    "test:db": "bun test packages/db/",
-    "lint": "bunx @biomejs/biome check .",
-    "typecheck": "bunx tsc --noEmit",
-    "check": "bun test && bunx tsc --noEmit"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "latest",
-    "@types/bun": "latest",
-    "typescript": "^5.7.0"
-  }
+	"name": "virexjs-monorepo",
+	"private": true,
+	"workspaces": [
+		"packages/*",
+		"playground"
+	],
+	"scripts": {
+		"dev": "cd playground && bun run ../packages/virexjs/src/cli/index.ts dev",
+		"build": "cd playground && bun run ../packages/virexjs/src/cli/index.ts build",
+		"test": "bun test --recursive packages/",
+		"test:router": "bun test packages/router/",
+		"test:bundler": "bun test packages/bundler/",
+		"test:db": "bun test packages/db/",
+		"lint": "bunx @biomejs/biome check .",
+		"typecheck": "bunx tsc --noEmit",
+		"check": "bun test && bunx tsc --noEmit"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "latest",
+		"@types/bun": "latest",
+		"typescript": "^5.7.0"
+	}
 }

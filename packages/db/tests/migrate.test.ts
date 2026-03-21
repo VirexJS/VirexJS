@@ -1,6 +1,6 @@
-import { describe, test, expect, beforeEach } from "bun:test";
-import { defineMigration, migrate, rollback, getMigrationStatus } from "../src/migrate";
-import { getDB, closeDB } from "../src/client";
+import { beforeEach, describe, expect, test } from "bun:test";
+import { closeDB, getDB } from "../src/client";
+import { defineMigration, getMigrationStatus, migrate, rollback } from "../src/migrate";
 
 beforeEach(() => {
 	closeDB();
@@ -119,7 +119,7 @@ describe("rollback", () => {
 
 	test("throws for unknown migration version", () => {
 		migrate([m001]);
-		expect(() => rollback([m002])).toThrow('not found');
+		expect(() => rollback([m002])).toThrow("not found");
 	});
 });
 

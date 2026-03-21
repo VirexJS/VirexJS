@@ -1,5 +1,5 @@
-export type { VirexPlugin, TransformHTMLContext, BuildResult, ServerInfo } from "./types";
 export { PluginRunner } from "./runner";
+export type { BuildResult, ServerInfo, TransformHTMLContext, VirexPlugin } from "./types";
 
 /**
  * Helper to define a plugin with full type inference.

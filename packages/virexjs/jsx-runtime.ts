@@ -1,1 +1,1 @@
-export { h as jsx, h as jsxs, Fragment } from "./src/render/jsx";
+export { Fragment, h as jsx, h as jsxs } from "./src/render/jsx";

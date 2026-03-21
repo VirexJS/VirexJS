@@ -68,7 +68,10 @@ export interface VirexPlugin {
 	 * Transform the rendered HTML before it is sent as a response.
 	 * Return the modified HTML string, or undefined to leave it unchanged.
 	 */
-	transformHTML?: (html: string, ctx: TransformHTMLContext) => string | undefined | Promise<string | undefined>;
+	transformHTML?: (
+		html: string,
+		ctx: TransformHTMLContext,
+	) => string | undefined | Promise<string | undefined>;
 
 	/**
 	 * Return middleware functions to inject into the server's middleware chain.

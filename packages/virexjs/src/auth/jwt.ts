@@ -82,10 +82,7 @@ export async function createJWT(
  *
  * Returns the payload if valid, throws on invalid/expired tokens.
  */
-export async function verifyJWT(
-	token: string,
-	secret: string,
-): Promise<JWTPayload> {
+export async function verifyJWT(token: string, secret: string): Promise<JWTPayload> {
 	const parts = token.split(".");
 	if (parts.length !== 3) {
 		throw new JWTError("Invalid token format");
@@ -171,11 +168,7 @@ async function hmacSign(data: string, secret: string): Promise<string> {
 		["sign"],
 	);
 
-	const signature = await crypto.subtle.sign(
-		"HMAC",
-		key,
-		new TextEncoder().encode(data),
-	);
+	const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(data));
 
 	const bytes = new Uint8Array(signature);
 	const base64 = btoa(String.fromCharCode(...bytes));

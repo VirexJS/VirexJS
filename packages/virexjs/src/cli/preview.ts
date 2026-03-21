@@ -27,7 +27,7 @@ export async function preview(_args: string[]): Promise<void> {
 			if (!pathname.endsWith("/")) {
 				pathname += "/";
 			}
-			response = await serveStatic(pathname + "index.html", outDir);
+			response = await serveStatic(`${pathname}index.html`, outDir);
 			if (response) return response;
 
 			// Fallback to 404

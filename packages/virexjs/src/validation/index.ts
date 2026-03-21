@@ -55,7 +55,7 @@ interface ValidationRule {
 function createFieldValidator<T = unknown>(): FieldValidator<T> {
 	const rules: ValidationRule[] = [];
 	const transforms: TransformFn[] = [];
-	let defaultValue: T | undefined;
+	let _defaultValue: T | undefined;
 
 	const validator: FieldValidator<T> = {
 		_rules: rules,
@@ -167,7 +167,7 @@ function createFieldValidator<T = unknown>(): FieldValidator<T> {
 		},
 
 		default(value: T) {
-			defaultValue = value;
+			_defaultValue = value;
 			validator._defaultValue = value;
 			return validator;
 		},
@@ -283,7 +283,10 @@ export async function parseBody<S extends Schema>(
 
 	if (contentType.includes("application/json")) {
 		data = await request.json();
-	} else if (contentType.includes("multipart/form-data") || contentType.includes("application/x-www-form-urlencoded")) {
+	} else if (
+		contentType.includes("multipart/form-data") ||
+		contentType.includes("application/x-www-form-urlencoded")
+	) {
 		const formData = await request.formData();
 		data = {};
 		for (const [key, value] of formData.entries()) {

@@ -55,11 +55,11 @@ export function defineWSRoute(route: WSRoute): WSRoute {
 /**
  * Create a WebSocket server with multiple route handlers.
  */
-export function createWSServer(options: {
+export function createWSServer(options: { port: number; routes: WSRoute[]; hostname?: string }): {
+	stop: () => void;
 	port: number;
-	routes: WSRoute[];
-	hostname?: string;
-}): { stop: () => void; port: number; clients: ReadonlySet<WSConnection> } {
+	clients: ReadonlySet<WSConnection>;
+} {
 	const { port, routes, hostname = "localhost" } = options;
 	const routeMap = new Map<string, WSRoute>();
 	const allClients = new Set<WSConnection>();
@@ -116,9 +116,7 @@ export function createWSServer(options: {
 				if (typeof message === "string") {
 					route?.message?.(conn, message);
 				} else {
-					const bytes = message instanceof ArrayBuffer
-						? new Uint8Array(message)
-						: message;
+					const bytes = message instanceof ArrayBuffer ? new Uint8Array(message) : message;
 					route?.binaryMessage?.(conn, bytes);
 				}
 			},

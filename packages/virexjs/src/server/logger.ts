@@ -45,11 +45,7 @@ export function createLogger(options?: {
 	const { level = "info", prefix, context = {} } = options ?? {};
 	const minLevel = LEVEL_VALUES[level];
 
-	function log(
-		logLevel: LogLevel,
-		message: string,
-		data?: Record<string, unknown>,
-	): void {
+	function log(logLevel: LogLevel, message: string, data?: Record<string, unknown>): void {
 		if (LEVEL_VALUES[logLevel] < minLevel) return;
 
 		const timestamp = new Date().toISOString();
@@ -57,9 +53,7 @@ export function createLogger(options?: {
 		const levelTag = logLevel.toUpperCase().padEnd(5);
 
 		const extra = { ...context, ...data };
-		const extraStr = Object.keys(extra).length > 0
-			? ` ${JSON.stringify(extra)}`
-			: "";
+		const extraStr = Object.keys(extra).length > 0 ? ` ${JSON.stringify(extra)}` : "";
 
 		const output = `${timestamp} ${levelTag} ${tag} ${message}${extraStr}`.trim();
 

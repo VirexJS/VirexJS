@@ -1,6 +1,6 @@
-import { h } from "./jsx";
 import { Head } from "./head";
 import type { VNode } from "./jsx";
+import { h } from "./jsx";
 
 /**
  * Common JSON-LD structured data types for SEO.
@@ -71,7 +71,13 @@ export interface FAQLD {
 	}>;
 }
 
-export type StructuredData = ArticleLD | WebSiteLD | BreadcrumbLD | OrganizationLD | ProductLD | FAQLD;
+export type StructuredData =
+	| ArticleLD
+	| WebSiteLD
+	| BreadcrumbLD
+	| OrganizationLD
+	| ProductLD
+	| FAQLD;
 
 /**
  * Render JSON-LD structured data into a `<Head>` script tag.
@@ -151,9 +157,7 @@ export function createBreadcrumbs(
  *   ]);
  *   <JsonLd data={faq} />
  */
-export function createFAQ(
-	items: Array<{ question: string; answer: string }>,
-): FAQLD {
+export function createFAQ(items: Array<{ question: string; answer: string }>): FAQLD {
 	return {
 		"@type": "FAQPage",
 		mainEntity: items.map((item) => ({
