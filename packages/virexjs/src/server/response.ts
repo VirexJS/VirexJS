@@ -3,8 +3,15 @@
  * Provides shorthand functions for common response patterns.
  */
 
-/** Redirect to another URL */
+/**
+ * Redirect to another URL.
+ * Only allows relative paths and same-origin URLs. Rejects protocol-relative URLs.
+ */
 export function redirect(url: string, status: 301 | 302 | 303 | 307 | 308 = 302): Response {
+	// Prevent open redirect: reject protocol-relative URLs and absolute foreign URLs
+	if (url.startsWith("//") || (url.includes("://") && !url.startsWith("/"))) {
+		throw new Error(`Unsafe redirect target: "${url}". Use relative paths or same-origin URLs.`);
+	}
 	return new Response(null, {
 		status,
 		headers: { Location: url },

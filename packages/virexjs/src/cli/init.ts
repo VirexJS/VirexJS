@@ -7,6 +7,11 @@ import { join } from "node:path";
  */
 export async function init(args: string[]): Promise<void> {
 	const projectName = args[0] ?? "my-virex-app";
+	// Validate project name — prevent path traversal
+	if (projectName.includes("..") || projectName.includes("/") || projectName.includes("\\")) {
+		console.error('  Error: Project name must not contain "..", "/" or "\\".');
+		process.exit(1);
+	}
 	const projectDir = join(process.cwd(), projectName);
 
 	if (existsSync(projectDir)) {

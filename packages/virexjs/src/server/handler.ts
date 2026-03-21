@@ -92,8 +92,10 @@ export async function handlePageRequest(
 			devScript: options?.devScript,
 		});
 	} catch (error) {
+		const isDev = process.env.NODE_ENV !== "production";
 		const message = error instanceof Error ? error.message : "Unknown error";
-		const stack = error instanceof Error ? error.stack : undefined;
+		const safeMessage = isDev ? message : "Internal Server Error";
+		const safeStack = isDev ? (error instanceof Error ? error.stack : undefined) : undefined;
 
 		// Try custom _error.tsx page
 		if (options?.errorPagePath) {
@@ -102,7 +104,11 @@ export async function handlePageRequest(
 				if (errorMod.default) {
 					const response = renderPage({
 						component: errorMod.default,
-						data: { data: { error: message, stack }, params: {}, url: new URL(request.url) },
+						data: {
+							data: { error: safeMessage, stack: safeStack },
+							params: {},
+							url: new URL(request.url),
+						},
 						devScript: options?.devScript,
 					});
 					return new Response(response.body, {
@@ -115,10 +121,10 @@ export async function handlePageRequest(
 			}
 		}
 
-		return new Response(`<h1>500 — Server Error</h1><pre>${escapeForHtml(message)}</pre>`, {
-			status: 500,
-			headers: { "Content-Type": "text/html" },
-		});
+		return new Response(
+			`<h1>500 — Server Error</h1>${isDev ? `<pre>${escapeForHtml(message)}</pre>` : "<p>Internal Server Error</p>"}`,
+			{ status: 500, headers: { "Content-Type": "text/html" } },
+		);
 	}
 }
 
@@ -147,7 +153,12 @@ export async function handleAPIRequest(
 
 		return await handler({ request, params });
 	} catch (error) {
-		const message = error instanceof Error ? error.message : "Unknown error";
+		const isDev = process.env.NODE_ENV !== "production";
+		const message = isDev
+			? error instanceof Error
+				? error.message
+				: "Unknown error"
+			: "Internal Server Error";
 		return new Response(JSON.stringify({ error: message }), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },

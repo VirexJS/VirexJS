@@ -37,19 +37,34 @@ describe("rateLimit", () => {
 		expect(text).toBe("Too Many Requests");
 	});
 
-	test("different IPs have separate limits", async () => {
-		const mw = rateLimit({ max: 2, windowMs: 60_000 });
+	test("different keys have separate limits", async () => {
+		const mw = rateLimit({
+			max: 2,
+			windowMs: 60_000,
+			keyGenerator: (req) => req.headers.get("X-Client-ID") ?? "anon",
+		});
 
-		// IP A: 2 requests
-		await runMiddleware([mw], makeCtx("10.0.0.1"), async () => new Response("ok"));
-		await runMiddleware([mw], makeCtx("10.0.0.1"), async () => new Response("ok"));
+		const ctxA = (): MiddlewareContext => ({
+			request: new Request("http://localhost/", { headers: { "X-Client-ID": "client-a" } }),
+			params: {},
+			locals: {},
+		});
+		const ctxB = (): MiddlewareContext => ({
+			request: new Request("http://localhost/", { headers: { "X-Client-ID": "client-b" } }),
+			params: {},
+			locals: {},
+		});
 
-		// IP A: blocked
-		const blockedA = await runMiddleware([mw], makeCtx("10.0.0.1"), async () => new Response("ok"));
+		// Client A: 2 requests
+		await runMiddleware([mw], ctxA(), async () => new Response("ok"));
+		await runMiddleware([mw], ctxA(), async () => new Response("ok"));
+
+		// Client A: blocked
+		const blockedA = await runMiddleware([mw], ctxA(), async () => new Response("ok"));
 		expect(blockedA.status).toBe(429);
 
-		// IP B: still allowed
-		const allowedB = await runMiddleware([mw], makeCtx("10.0.0.2"), async () => new Response("ok"));
+		// Client B: still allowed
+		const allowedB = await runMiddleware([mw], ctxB(), async () => new Response("ok"));
 		expect(allowedB.status).toBe(200);
 	});
 });

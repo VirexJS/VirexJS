@@ -107,19 +107,23 @@ export function rateLimit(options: RateLimitOptions = {}): MiddlewareFn {
 	};
 }
 
-/** Default key generator — uses client IP from headers or socket */
+/**
+ * Default key generator — uses URL origin as a basic per-client key.
+ * Does NOT trust X-Forwarded-For by default (spoofable).
+ * Override with keyGenerator option for proxy-aware setups.
+ */
 function defaultKeyGenerator(request: Request): string {
-	// Check common proxy headers
-	const forwarded = request.headers.get("X-Forwarded-For");
-	if (forwarded) {
-		return forwarded.split(",")[0]?.trim() ?? "default";
-	}
+	// Use the URL host + a hash of user-agent as a basic client identifier
+	// This is not perfect but prevents the "everyone shares one key" problem
+	const url = new URL(request.url);
+	const ua = request.headers.get("User-Agent") ?? "";
+	return `${url.hostname}:${simpleHash(ua)}`;
+}
 
-	const realIp = request.headers.get("X-Real-IP");
-	if (realIp) {
-		return realIp;
+function simpleHash(str: string): string {
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
 	}
-
-	// Fallback to a generic key
-	return "default";
+	return Math.abs(hash).toString(36);
 }

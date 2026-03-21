@@ -32,7 +32,9 @@ function deepMerge(
 ): Record<string, unknown> {
 	const result: Record<string, unknown> = { ...target };
 
+	const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 	for (const key of Object.keys(source)) {
+		if (DANGEROUS_KEYS.has(key)) continue;
 		const sourceVal = source[key];
 		const targetVal = target[key];
 

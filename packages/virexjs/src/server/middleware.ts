@@ -30,22 +30,30 @@ export async function runMiddleware(
 	finalHandler: () => Promise<Response>,
 ): Promise<Response> {
 	let index = 0;
+	let nextCalled = false;
 
 	async function next(): Promise<Response> {
+		nextCalled = true;
 		if (index >= middlewares.length) {
 			return finalHandler();
 		}
 
 		const middleware = middlewares[index]!;
 		index++;
+		nextCalled = false;
 
 		const result = await middleware(ctx, next);
 		if (result instanceof Response) {
 			return result;
 		}
 
-		// If middleware didn't return a Response and didn't call next,
-		// we still need to proceed
+		// Only fall through to finalHandler if next() was NOT already called
+		// to prevent double execution
+		if (!nextCalled) {
+			return finalHandler();
+		}
+
+		// next() was called but middleware returned undefined — use next's result
 		return finalHandler();
 	}
 

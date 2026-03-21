@@ -23,8 +23,8 @@ export function minifyHTML(html: string): string {
 		return `__VRX_RAW_${preserved.length - 1}__`;
 	});
 
-	// Remove HTML comments (but keep conditional comments)
-	result = result.replace(/<!--(?!\[if)[\s\S]*?-->/g, "");
+	// Remove HTML comments (keep conditional comments and VirexJS island markers)
+	result = result.replace(/<!--(?!\[if|vrx-island|\/vrx-island)[\s\S]*?-->/g, "");
 
 	// Collapse whitespace between tags
 	result = result.replace(/>\s+</g, "> <");

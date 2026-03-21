@@ -26,21 +26,46 @@ interface TableOperations<T extends Record<string, ColumnDef>> {
 	count(where?: Partial<Record<keyof T, unknown>>): number;
 }
 
+/** Validate an identifier (table/column name) — alphanumeric + underscore only */
+function validateIdentifier(name: string): string {
+	if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) {
+		throw new Error(`Invalid identifier: "${name}". Only alphanumeric and underscore allowed.`);
+	}
+	return name;
+}
+
 /**
  * Define a table with auto-creation and return typed CRUD operations.
  * Uses prepared statements for SQL injection prevention.
+ * Column names and table names are validated against injection.
  */
 export function defineTable<T extends Record<string, ColumnDef>>(
 	name: string,
 	schema: T,
 ): TableOperations<T> {
 	const db = getDB();
+	const schemaKeys = new Set(Object.keys(schema));
+
+	// Validate table name and column names at definition time
+	validateIdentifier(name);
+	for (const col of schemaKeys) {
+		validateIdentifier(col);
+	}
 
 	// Auto-create table
 	const columns = Object.entries(schema)
 		.map(([col, def]) => `"${col}" ${def}`)
 		.join(", ");
 	db.run(`CREATE TABLE IF NOT EXISTS "${name}" (${columns})`);
+
+	/** Validate that all keys exist in the schema to prevent column injection */
+	function validateKeys(obj: Record<string, unknown>): void {
+		for (const key of Object.keys(obj)) {
+			if (!schemaKeys.has(key)) {
+				throw new Error(`Unknown column: "${key}". Valid columns: ${[...schemaKeys].join(", ")}`);
+			}
+		}
+	}
 
 	function buildWhere(where: Partial<Record<string, unknown>>): {
 		clause: string;
@@ -50,6 +75,7 @@ export function defineTable<T extends Record<string, ColumnDef>>(
 		if (entries.length === 0) {
 			return { clause: "", values: [] };
 		}
+		validateKeys(where);
 		const conditions = entries.map(([key]) => `"${key}" = ?`);
 		const values = entries.map(([, val]) => val);
 		return { clause: ` WHERE ${conditions.join(" AND ")}`, values };
@@ -74,7 +100,16 @@ export function defineTable<T extends Record<string, ColumnDef>>(
 			}
 
 			if (opts.orderBy) {
-				sql += ` ORDER BY ${opts.orderBy}`;
+				// Validate orderBy: only allow "column ASC|DESC" patterns
+				const orderParts = opts.orderBy.split(",").map((p) => p.trim());
+				const validatedOrder = orderParts.map((part) => {
+					const match = part.match(/^(\w+)(?:\s+(ASC|DESC))?$/i);
+					if (!match) throw new Error(`Invalid ORDER BY: "${part}"`);
+					const col = match[1]!;
+					if (!schemaKeys.has(col)) throw new Error(`Unknown column in ORDER BY: "${col}"`);
+					return match[2] ? `"${col}" ${match[2].toUpperCase()}` : `"${col}"`;
+				});
+				sql += ` ORDER BY ${validatedOrder.join(", ")}`;
 			}
 
 			if (opts.limit !== undefined) {
@@ -92,6 +127,7 @@ export function defineTable<T extends Record<string, ColumnDef>>(
 		},
 
 		insert(data) {
+			validateKeys(data);
 			const entries = Object.entries(data);
 			const columns = entries.map(([key]) => `"${key}"`).join(", ");
 			const placeholders = entries.map(() => "?").join(", ");
@@ -104,6 +140,7 @@ export function defineTable<T extends Record<string, ColumnDef>>(
 		},
 
 		update(where, data) {
+			validateKeys(data);
 			const dataEntries = Object.entries(data);
 			const setClauses = dataEntries.map(([key]) => `"${key}" = ?`).join(", ");
 			const setValues = dataEntries.map(([, val]) => val);

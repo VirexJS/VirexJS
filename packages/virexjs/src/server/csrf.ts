@@ -63,7 +63,7 @@ export function csrf(options?: {
 			return response;
 		}
 
-		// Validate token from header, body, or query
+		// Validate token from header, body field, or query param
 		const headerToken = ctx.request.headers.get(headerName);
 		const queryToken = url.searchParams.get(fieldName);
 
@@ -73,6 +73,24 @@ export function csrf(options?: {
 			valid = true;
 		} else if (queryToken && timingSafeEqual(queryToken, token)) {
 			valid = true;
+		} else {
+			// Check body field (clone request so downstream can still read body)
+			const contentType = ctx.request.headers.get("Content-Type") ?? "";
+			if (
+				contentType.includes("application/x-www-form-urlencoded") ||
+				contentType.includes("multipart/form-data")
+			) {
+				try {
+					const cloned = ctx.request.clone();
+					const formData = await cloned.formData();
+					const bodyToken = formData.get(fieldName);
+					if (typeof bodyToken === "string" && timingSafeEqual(bodyToken, token)) {
+						valid = true;
+					}
+				} catch {
+					// Parse error — invalid body
+				}
+			}
 		}
 
 		if (!valid) {
@@ -92,7 +110,10 @@ function generateToken(): string {
 }
 
 function setTokenCookie(response: Response, name: string, token: string): void {
-	response.headers.append("Set-Cookie", `${name}=${token}; Path=/; HttpOnly; SameSite=Strict`);
+	response.headers.append(
+		"Set-Cookie",
+		`${encodeURIComponent(name)}=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=Strict`,
+	);
 }
 
 function parseCookieHeader(header: string | null): Record<string, string> {
@@ -107,10 +128,12 @@ function parseCookieHeader(header: string | null): Record<string, string> {
 }
 
 function timingSafeEqual(a: string, b: string): boolean {
-	if (a.length !== b.length) return false;
-	let result = 0;
-	for (let i = 0; i < a.length; i++) {
-		result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+	const { timingSafeEqual: cryptoEqual } = require("node:crypto");
+	const bufA = Buffer.from(a);
+	const bufB = Buffer.from(b);
+	if (bufA.length !== bufB.length) {
+		cryptoEqual(bufA, bufA);
+		return false;
 	}
-	return result === 0;
+	return cryptoEqual(bufA, bufB);
 }

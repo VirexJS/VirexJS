@@ -90,6 +90,17 @@ export async function verifyJWT(token: string, secret: string): Promise<JWTPaylo
 
 	const [encodedHeader, encodedPayload, signature] = parts as [string, string, string];
 
+	// Validate header algorithm
+	try {
+		const header = JSON.parse(base64urlDecode(encodedHeader));
+		if (header.alg !== "HS256") {
+			throw new JWTError(`Unsupported algorithm: ${header.alg}`);
+		}
+	} catch (err) {
+		if (err instanceof JWTError) throw err;
+		throw new JWTError("Invalid header");
+	}
+
 	// Verify signature
 	const signingInput = `${encodedHeader}.${encodedPayload}`;
 	const expectedSignature = await hmacSign(signingInput, secret);
@@ -175,12 +186,15 @@ async function hmacSign(data: string, secret: string): Promise<string> {
 	return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-/** Timing-safe string comparison to prevent timing attacks */
+/** Timing-safe string comparison using node:crypto to prevent timing attacks */
 function timingSafeEqual(a: string, b: string): boolean {
-	if (a.length !== b.length) return false;
-	let result = 0;
-	for (let i = 0; i < a.length; i++) {
-		result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+	const { timingSafeEqual: cryptoEqual } = require("node:crypto");
+	const bufA = Buffer.from(a);
+	const bufB = Buffer.from(b);
+	if (bufA.length !== bufB.length) {
+		// Consume constant time even on length mismatch
+		cryptoEqual(bufA, bufA);
+		return false;
 	}
-	return result === 0;
+	return cryptoEqual(bufA, bufB);
 }

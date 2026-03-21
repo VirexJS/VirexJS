@@ -52,7 +52,7 @@ export function session(options: SessionOptions = {}): MiddlewareFn {
 		maxAge = 86400,
 		path = "/",
 		httpOnly = true,
-		secure = false,
+		secure = true,
 		sameSite = "Lax",
 		store = createMemoryStore(),
 	} = options;
@@ -132,9 +132,16 @@ export function session(options: SessionOptions = {}): MiddlewareFn {
 	};
 }
 
-/** Create an in-memory session store */
-export function createMemoryStore(): SessionStore {
+/** Create an in-memory session store with size limit to prevent DoS */
+export function createMemoryStore(maxSessions = 10_000): SessionStore {
 	const sessions = new Map<string, { data: Record<string, unknown>; expiresAt: number }>();
+
+	function evictExpired(): void {
+		const now = Date.now();
+		for (const [key, entry] of sessions) {
+			if (now >= entry.expiresAt) sessions.delete(key);
+		}
+	}
 
 	return {
 		async get(id) {
@@ -151,6 +158,14 @@ export function createMemoryStore(): SessionStore {
 				data,
 				expiresAt: Date.now() + maxAge * 1000,
 			});
+			// Evict oldest if over limit
+			if (sessions.size > maxSessions) {
+				evictExpired();
+				if (sessions.size > maxSessions) {
+					const firstKey = sessions.keys().next().value;
+					if (firstKey !== undefined) sessions.delete(firstKey);
+				}
+			}
 		},
 		async delete(id) {
 			sessions.delete(id);
@@ -183,7 +198,7 @@ function buildCookie(
 	value: string,
 	opts: { path: string; maxAge: number; httpOnly: boolean; secure: boolean; sameSite: string },
 ): string {
-	const parts = [`${name}=${value}`];
+	const parts = [`${encodeURIComponent(name)}=${encodeURIComponent(value)}`];
 	parts.push(`Path=${opts.path}`);
 	parts.push(`Max-Age=${opts.maxAge}`);
 	if (opts.httpOnly) parts.push("HttpOnly");

@@ -1,4 +1,4 @@
-import { join } from "node:path";
+import { join, resolve, sep } from "node:path";
 
 /** Map of file extensions to MIME types */
 const MIME_TYPES: Record<string, string> = {
@@ -37,12 +37,12 @@ export async function serveStatic(
 	publicDir: string,
 	request?: Request,
 ): Promise<Response | null> {
-	// Prevent directory traversal
-	if (path.includes("..")) {
+	// Prevent directory traversal — join then resolve, verify path stays within publicDir
+	const normalizedPublicDir = resolve(publicDir);
+	const filePath = resolve(join(publicDir, path));
+	if (!filePath.startsWith(normalizedPublicDir + sep) && filePath !== normalizedPublicDir) {
 		return null;
 	}
-
-	const filePath = join(publicDir, path);
 	const file = Bun.file(filePath);
 
 	if (!(await file.exists())) {
@@ -61,7 +61,7 @@ export async function serveStatic(
 	if (request) {
 		const ifNoneMatch = request.headers.get("If-None-Match");
 		if (ifNoneMatch === etag) {
-			return new Response(null, { status: 304 });
+			return new Response(null, { status: 304, headers: { ETag: etag } });
 		}
 	}
 
