@@ -67,10 +67,24 @@ export async function dev(args: string[]): Promise<void> {
 		}
 	}
 
-	// Start file watcher
+	// Start file watcher with module cache invalidation
 	const watcher = startDevMode({
 		srcDir,
 		onFileChange: (filePath, _event) => {
+			// Clear Bun's module cache so re-import gets fresh code
+			try {
+				const registry = require.cache;
+				if (registry) {
+					for (const key of Object.keys(registry)) {
+						if (key.includes(srcDir.replace(/\\/g, "/"))) {
+							delete registry[key];
+						}
+					}
+				}
+			} catch {
+				// Cache clear not supported — full reload will still work
+			}
+
 			if (hmrServer) {
 				if (filePath.endsWith(".css")) {
 					hmrServer.broadcast({ type: "css-update", href: filePath });

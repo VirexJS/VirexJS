@@ -54,7 +54,9 @@ export async function handlePageRequest(
 	options?: PageRequestOptions,
 ): Promise<Response> {
 	try {
-		const mod = (await import(match.route.filePath!)) as PageModule;
+		// Add timestamp to bypass Bun's module cache in dev mode
+		const cacheBust = process.env.NODE_ENV !== "production" ? `?t=${Date.now()}` : "";
+		const mod = (await import(match.route.filePath! + cacheBust)) as PageModule;
 		const component = mod.default;
 
 		if (!component) {
@@ -140,7 +142,8 @@ export async function handleAPIRequest(
 	params: Record<string, string> = {},
 ): Promise<Response> {
 	try {
-		const mod = (await import(filePath)) as APIModule;
+		const cacheBust = process.env.NODE_ENV !== "production" ? `?t=${Date.now()}` : "";
+		const mod = (await import(filePath + cacheBust)) as APIModule;
 		const method = request.method.toUpperCase() as keyof APIModule;
 		const handler = mod[method];
 
@@ -181,7 +184,8 @@ async function findLayout(
 		const layoutPath = join(dir, "_layout.tsx");
 		if (existsSync(layoutPath)) {
 			try {
-				const mod = await import(layoutPath);
+				const cb = process.env.NODE_ENV !== "production" ? `?t=${Date.now()}` : "";
+				const mod = await import(layoutPath + cb);
 				if (mod.default) {
 					return mod.default as (props: { children: unknown }) => VNode;
 				}
