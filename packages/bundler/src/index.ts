@@ -9,3 +9,4 @@ export { buildProduction } from "./build";
 export { processCSS } from "./css";
 export { writeBuildManifest, type BuildManifest } from "./manifest";
 export { generateSitemap } from "./sitemap";
+export { minifyHTML, minificationStats } from "./html-minifier";
