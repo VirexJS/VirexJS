@@ -133,4 +133,51 @@ bench("escapeHtml via renderToString", () => {
 	renderToString(h("p", null, '<script>alert("xss")</script> & "quotes" & <tags>'));
 });
 
+// Validation benchmark
+console.log("\n  Validation:");
+
+import { validate, string, number } from "./packages/virexjs/src/validation/index";
+
+const schema = {
+	name: string().required().min(2).max(50).trim(),
+	email: string().required().email(),
+	age: number().min(0).max(150),
+};
+
+bench("validate (valid)", () => {
+	validate(schema, { name: "  Alice  ", email: "alice@test.com", age: "30" });
+});
+
+bench("validate (invalid)", () => {
+	validate(schema, { name: "", email: "bad", age: "200" });
+});
+
+// i18n benchmark
+console.log("\n  i18n:");
+
+import { createI18n, defineTranslations } from "./packages/virexjs/src/i18n/index";
+
+const i18n = createI18n({
+	defaultLocale: "en",
+	locales: {
+		en: defineTranslations({
+			greeting: "Hello {name}",
+			items: { one: "1 item", other: "{count} items" },
+			nav: { home: "Home", about: "About" },
+		}),
+	},
+});
+
+bench("i18n t() simple", () => {
+	i18n.t("greeting", { name: "World" });
+});
+
+bench("i18n t() nested", () => {
+	i18n.t("nav.home");
+});
+
+bench("i18n t() plural", () => {
+	i18n.t("items", { count: 5 });
+});
+
 console.log("\n  Done.\n");
