@@ -1,4 +1,5 @@
-import type { PageProps, LoaderContext, MetaContext, MetaData } from "virexjs";
+import type { PageProps, LoaderContext } from "virexjs";
+import { useHead } from "virexjs";
 import Default from "../../layouts/Default";
 
 interface BlogPostData {
@@ -48,22 +49,19 @@ export async function loader(ctx: LoaderContext) {
 	return post;
 }
 
-export function meta(ctx: MetaContext<BlogPostData>): MetaData {
-	return {
-		title: `${ctx.data.title} — VirexJS Blog`,
-		description: ctx.data.content.slice(0, 160),
-		og: {
-			title: ctx.data.title,
-			type: "article",
-		},
-	};
-}
-
 export default function BlogPost(props: PageProps<BlogPostData>) {
 	const { title, date, content } = props.data;
 
+	const head = useHead({
+		title: `${title} — VirexJS Blog`,
+		description: content.slice(0, 160),
+		og: { title, type: "article" },
+		twitter: { card: "summary", title },
+	});
+
 	return (
 		<Default>
+			{head}
 			<article>
 				<h1>{title}</h1>
 				{date && <p style={{ color: "#999", fontSize: "14px" }}>{date}</p>}
@@ -71,7 +69,7 @@ export default function BlogPost(props: PageProps<BlogPostData>) {
 					<p>{content}</p>
 				</div>
 				<a href="/blog" style={{ display: "inline-block", marginTop: "24px", color: "#0066cc" }}>
-					← Back to Blog
+					&#8592; Back to Blog
 				</a>
 			</article>
 		</Default>

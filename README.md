@@ -30,7 +30,7 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 | **Error Boundaries** | Done | `ErrorBoundary` component with fallback UI, `onError` callback |
 | **useHead()** | Done | Programmatic head management with SEO, OG, Twitter Card support |
 | **i18n** | Done | `createI18n()`, interpolation, pluralization, `detectLocale()` from Accept-Language |
-| **Tests** | Done | 368 tests across 24 files, 0 failures |
+| **Tests** | Done | 383 tests across 27 files, 0 failures |
 | **TypeScript** | Done | Strict mode, 0 errors |
 
 ### Roadmap

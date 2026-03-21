@@ -79,11 +79,16 @@ describe("HTTP Server", () => {
 	});
 
 	test("POST /api/hello returns 201", async () => {
-		const res = await fetch(`${BASE}/api/hello`, { method: "POST" });
+		const res = await fetch(`${BASE}/api/hello`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ test: true }),
+		});
 		expect(res.status).toBe(201);
 
 		const json = await res.json();
 		expect(json.received).toBe(true);
+		expect(json.echo).toEqual({ test: true });
 	});
 
 	test("PUT /api/hello returns 405 (not defined)", async () => {

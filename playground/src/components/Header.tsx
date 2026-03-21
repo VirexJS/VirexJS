@@ -9,6 +9,7 @@ export default function Header() {
 				<a href="/" style={{ textDecoration: "none", color: "#666" }}>Home</a>
 				<a href="/about" style={{ textDecoration: "none", color: "#666" }}>About</a>
 				<a href="/blog" style={{ textDecoration: "none", color: "#666" }}>Blog</a>
+				<a href="/i18n-demo" style={{ textDecoration: "none", color: "#666" }}>i18n</a>
 			</nav>
 		</header>
 	);
