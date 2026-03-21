@@ -18,8 +18,18 @@ export function renderPage(options: {
 	meta?: MetaData;
 	cssLinks?: string[];
 	devScript?: string;
+	/** Loading component shown while streaming (like Next.js loading.tsx) */
+	loadingComponent?: (props: Record<string, unknown>) => VNode;
 }): Response {
-	const { component, layout, data = {}, meta, cssLinks = [], devScript } = options;
+	const {
+		component,
+		layout,
+		data = {},
+		meta,
+		cssLinks = [],
+		devScript,
+		loadingComponent,
+	} = options;
 
 	// Reset head collector before rendering
 	resetHeadCollector();
@@ -46,7 +56,10 @@ export function renderPage(options: {
 	const devScriptTag = devScript ? `\n    <script>${devScript}</script>` : "";
 
 	// Create a true streaming response — head arrives first for fast TTFB
+	// If loadingComponent exists, send loading shell before body (like Next.js loading.tsx)
 	const encoder = new TextEncoder();
+	const loadingHtml = loadingComponent ? renderToString(loadingComponent({})) : "";
+
 	const stream = new ReadableStream({
 		start(controller) {
 			// 1. Send <head> immediately — browser can start loading CSS/fonts
@@ -56,10 +69,23 @@ export function renderPage(options: {
 				),
 			);
 
-			// 2. Send rendered body
-			controller.enqueue(encoder.encode(bodyHtml));
+			// 2. If loading component exists, send it as initial shell
+			if (loadingHtml) {
+				controller.enqueue(encoder.encode(`<div id="vrx-loading">${loadingHtml}</div>\n`));
+			}
 
-			// 3. Send closing tags + dev script
+			// 3. Send rendered body (replaces loading shell via script)
+			if (loadingHtml) {
+				controller.enqueue(
+					encoder.encode(
+						`<div id="vrx-content" style="display:none">${bodyHtml}</div>\n<script>document.getElementById("vrx-loading").remove();document.getElementById("vrx-content").style.display="";</script>\n`,
+					),
+				);
+			} else {
+				controller.enqueue(encoder.encode(bodyHtml));
+			}
+
+			// 4. Send closing tags + dev script
 			controller.enqueue(encoder.encode(`${devScriptTag}\n</body>\n</html>`));
 
 			controller.close();

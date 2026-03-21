@@ -4,11 +4,11 @@ import type { MatchResult } from "@virexjs/router";
 import { getRevalidateTime, isCachedPage, withCache } from "../directives/index";
 import { renderPage } from "../render/index";
 import type { VNode } from "../render/jsx";
+import { h, renderToString } from "../render/jsx";
 import type { MetaData } from "../render/meta";
 
 interface PageModule {
 	default: (props: Record<string, unknown>) => VNode;
-	/** ISR revalidation time in seconds */
 	revalidate?: number;
 	loader?: (ctx: {
 		params: Record<string, string>;
@@ -43,13 +43,11 @@ export interface PageRequestOptions {
 }
 
 /**
- * Handle a matched page route:
- * 1. Import the page module dynamically
- * 2. Call loader() export (if exists) with { params, request, headers }
- * 3. Call meta() export (if exists) with { data }
- * 4. Render page component with { data }
- * 5. Return streaming HTML Response
- * 6. On error: render _error.tsx if available, otherwise fallback
+ * Handle a matched page route with Next.js-like features:
+ * 1. Import the page module
+ * 2. Find nested layouts (_layout.tsx cascade)
+ * 3. Find per-route _loading.tsx and _error.tsx
+ * 4. Run loader, render with layouts, stream response
  */
 export async function handlePageRequest(
 	match: MatchResult,
@@ -57,7 +55,6 @@ export async function handlePageRequest(
 	options?: PageRequestOptions,
 ): Promise<Response> {
 	try {
-		// Add timestamp to bypass Bun's module cache in dev mode
 		const cacheBust = process.env.NODE_ENV !== "production" ? `?t=${Date.now()}` : "";
 		const mod = (await import(match.route.filePath! + cacheBust)) as PageModule;
 		const component = mod.default;
@@ -66,7 +63,7 @@ export async function handlePageRequest(
 			return new Response("Page module has no default export", { status: 500 });
 		}
 
-		// "use cache" / revalidate — ISR support
+		// ISR support
 		const revalidate =
 			getRevalidateTime(mod as unknown as Record<string, unknown>) ??
 			(isCachedPage(match.route.filePath!) ? 60 : null);
@@ -80,11 +77,11 @@ export async function handlePageRequest(
 
 		return renderPageFull(mod, match, request, options);
 	} catch (error) {
-		return handlePageError(error, request, options);
+		return handlePageError(error, match.route.filePath!, request, options);
 	}
 }
 
-/** Full page render pipeline */
+/** Full page render pipeline with nested layouts */
 async function renderPageFull(
 	mod: PageModule,
 	match: MatchResult,
@@ -107,72 +104,180 @@ async function renderPageFull(
 		metaData = mod.meta({ data, params: match.params });
 	}
 
-	// Auto-detect _layout.tsx in the page's directory or parent directories
-	let layout = options?.layout;
-	if (!layout) {
-		layout = await findLayout(match.route.filePath!);
-	}
+	// Find ALL nested layouts (root → leaf order)
+	const layouts = options?.layout
+		? [options.layout]
+		: await findNestedLayouts(match.route.filePath!);
 
+	// Build component tree: Layout1 → Layout2 → ... → Page
 	const component = mod.default;
-	return renderPage({
-		component,
-		layout,
-		data: { data, params: match.params, url: new URL(request.url) },
-		meta: metaData,
-		cssLinks: options?.cssLinks,
-		devScript: options?.devScript,
-	});
-}
+	let pageVNode: VNode = h(component, { data, params: match.params, url: new URL(request.url) });
 
-/** Handle page rendering errors */
-async function handlePageError(
-	error: unknown,
-	request: Request,
-	options?: PageRequestOptions,
-): Promise<Response> {
-	{
-		const isDev = process.env.NODE_ENV !== "production";
-		const message = error instanceof Error ? error.message : "Unknown error";
-		const safeMessage = isDev ? message : "Internal Server Error";
-		const safeStack = isDev ? (error instanceof Error ? error.stack : undefined) : undefined;
-
-		// Try custom _error.tsx page
-		if (options?.errorPagePath) {
-			try {
-				const errorMod = await import(options.errorPagePath);
-				if (errorMod.default) {
-					const response = renderPage({
-						component: errorMod.default,
-						data: {
-							data: { error: safeMessage, stack: safeStack },
-							params: {},
-							url: new URL(request.url),
-						},
-						devScript: options?.devScript,
-					});
-					return new Response(response.body, {
-						status: 500,
-						headers: response.headers,
-					});
-				}
-			} catch {
-				// Fall through to default error page
-			}
-		}
-
-		return new Response(
-			`<h1>500 — Server Error</h1>${isDev ? `<pre>${escapeForHtml(message)}</pre>` : "<p>Internal Server Error</p>"}`,
-			{ status: 500, headers: { "Content-Type": "text/html" } },
-		);
+	// Wrap in layouts from innermost to outermost
+	for (let i = layouts.length - 1; i >= 0; i--) {
+		const layout = layouts[i]!;
+		pageVNode = h(layout, { children: pageVNode });
 	}
+
+	// Find _loading.tsx for this route (used as fallback shell)
+	const loadingComponent = await findSpecialFile(match.route.filePath!, "_loading.tsx");
+
+	// Render with streaming — send loading shell first if available
+	return renderPageStreaming(pageVNode, metaData, options, loadingComponent);
 }
 
 /**
- * Handle an API route:
- * 1. Import the API module dynamically
- * 2. Call the appropriate exported function (GET, POST, PUT, DELETE)
- * 3. Return the Response
+ * Streaming render — sends loading shell immediately, then full content.
+ * Like Next.js loading.tsx + Suspense but without React.
  */
+function renderPageStreaming(
+	pageVNode: VNode,
+	meta: MetaData | undefined,
+	options?: PageRequestOptions,
+	loadingComponent?: (props: Record<string, unknown>) => VNode,
+): Response {
+	return renderPage({
+		// biome-ignore lint/suspicious/noExplicitAny: VNode component wrapper
+		component: (() => pageVNode) as any,
+		meta,
+		cssLinks: options?.cssLinks,
+		devScript: options?.devScript,
+		loadingComponent,
+	});
+}
+
+/**
+ * Handle errors with per-route _error.tsx support.
+ * Walks up from page directory looking for nearest _error.tsx.
+ * Falls back to root _error.tsx, then default error page.
+ */
+async function handlePageError(
+	error: unknown,
+	pageFilePath: string,
+	request: Request,
+	options?: PageRequestOptions,
+): Promise<Response> {
+	const isDev = process.env.NODE_ENV !== "production";
+	const message = error instanceof Error ? error.message : "Unknown error";
+	const safeMessage = isDev ? message : "Internal Server Error";
+	const safeStack = isDev ? (error instanceof Error ? error.stack : undefined) : undefined;
+
+	// Walk up looking for nearest _error.tsx (per-route error boundary)
+	const errorComponent = await findSpecialFile(pageFilePath, "_error.tsx");
+
+	if (errorComponent) {
+		try {
+			const errorVNode = h(errorComponent, { error: safeMessage, stack: safeStack });
+			const html = renderToString(errorVNode);
+			return new Response(
+				`<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${html}</body></html>`,
+				{ status: 500, headers: { "Content-Type": "text/html; charset=utf-8" } },
+			);
+		} catch {
+			// Error page itself failed, fall through
+		}
+	}
+
+	// Try root error page from options
+	if (options?.errorPagePath) {
+		try {
+			const errorMod = await import(options.errorPagePath);
+			if (errorMod.default) {
+				const response = renderPage({
+					component: errorMod.default,
+					data: {
+						data: { error: safeMessage, stack: safeStack },
+						params: {},
+						url: new URL(request.url),
+					},
+					devScript: options?.devScript,
+				});
+				return new Response(response.body, { status: 500, headers: response.headers });
+			}
+		} catch {
+			// Fall through
+		}
+	}
+
+	return new Response(
+		`<h1>500 — Server Error</h1>${isDev ? `<pre>${escapeForHtml(message)}</pre>` : "<p>Internal Server Error</p>"}`,
+		{ status: 500, headers: { "Content-Type": "text/html" } },
+	);
+}
+
+/**
+ * Find ALL nested layouts from root to page directory.
+ * Like Next.js App Router — each _layout.tsx wraps its children.
+ *
+ * Example:
+ *   src/pages/_layout.tsx         → Root layout
+ *   src/pages/admin/_layout.tsx   → Admin layout
+ *   src/pages/admin/users.tsx     → Page
+ *
+ * Result: [RootLayout, AdminLayout] (applied root → leaf)
+ */
+async function findNestedLayouts(
+	pageFilePath: string,
+): Promise<Array<(props: { children: unknown }) => VNode>> {
+	const layouts: Array<{ depth: number; component: (props: { children: unknown }) => VNode }> = [];
+	let dir = dirname(pageFilePath);
+	const maxDepth = 10;
+	let depth = 0;
+
+	while (depth < maxDepth) {
+		const layoutPath = join(dir, "_layout.tsx");
+		if (existsSync(layoutPath)) {
+			try {
+				const cb = process.env.NODE_ENV !== "production" ? `?t=${Date.now()}` : "";
+				const mod = await import(layoutPath + cb);
+				if (mod.default) {
+					layouts.push({ depth, component: mod.default });
+				}
+			} catch {
+				// Skip invalid layout
+			}
+		}
+
+		const parentDir = dirname(dir);
+		if (parentDir === dir) break;
+		dir = parentDir;
+		depth++;
+	}
+
+	// Sort by depth descending so root layout is first (outermost)
+	return layouts.sort((a, b) => b.depth - a.depth).map((l) => l.component);
+}
+
+/**
+ * Find a special file (_loading.tsx, _error.tsx) walking up from page directory.
+ * Returns the nearest one's default export, or undefined.
+ */
+async function findSpecialFile(
+	pageFilePath: string,
+	fileName: string,
+): Promise<((props: Record<string, unknown>) => VNode) | undefined> {
+	let dir = dirname(pageFilePath);
+	const maxDepth = 10;
+
+	for (let i = 0; i < maxDepth; i++) {
+		const filePath = join(dir, fileName);
+		if (existsSync(filePath)) {
+			try {
+				const cb = process.env.NODE_ENV !== "production" ? `?t=${Date.now()}` : "";
+				const mod = await import(filePath + cb);
+				if (mod.default) return mod.default;
+			} catch {
+				// Skip
+			}
+		}
+		const parentDir = dirname(dir);
+		if (parentDir === dir) break;
+		dir = parentDir;
+	}
+
+	return undefined;
+}
+
 export async function handleAPIRequest(
 	filePath: string,
 	request: Request,
@@ -204,40 +309,6 @@ export async function handleAPIRequest(
 			headers: { "Content-Type": "application/json" },
 		});
 	}
-}
-
-/**
- * Walk up from a page's directory looking for _layout.tsx.
- * Stops when it reaches a directory that no longer contains pages or the src root.
- */
-async function findLayout(
-	pageFilePath: string,
-): Promise<((props: { children: unknown }) => VNode) | undefined> {
-	let dir = dirname(pageFilePath);
-	const maxDepth = 10;
-	let depth = 0;
-
-	while (depth < maxDepth) {
-		const layoutPath = join(dir, "_layout.tsx");
-		if (existsSync(layoutPath)) {
-			try {
-				const cb = process.env.NODE_ENV !== "production" ? `?t=${Date.now()}` : "";
-				const mod = await import(layoutPath + cb);
-				if (mod.default) {
-					return mod.default as (props: { children: unknown }) => VNode;
-				}
-			} catch {
-				// Invalid layout file, skip
-			}
-		}
-
-		const parentDir = dirname(dir);
-		if (parentDir === dir) break;
-		dir = parentDir;
-		depth++;
-	}
-
-	return undefined;
 }
 
 function escapeForHtml(str: string): string {
