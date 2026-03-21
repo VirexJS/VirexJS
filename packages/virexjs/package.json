@@ -1,6 +1,7 @@
 {
   "name": "virexjs",
   "version": "0.1.0",
+  "description": "Ship HTML, not JavaScript. A full-stack web framework built on Bun.",
   "type": "module",
   "main": "src/types/index.ts",
   "types": "src/types/index.ts",
@@ -30,6 +31,30 @@
   "bin": {
     "virex": "src/cli/index.ts"
   },
+  "files": [
+    "src",
+    "jsx-runtime.ts",
+    "jsx-dev-runtime.ts"
+  ],
+  "keywords": [
+    "bun",
+    "web-framework",
+    "ssr",
+    "islands",
+    "jsx",
+    "file-based-routing",
+    "zero-js",
+    "html-first",
+    "server-rendering",
+    "typescript"
+  ],
+  "homepage": "https://github.com/virex-js/virexjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/virex-js/virexjs.git",
+    "directory": "packages/virexjs"
+  },
+  "bugs": "https://github.com/virex-js/virexjs/issues",
   "license": "MIT",
   "author": "ECOSTACK TECHNOLOGY OÜ",
   "dependencies": {

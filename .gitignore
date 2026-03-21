@@ -1,5 +1,20 @@
 node_modules
 dist
 .out
-.env
 *.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/settings.json
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Bun
+bun.lockb

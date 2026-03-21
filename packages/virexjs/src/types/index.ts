@@ -100,6 +100,8 @@ export { guard } from "../auth/guard";
 export type { GuardOptions } from "../auth/guard";
 export { defineAction, actionRedirect, actionJson, parseFormData } from "../server/action";
 export type { ActionContext, ActionHandler } from "../server/action";
+export { requestId } from "../server/request-id";
+export { healthCheck } from "../server/health";
 export type { StructuredData, ArticleLD, BreadcrumbLD, FAQLD } from "../render/json-ld";
 export type { MiddlewareContext, MiddlewareNext, MiddlewareFn } from "../server/middleware";
 export type { VirexConfig } from "../config/types";
