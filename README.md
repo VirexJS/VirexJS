@@ -33,7 +33,8 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 | **CORS** | Done | Built-in CORS middleware with wildcard, array, function origins |
 | **Rate Limiter** | Done | In-memory rate limiter with sliding window, custom keys |
 | **Env Loader** | Done | `.env` file loading with mode, interpolation, variable expansion |
-| **Tests** | Done | 460 tests across 32 files, 0 failures |
+| **Logger** | Done | Structured logger with levels, prefix, context, child loggers |
+| **Tests** | Done | 481 tests across 34 files, 0 failures |
 | **TypeScript** | Done | Strict mode, 0 errors |
 
 ### Roadmap

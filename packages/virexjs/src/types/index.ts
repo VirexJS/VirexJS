@@ -79,6 +79,8 @@ export type { CORSOptions } from "../server/cors";
 export { rateLimit } from "../server/rate-limit";
 export type { RateLimitOptions } from "../server/rate-limit";
 export { loadEnv, parseEnvFile } from "../config/env";
+export { createLogger } from "../server/logger";
+export type { Logger, LogLevel } from "../server/logger";
 export type { MiddlewareContext, MiddlewareNext, MiddlewareFn } from "../server/middleware";
 export type { VirexConfig } from "../config/types";
 export type { MetaData } from "../render/meta";
