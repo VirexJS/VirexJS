@@ -45,7 +45,10 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 | **Session** | Done | Cookie-based sessions with in-memory store, get/set/destroy |
 | **SSE** | Done | `createSSEStream` for Server-Sent Events with named events |
 | **DB Migrations** | Done | `migrate()`, `rollback()`, `getMigrationStatus()` with transactions |
-| **Tests** | Done | 632 tests across 45 files, 0 failures |
+| **JWT Auth** | Done | `createJWT`, `verifyJWT`, HS256 via Web Crypto, timing-safe comparison |
+| **Route Guards** | Done | `guard()` with string/array/regex/function matchers, custom onDenied |
+| **Form Actions** | Done | `defineAction`, `parseFormData`, `actionRedirect`, `actionJson` |
+| **Tests** | Done | 671 tests across 48 files, 0 failures |
 | **TypeScript** | Done | Strict mode, 0 errors |
 
 ### Roadmap
