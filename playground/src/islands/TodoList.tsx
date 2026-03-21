@@ -14,7 +14,6 @@ interface Todo {
 interface TodoListProps {
 	items?: Todo[];
 	nextId?: number;
-	inputValue?: string;
 	_state?: Record<string, unknown>;
 	_rerender?: () => void;
 }
@@ -26,8 +25,6 @@ export default function TodoList(props: TodoListProps) {
 		{ id: 3, text: "Ship to production", done: false },
 	];
 	const nextId = (props.nextId as number) ?? 4;
-	const inputValue = (props.inputValue as string) ?? "";
-
 	const remaining = items.filter((t) => !t.done).length;
 
 	return (
@@ -80,7 +77,7 @@ export default function TodoList(props: TodoListProps) {
 								lineHeight: "16px",
 							}}
 						>
-							{todo.done ? "✓" : ""}
+							{todo.done ? "\u2713" : ""}
 						</button>
 						<span
 							style={{
@@ -111,7 +108,7 @@ export default function TodoList(props: TodoListProps) {
 								padding: "0 4px",
 							}}
 						>
-							{"×"}
+							{"\u00d7"}
 						</button>
 					</div>
 				))}
@@ -120,13 +117,8 @@ export default function TodoList(props: TodoListProps) {
 			<div style={{ display: "flex", padding: "8px", gap: "8px", borderTop: "1px solid #eee" }}>
 				<input
 					type="text"
-					value={inputValue}
+					data-todo-input="true"
 					placeholder="Add a todo..."
-					onInput={(e: Event) => {
-						if (props._state) {
-							props._state.inputValue = (e.target as HTMLInputElement).value;
-						}
-					}}
 					style={{
 						flex: 1,
 						padding: "8px 12px",
@@ -138,12 +130,19 @@ export default function TodoList(props: TodoListProps) {
 				<button
 					type="button"
 					onClick={() => {
-						if (props._state && props._rerender && inputValue.trim()) {
-							const list = props._state.items as Todo[];
-							list.push({ id: nextId, text: inputValue.trim(), done: false });
-							props._state.nextId = nextId + 1;
-							props._state.inputValue = "";
-							props._rerender();
+						if (props._state && props._rerender) {
+							// Read input value directly from DOM
+							const input =
+								typeof document !== "undefined"
+									? document.querySelector<HTMLInputElement>("[data-todo-input]")
+									: null;
+							const text = input?.value?.trim() ?? "";
+							if (text) {
+								const list = props._state.items as Todo[];
+								list.push({ id: nextId, text, done: false });
+								props._state.nextId = nextId + 1;
+								props._rerender();
+							}
 						}
 					}}
 					style={{

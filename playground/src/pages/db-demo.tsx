@@ -2,34 +2,35 @@ import type { LoaderContext, PageProps } from "virexjs";
 import { useHead } from "virexjs";
 import Default from "../layouts/Default";
 
-interface DBDemoData {
-	tableInfo: string;
-	features: string[];
+interface Note {
+	id: number;
+	title: string;
+	content: string;
+	created_at: string;
 }
 
-export async function loader(_ctx: LoaderContext) {
-	return {
-		tableInfo: "defineTable() creates typed CRUD operations with SQL injection protection.",
-		features: [
-			"defineTable(name, schema) — auto-creates table with typed operations",
-			"findOne(where) — find single record by condition",
-			"findMany({ where, orderBy, limit, offset }) — query with pagination",
-			"insert(data) — insert and return the new record",
-			"update(where, data) — update matching records",
-			"delete(where) — delete matching records",
-			"count(where) — count matching records",
-			"defineMigration({ version, up, down }) — versioned migrations",
-			"migrate(migrations) — apply pending migrations with transactions",
-			"rollback(migrations, count) — revert last N migrations",
-			"getMigrationStatus() — show applied/pending versions",
-		],
-	};
+interface DBDemoData {
+	notes: Note[];
+	total: number;
+}
+
+export async function loader(ctx: LoaderContext) {
+	// Fetch notes from our own API
+	try {
+		const url = new URL("/api/notes", ctx.request.url);
+		const res = await fetch(url.toString());
+		const data = await res.json();
+		return { notes: data.notes ?? [], total: data.total ?? 0 };
+	} catch {
+		return { notes: [], total: 0 };
+	}
 }
 
 export default function DBDemo(props: PageProps<DBDemoData>) {
+	const { notes, total } = props.data;
 	const head = useHead({
 		title: "Database — VirexJS",
-		description: "SQLite ORM with typed CRUD and migrations.",
+		description: "Live SQLite database demo with defineTable() CRUD.",
 	});
 
 	const codeStyle = {
@@ -48,29 +49,80 @@ export default function DBDemo(props: PageProps<DBDemoData>) {
 
 			<h1 style={{ fontSize: "28px", margin: "0 0 8px" }}>Database</h1>
 			<p style={{ color: "#666", margin: "0 0 24px" }}>
-				Built-in SQLite ORM using <code>bun:sqlite</code>. Zero dependencies, typed CRUD, SQL
-				injection protection.
+				Built-in SQLite ORM using <code>bun:sqlite</code>. Zero dependencies, typed CRUD.
 			</p>
 
-			<h2 style={{ fontSize: "20px", margin: "0 0 12px" }}>Define a Table</h2>
+			<section
+				style={{
+					padding: "20px",
+					background: "#f0f7ff",
+					borderRadius: "8px",
+					marginBottom: "24px",
+				}}
+			>
+				<h2 style={{ fontSize: "18px", margin: "0 0 12px" }}>Live Notes ({total} records)</h2>
+				<p style={{ color: "#666", fontSize: "14px", margin: "0 0 12px" }}>
+					These notes are stored in a live SQLite database (in-memory). Try the API:
+				</p>
+				<div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
+					{notes.length > 0 ? (
+						notes.map((note) => (
+							<div
+								style={{
+									padding: "12px",
+									background: "#fff",
+									borderRadius: "6px",
+									border: "1px solid #e0e7ff",
+								}}
+							>
+								<strong style={{ fontSize: "14px" }}>{note.title}</strong>
+								<p style={{ margin: "4px 0 0", color: "#666", fontSize: "13px" }}>{note.content}</p>
+							</div>
+						))
+					) : (
+						<p style={{ color: "#999", fontStyle: "italic" }}>No notes yet.</p>
+					)}
+				</div>
+				<div style={{ fontSize: "13px", color: "#555" }}>
+					<strong>Try it:</strong>
+					<pre style={{ ...codeStyle, marginTop: "8px", fontSize: "12px" }}>
+						{`# List notes
+curl http://localhost:3000/api/notes
+
+# Create a note
+curl -X POST -H "Content-Type: application/json" \\
+  -d '{"title":"My Note","content":"Hello!"}' \\
+  http://localhost:3000/api/notes
+
+# Delete a note
+curl -X DELETE "http://localhost:3000/api/notes?id=1"`}
+					</pre>
+				</div>
+			</section>
+
+			<h2 style={{ fontSize: "20px", margin: "0 0 12px" }}>How It Works</h2>
 			<pre style={codeStyle}>
 				{`import { defineTable } from "@virexjs/db";
 
-const posts = defineTable("posts", {
+// Define table — auto-creates with typed CRUD
+const notes = defineTable("notes", {
   id: "integer primary key autoincrement",
   title: "text not null",
-  slug: "text not null",
-  content: "text not null",
-  published: "integer not null default 0",
+  content: "text not null default ''",
+  created_at: "text not null",
 });
 
-// CRUD — all queries use prepared statements
-const post = posts.insert({ title: "Hello", slug: "hello", content: "World", published: 1 });
-const found = posts.findOne({ slug: "hello" });
-const all = posts.findMany({ where: { published: 1 }, orderBy: "id DESC", limit: 10 });
-posts.update({ id: 1 }, { title: "Updated" });
-posts.delete({ id: 1 });
-const total = posts.count({ published: 1 });`}
+// Insert
+notes.insert({ title: "Hello", content: "World", created_at: new Date().toISOString() });
+
+// Query
+notes.findMany({ orderBy: "id DESC", limit: 10 });
+notes.findOne({ id: 1 });
+notes.count({ title: "Hello" });
+
+// Update & Delete
+notes.update({ id: 1 }, { title: "Updated" });
+notes.delete({ id: 1 });`}
 			</pre>
 
 			<h2 style={{ fontSize: "20px", margin: "24px 0 12px" }}>Migrations</h2>
@@ -84,23 +136,9 @@ const m001 = defineMigration({
   down: "DROP TABLE users",
 });
 
-// Apply pending migrations (with transaction safety)
-const result = migrate([m001]);
-console.log(\`Applied: \${result.applied.join(", ")}\`);
-
-// Rollback last migration
-rollback([m001], 1);`}
+migrate([m001]);      // Apply pending
+rollback([m001], 1);  // Revert last`}
 			</pre>
-
-			<h2 style={{ fontSize: "20px", margin: "24px 0 12px" }}>Features</h2>
-			<ul style={{ paddingLeft: "20px", lineHeight: "1.8", color: "#555" }}>
-				{props.data.features.map((f) => (
-					<li>
-						<code>{f.split(" — ")[0]}</code>
-						{f.includes(" — ") ? ` — ${f.split(" — ")[1]}` : ""}
-					</li>
-				))}
-			</ul>
 
 			<div
 				style={{
@@ -112,8 +150,8 @@ rollback([m001], 1);`}
 					color: "#856404",
 				}}
 			>
-				<strong>Security:</strong> Column names are validated against the schema whitelist. ORDER BY
-				clauses are sanitized. All values use prepared statement bindings (no SQL injection).
+				<strong>Security:</strong> Column names validated against schema. ORDER BY sanitized. All
+				values use prepared statement bindings. SQL injection protected.
 			</div>
 		</Default>
 	);

@@ -1,4 +1,4 @@
-import { defineAPIRoute, json, string, validate } from "virexjs";
+import { defineAPIRoute, json, parseFormData, string, validate } from "virexjs";
 
 const contactSchema = {
 	name: string().required("Name is required").min(2, "Name too short").max(50).trim(),
@@ -7,14 +7,41 @@ const contactSchema = {
 };
 
 export const POST = defineAPIRoute(async ({ request }) => {
-	const body = await request.json();
-	const result = validate(contactSchema, body);
+	// Accept both JSON and form-encoded data
+	const data = await parseFormData(request);
+	const result = validate(contactSchema, data);
 
 	if (!result.success) {
-		return json({ success: false, errors: result.errors }, { status: 400 });
+		// Return HTML page with errors for form submissions
+		const contentType = request.headers.get("Content-Type") ?? "";
+		if (contentType.includes("application/json")) {
+			return json({ success: false, errors: result.errors }, { status: 400 });
+		}
+		// For HTML form: show error page
+		const errorList = result.errors.map((e) => `<li>${e.field}: ${e.message}</li>`).join("");
+		return new Response(
+			`<!DOCTYPE html><html><head><title>Validation Error</title></head><body style="font-family:system-ui;max-width:500px;margin:40px auto;padding:0 16px">
+			<h1 style="color:#dc2626">Validation Failed</h1>
+			<ul style="color:#666">${errorList}</ul>
+			<a href="/contact" style="color:#0066cc">Go back</a>
+			</body></html>`,
+			{ status: 400, headers: { "Content-Type": "text/html" } },
+		);
 	}
 
-	// In a real app: send email, save to DB, etc.
+	// For HTML form: show success page
+	const contentType = request.headers.get("Content-Type") ?? "";
+	if (!contentType.includes("application/json")) {
+		return new Response(
+			`<!DOCTYPE html><html><head><title>Success</title></head><body style="font-family:system-ui;max-width:500px;margin:40px auto;padding:0 16px;text-align:center">
+			<h1 style="color:#16a34a">Message Sent!</h1>
+			<p style="color:#666">Thank you ${result.data.name}! We received your message.</p>
+			<a href="/" style="color:#0066cc">Back to home</a>
+			</body></html>`,
+			{ headers: { "Content-Type": "text/html" } },
+		);
+	}
+
 	return json({
 		success: true,
 		message: `Thank you ${result.data.name}! We received your message.`,

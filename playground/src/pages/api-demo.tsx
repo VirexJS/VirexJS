@@ -47,6 +47,27 @@ export default function APIDemo(_props: PageProps) {
 			curl: "curl http://localhost:3000/api/health",
 			response: '{"status":"healthy","timestamp":"...","uptime":...}',
 		},
+		{
+			method: "GET",
+			path: "/api/notes",
+			desc: "List all notes from SQLite database",
+			curl: "curl http://localhost:3000/api/notes",
+			response: '{"notes":[{"id":1,"title":"Welcome",...}],"total":3}',
+		},
+		{
+			method: "POST",
+			path: "/api/notes",
+			desc: "Create a new note in SQLite",
+			curl: 'curl -X POST -H "Content-Type: application/json" -d \'{"title":"Test","content":"Hello"}\' http://localhost:3000/api/notes',
+			response: '{"note":{"id":4,"title":"Test",...}}',
+		},
+		{
+			method: "GET",
+			path: "/api/events",
+			desc: "SSE stream — sends 10 ticks (1/sec)",
+			curl: "curl http://localhost:3000/api/events",
+			response: 'event: tick\\ndata: {"count":1,...}',
+		},
 	];
 
 	return (
