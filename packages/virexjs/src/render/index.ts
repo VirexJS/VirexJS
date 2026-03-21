@@ -74,15 +74,25 @@ export function renderPage(options: {
 				controller.enqueue(encoder.encode(`<div id="vrx-loading">${loadingHtml}</div>\n`));
 			}
 
-			// 3. Send rendered body (replaces loading shell via script)
+			// 3. Send rendered body in chunks (better streaming for large pages)
 			if (loadingHtml) {
+				controller.enqueue(encoder.encode(`<div id="vrx-content" style="display:none">`));
+				// Stream body in 16KB chunks for better TTFB on large pages
+				const CHUNK_SIZE = 16384;
+				for (let i = 0; i < bodyHtml.length; i += CHUNK_SIZE) {
+					controller.enqueue(encoder.encode(bodyHtml.slice(i, i + CHUNK_SIZE)));
+				}
 				controller.enqueue(
 					encoder.encode(
-						`<div id="vrx-content" style="display:none">${bodyHtml}</div>\n<script>document.getElementById("vrx-loading").remove();document.getElementById("vrx-content").style.display="";</script>\n`,
+						`</div>\n<script>document.getElementById("vrx-loading").remove();document.getElementById("vrx-content").style.display="";</script>\n`,
 					),
 				);
 			} else {
-				controller.enqueue(encoder.encode(bodyHtml));
+				// Stream body in chunks for large pages
+				const CHUNK = 16384;
+				for (let i = 0; i < bodyHtml.length; i += CHUNK) {
+					controller.enqueue(encoder.encode(bodyHtml.slice(i, i + CHUNK)));
+				}
 			}
 
 			// 4. Send closing tags + dev script

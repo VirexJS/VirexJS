@@ -29,6 +29,10 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 	const publicDir = resolve(cwd, config.publicDir);
 	const outDir = resolve(cwd, config.outDir);
 
+	// Initialize ISR disk cache
+	const { initISRDiskCache } = require("./isr");
+	initISRDiskCache(resolve(outDir, ".cache"));
+
 	// Initialize plugin runner
 	const pluginRunner = new PluginRunner(config.plugins ?? []);
 

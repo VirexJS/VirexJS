@@ -218,6 +218,22 @@ bun run lint             # Biome lint (0 errors)
 bun benchmark.ts         # Performance benchmark
 ```
 
+## Limitations (vs Next.js)
+
+VirexJS is not a drop-in Next.js replacement. Be aware of these differences:
+
+- **No React ecosystem** — Can't use React component libraries (MUI, shadcn, etc.)
+- **No Suspense streaming** — Body streams in chunks but not component-level like React Suspense
+- **Image optimization is basic** — Native lazy loading only, no resize/WebP/blur placeholder
+- **Hot reload is page-level** — File changes reload the page, not individual components
+- **ISR cache is local** — Disk + memory backed, not CDN-integrated like Vercel
+- **Young project** — Not battle-tested at scale like Next.js (5+ years, millions of users)
+- **Bun-only** — Requires Bun runtime, doesn't run on Node.js
+
+**VirexJS is best for:** Server-centric apps, content sites, APIs, tools, and teams that value simplicity and zero dependencies over the React ecosystem.
+
+**Next.js is better for:** Complex SPAs, React-dependent UIs, Vercel deployments, projects needing the React component ecosystem.
+
 ## Tech Stack
 
 | | |
