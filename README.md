@@ -30,7 +30,10 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 | **Error Boundaries** | Done | `ErrorBoundary` component with fallback UI, `onError` callback |
 | **useHead()** | Done | Programmatic head management with SEO, OG, Twitter Card support |
 | **i18n** | Done | `createI18n()`, interpolation, pluralization, `detectLocale()` from Accept-Language |
-| **Tests** | Done | 383 tests across 27 files, 0 failures |
+| **CORS** | Done | Built-in CORS middleware with wildcard, array, function origins |
+| **Rate Limiter** | Done | In-memory rate limiter with sliding window, custom keys |
+| **Env Loader** | Done | `.env` file loading with mode, interpolation, variable expansion |
+| **Tests** | Done | 432 tests across 30 files, 0 failures |
 | **TypeScript** | Done | Strict mode, 0 errors |
 
 ### Roadmap
@@ -221,6 +224,28 @@ Middleware in `src/middleware/` is auto-loaded. Supports:
 - Short-circuit responses
 - Shared context via `ctx.locals`
 - Chain ordering
+
+### Built-in Middleware
+
+```ts
+// src/middleware/cors.ts
+import { cors } from "virexjs";
+export default cors({ origin: ["https://myapp.com"], credentials: true });
+
+// src/middleware/rate-limit.ts
+import { rateLimit } from "virexjs";
+export default rateLimit({ max: 100, windowMs: 60_000 });
+```
+
+### Environment Variables
+
+```ts
+import { loadEnv } from "virexjs";
+
+// Loads .env, .env.local, .env.production, .env.production.local
+const env = loadEnv("production");
+// Variables also set on process.env
+```
 
 ## Islands
 

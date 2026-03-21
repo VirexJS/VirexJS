@@ -74,6 +74,11 @@ export function defineAPIRoute(fn: APIHandler): APIHandler {
 
 export { defineMiddleware } from "../server/middleware";
 export { redirect, json, html, notFound, text, setCookie, parseCookies } from "../server/response";
+export { cors } from "../server/cors";
+export type { CORSOptions } from "../server/cors";
+export { rateLimit } from "../server/rate-limit";
+export type { RateLimitOptions } from "../server/rate-limit";
+export { loadEnv, parseEnvFile } from "../config/env";
 export type { MiddlewareContext, MiddlewareNext, MiddlewareFn } from "../server/middleware";
 export type { VirexConfig } from "../config/types";
 export type { MetaData } from "../render/meta";
