@@ -38,7 +38,10 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 | **Cache** | Done | In-memory TTL cache with maxSize eviction, typed API |
 | **HTML Minifier** | Done | Comment removal, whitespace collapse, attribute optimization |
 | **Test Utilities** | Done | `renderComponent`, `createTestRequest`, `assertHTML` helpers |
-| **Tests** | Done | 553 tests across 38 files, 0 failures |
+| **Validation** | Done | `validate()`, `string()`, `number()`, `boolean()` with chainable rules |
+| **JSON-LD** | Done | `JsonLd` component, `createBreadcrumbs()`, `createFAQ()` |
+| **CLI Generate** | Done | `virex generate page/component/api/middleware/island` |
+| **Tests** | Done | 590 tests across 41 files, 0 failures |
 | **TypeScript** | Done | Strict mode, 0 errors |
 
 ### Roadmap
@@ -456,6 +459,7 @@ virex init <name>     Create a new VirexJS project
 virex dev             Start development server with HMR
 virex build           Build for production (static pages only)
 virex preview         Preview production build locally
+virex generate <type> <name>  Scaffold page, component, api, middleware, island
 virex --help          Show help
 virex --version       Show version
 ```

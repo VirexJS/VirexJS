@@ -17,6 +17,10 @@ switch (command) {
 	case "init":
 		await import("./init").then((m) => m.init(args.slice(1)));
 		break;
+	case "generate":
+	case "g":
+		await import("./generate").then((m) => m.generate(args.slice(1)));
+		break;
 	case "--version":
 	case "-v":
 		console.log("virexjs 0.1.0");
@@ -37,7 +41,8 @@ function printHelp(): void {
     init      Create a new VirexJS project
     dev       Start development server with HMR
     build     Build for production
-    preview   Preview production build locally
+    preview   Preview production build
+    generate  Scaffold a page, component, API route, middleware, or island locally
 
   Options:
     --help    Show this help message
