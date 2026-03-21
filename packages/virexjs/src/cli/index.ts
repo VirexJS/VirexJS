@@ -14,6 +14,9 @@ switch (command) {
 	case "preview":
 		await import("./preview").then((m) => m.preview(args.slice(1)));
 		break;
+	case "create":
+		await import("./create").then((m) => m.create(args.slice(1)));
+		break;
 	case "init":
 		await import("./init").then((m) => m.init(args.slice(1)));
 		break;
@@ -39,7 +42,8 @@ function printHelp(): void {
   Usage: virex <command>
 
   Commands:
-    init      Create a new VirexJS project
+    create    Interactive project wizard (templates + features)
+    init      Quick project scaffold (no prompts)
     dev       Start development server with HMR
     build     Build for production
     preview   Preview production build

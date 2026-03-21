@@ -84,9 +84,14 @@ virex generate <type> <name>   Scaffold page, component, api, middleware, island
 |-------|-------------|
 | [Getting Started](./docs/getting-started.md) | Installation, first page, project structure |
 | [Routing](./docs/routing.md) | Pages, dynamic params, SSG, API routes, form actions |
+| [Components](./docs/components.md) | Link, Image, Head, Script, Font, ErrorBoundary, JsonLd |
+| [Islands](./docs/islands.md) | Interactive components, hydration, state pattern |
 | [Middleware & Auth](./docs/middleware.md) | CORS, rate limit, JWT, sessions, route guards |
-| [Configuration](./docs/configuration.md) | Config options, .env files, plugins |
+| [Database](./docs/database.md) | SQLite ORM, defineTable, CRUD, migrations |
 | [Directives](./docs/directives.md) | "use client", "use server", "use cache", ISR |
+| [Testing](./docs/testing.md) | renderComponent, createTestRequest, assertHTML |
+| [Configuration](./docs/configuration.md) | Config, .env files, plugins, defineEnv |
+| [Deployment](./docs/deployment.md) | Docker, Fly.io, Railway, VPS |
 | [API Reference](./docs/api-reference.md) | Complete export list with types |
 
 ## Development
