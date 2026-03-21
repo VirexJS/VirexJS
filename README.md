@@ -233,4 +233,4 @@ bun benchmark.ts         # Performance benchmark
 
 ## License
 
-MIT — [ECOSTACK TECHNOLOGY OÜ](https://ecostack.dev)
+MIT — Estonian company ECOSTACK TECHNOLOGY OÜ
