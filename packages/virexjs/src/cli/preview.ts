@@ -12,7 +12,7 @@ export async function preview(_args: string[]): Promise<void> {
 	const outDir = resolve(cwd, config.outDir);
 
 	const server = Bun.serve({
-		port: config.port + 1,
+		port: config.port + 100,
 		hostname: config.hostname,
 
 		async fetch(request: Request): Promise<Response> {
@@ -46,7 +46,7 @@ export async function preview(_args: string[]): Promise<void> {
 	console.log(`
   ⚡ VirexJS v0.1.0 — Preview Mode
 
-  → Local: http://localhost:${config.port + 1}
+  → Local: http://localhost:${config.port + 100}
   → Serving: ${outDir}
 
   Press Ctrl+C to stop
