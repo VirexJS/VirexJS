@@ -100,6 +100,17 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 
 		async fetch(request: Request): Promise<Response> {
 			const response = await handleRequest(request);
+			// Apply config headers
+			if (config.headers) {
+				const url = new URL(request.url);
+				for (const rule of config.headers) {
+					if (matchPattern(rule.source, url.pathname)) {
+						for (const h of rule.headers) {
+							response.headers.set(h.key, h.value);
+						}
+					}
+				}
+			}
 			return maybeCompress(response, request);
 		},
 	});
@@ -120,6 +131,29 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 		} else if (basePath && !pathname.startsWith(basePath)) {
 			// Request outside basePath — 404
 			return addTimingHeader(new Response("Not Found", { status: 404 }), startTime);
+		}
+
+		// Config redirects (like Next.js redirects)
+		if (config.redirects) {
+			for (const rule of config.redirects) {
+				if (matchPattern(rule.source, pathname)) {
+					const dest = applyParams(rule.destination, pathname, rule.source);
+					return new Response(null, {
+						status: rule.permanent ? 308 : 307,
+						headers: { Location: dest },
+					});
+				}
+			}
+		}
+
+		// Config rewrites (like Next.js rewrites — internal redirect, URL stays)
+		if (config.rewrites) {
+			for (const rule of config.rewrites) {
+				if (matchPattern(rule.source, pathname)) {
+					pathname = applyParams(rule.destination, pathname, rule.source);
+					break;
+				}
+			}
 		}
 
 		// Trailing slash redirect (except root)
@@ -329,4 +363,38 @@ async function maybeCompress(response: Response, request: Request): Promise<Resp
 
 function escapeForHtml(str: string): string {
 	return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/** Match a URL pattern like "/blog/:slug" against a pathname */
+function matchPattern(pattern: string, pathname: string): boolean {
+	if (pattern === pathname) return true;
+	if (!pattern.includes(":") && !pattern.includes("*")) return false;
+
+	const patternParts = pattern.split("/");
+	const pathParts = pathname.split("/");
+
+	if (patternParts.length !== pathParts.length && !pattern.includes("*")) return false;
+
+	for (let i = 0; i < patternParts.length; i++) {
+		const pp = patternParts[i]!;
+		if (pp.startsWith(":")) continue; // dynamic segment matches anything
+		if (pp === "*") return true; // wildcard matches rest
+		if (pp !== pathParts[i]) return false;
+	}
+	return true;
+}
+
+/** Apply params from source pattern to destination */
+function applyParams(destination: string, pathname: string, source: string): string {
+	const srcParts = source.split("/");
+	const pathParts = pathname.split("/");
+	let result = destination;
+
+	for (let i = 0; i < srcParts.length; i++) {
+		const sp = srcParts[i]!;
+		if (sp.startsWith(":") && pathParts[i]) {
+			result = result.replace(sp, pathParts[i]!);
+		}
+	}
+	return result;
 }

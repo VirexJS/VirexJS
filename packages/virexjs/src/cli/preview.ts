@@ -7,6 +7,7 @@ import { serveStatic } from "../server/static";
  * Preview a production build locally by serving the dist/ directory.
  */
 export async function preview(_args: string[]): Promise<void> {
+	process.env.NODE_ENV = "production";
 	const config = await loadConfig();
 	const cwd = process.cwd();
 	const outDir = resolve(cwd, config.outDir);

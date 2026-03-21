@@ -15,6 +15,7 @@ import { createServer } from "../server/index";
  * 7. Print ready message with URL and timing
  */
 export async function dev(args: string[]): Promise<void> {
+	process.env.NODE_ENV = "development";
 	const startTime = performance.now();
 
 	// Load config and apply CLI overrides

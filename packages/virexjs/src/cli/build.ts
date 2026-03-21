@@ -4,24 +4,28 @@ import { loadConfig } from "../config/index";
 import { PluginRunner } from "../plugin/runner";
 
 /**
- * `virex build` command:
- * 1. Load config
- * 2. Run plugin buildStart hooks
- * 3. Run production build pipeline
- * 4. Run plugin buildEnd hooks
- * 5. Print build stats
+ * `virex build` command — production build with progress reporting.
  */
 export async function build(_args: string[]): Promise<void> {
+	process.env.NODE_ENV = "production";
+
 	console.log("\n  ⚡ VirexJS v0.1.0 — Building for production...\n");
 
 	const config = await loadConfig();
 	const cwd = process.cwd();
 	const outDir = resolve(cwd, config.outDir);
 
-	// Initialize plugins
+	// Step 1: Plugins
 	const pluginRunner = new PluginRunner(config.plugins ?? []);
 	await pluginRunner.runConfigResolved(config);
+	if (pluginRunner.count > 0) {
+		console.log(`  • Loading ${pluginRunner.count} plugin(s)...`);
+	}
 	await pluginRunner.runBuildStart(config);
+
+	// Step 2: Build
+	console.log("  • Scanning pages...");
+	const buildStart = performance.now();
 
 	const stats = await buildProduction({
 		srcDir: resolve(cwd, config.srcDir),
@@ -30,7 +34,9 @@ export async function build(_args: string[]): Promise<void> {
 		minify: config.build.minify,
 	});
 
-	// Run plugin buildEnd hooks
+	const buildTime = Math.round(performance.now() - buildStart);
+
+	// Step 3: Plugin post-build
 	await pluginRunner.runBuildEnd({
 		pages: stats.pages,
 		assets: stats.assets,
@@ -38,14 +44,18 @@ export async function build(_args: string[]): Promise<void> {
 		outDir,
 	});
 
+	// Results
 	const sizeKB = (stats.totalSize / 1024).toFixed(1);
 
-	console.log(`  ✓ Build complete in ${stats.time}ms`);
-	console.log(`  → ${stats.pages} pages rendered`);
-	console.log(`  → ${stats.assets} assets copied`);
-	console.log(`  → ${sizeKB} KB total output`);
+	console.log("");
+	console.log(`  ✓ Build complete in ${buildTime}ms`);
+	console.log("");
+	console.log(`    Pages:   ${stats.pages} rendered`);
+	console.log(`    Assets:  ${stats.assets} copied`);
+	console.log(`    Size:    ${sizeKB} KB`);
 	if (pluginRunner.count > 0) {
-		console.log(`  → ${pluginRunner.count} plugin(s): ${pluginRunner.names.join(", ")}`);
+		console.log(`    Plugins: ${pluginRunner.names.join(", ")}`);
 	}
-	console.log(`  → Output: ${outDir}\n`);
+	console.log(`    Output:  ${outDir}`);
+	console.log("");
 }
