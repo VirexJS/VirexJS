@@ -91,23 +91,11 @@ export function h(
 		return allChildren as VNode;
 	}
 
-	// Function component — call immediately
+	// Function component — defer to renderToString (do not call eagerly,
+	// so that context providers can set values before children render)
 	if (typeof type === "function") {
 		const componentProps = { ...mergedProps, children: allChildren.length === 1 ? allChildren[0] : allChildren };
-		const result = type(componentProps);
-
-		// If this component is a registered island, return a VElement that
-		// renderToString will wrap with island markers
-		const componentName = type.name;
-		if (componentName && islandRegistry.has(componentName)) {
-			const { children: _ch, ...serializableProps } = componentProps;
-			return {
-				type: "__vrx_island__",
-				props: { name: componentName, serializableProps, children: [result] },
-			} as VElement;
-		}
-
-		return result;
+		return { type: type as (props: Record<string, unknown>) => VNode, props: componentProps };
 	}
 
 	// String type — build VElement
@@ -147,6 +135,18 @@ export function renderToString(node: VNode): string {
 
 	const { type, props } = node;
 
+	// Handle context provider (inserted by compat/react createContext)
+	if (type === "__vrx_context__") {
+		const ctx = props._ctx as { _currentValue: unknown };
+		const value = props._value;
+		const renderChildren = props._renderChildren as () => VNode;
+		const prev = ctx._currentValue;
+		ctx._currentValue = value;
+		const childHtml = renderToString(renderChildren());
+		ctx._currentValue = prev;
+		return childHtml;
+	}
+
 	// Handle island marker wrapper (inserted by h() for registered islands)
 	if (type === "__vrx_island__") {
 		const islandName = props.name as string;
@@ -157,6 +157,28 @@ export function renderToString(node: VNode): string {
 	}
 
 	if (typeof type === "function") {
+		const fn = type as unknown as Record<string, unknown>;
+
+		// Context provider: set value, render children, restore previous
+		if (fn.__vrx_provider__) {
+			const ctx = fn.__vrx_ctx__ as { _currentValue: unknown };
+			const prev = ctx._currentValue;
+			ctx._currentValue = props.value;
+			const childHtml = renderToString(props.children as VNode);
+			ctx._currentValue = prev;
+			return childHtml;
+		}
+
+		// Island component: wrap output with hydration markers
+		const componentName = type.name;
+		if (componentName && islandRegistry.has(componentName)) {
+			const result = type(props);
+			const childHtml = renderToString(result);
+			const { children: _children, ...serializableProps } = props;
+			const serialized = JSON.stringify(serializableProps);
+			return `<!--vrx-island:${componentName}:${serialized}:visible-->\n<div data-vrx-island="${componentName}">${childHtml}</div>\n<!--/vrx-island-->`;
+		}
+
 		const result = type(props);
 		return renderToString(result);
 	}

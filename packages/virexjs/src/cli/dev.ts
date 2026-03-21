@@ -15,11 +15,17 @@ import { createHMRServer, generateHMRClientScript } from "@virexjs/bundler";
  * 6. Start file watcher
  * 7. Print ready message with URL and timing
  */
-export async function dev(_args: string[]): Promise<void> {
+export async function dev(args: string[]): Promise<void> {
 	const startTime = performance.now();
 
-	// Load config
+	// Load config and apply CLI overrides
 	const config = await loadConfig();
+	const { parseArgs } = await import("./args");
+	const flags = parseArgs(args);
+	if (typeof flags.port === "string") config.port = Number(flags.port);
+	if (typeof flags.host === "string") config.hostname = flags.host;
+	if (flags.hmr === false) config.dev.hmr = false;
+	if (flags.open === true) config.dev.open = true;
 	const srcDir = resolve(process.cwd(), config.srcDir);
 
 	// Start HMR server

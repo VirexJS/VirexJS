@@ -28,4 +28,5 @@ export const DEFAULT_CONFIG: VirexConfig = {
 		hmr: true,
 		hmrPort: 3001,
 	},
+	plugins: [],
 };

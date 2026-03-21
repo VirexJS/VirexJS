@@ -1,5 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import { h, renderToString, Fragment, registerIsland, clearIslands } from "../src/render/jsx";
+import type { VElement } from "../src/render/jsx";
 
 describe("h() — JSX factory", () => {
 	test("creates VElement for string type", () => {
@@ -22,12 +23,16 @@ describe("h() — JSX factory", () => {
 		expect(node).toEqual(["a", "b"]);
 	});
 
-	test("function component is called immediately", () => {
+	test("function component is deferred to renderToString", () => {
 		function Greeting(props: Record<string, unknown>) {
 			return h("span", null, `Hello ${props.name}`);
 		}
-		const node = h(Greeting, { name: "World" });
-		expect(node).toEqual({ type: "span", props: { children: ["Hello World"] } });
+		const node = h(Greeting, { name: "World" }) as VElement;
+		// h() returns a VElement with function type (deferred)
+		expect(node.type).toBe(Greeting);
+		expect(node.props).toEqual({ name: "World", children: [] });
+		// Actually renders when passed to renderToString
+		expect(renderToString(node)).toBe("<span>Hello World</span>");
 	});
 });
 

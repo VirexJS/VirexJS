@@ -4,6 +4,7 @@ import { scanPages } from "@virexjs/router";
 import { parseSegment } from "@virexjs/router";
 import { processCSS } from "./css";
 import { writeBuildManifest } from "./manifest";
+import { generateSitemap } from "./sitemap";
 
 /**
  * Check if a route has dynamic segments (e.g., [slug] or [...rest]).
@@ -27,6 +28,7 @@ export async function buildProduction(options: {
 	outDir: string;
 	publicDir: string;
 	minify: boolean;
+	baseURL?: string;
 }): Promise<{
 	pages: number;
 	assets: number;
@@ -57,8 +59,27 @@ export async function buildProduction(options: {
 			continue;
 		}
 
-		// Dynamic routes can't be pre-rendered without params
+		// Dynamic routes: check for getStaticPaths() for SSG
 		if (isDynamicRoute(route.segments)) {
+			try {
+				const mod = await import(route.absolutePath);
+				if (typeof mod.getStaticPaths === "function") {
+					// SSG: render each path returned by getStaticPaths
+					const paths: { params: Record<string, string> }[] = await mod.getStaticPaths();
+					for (const pathEntry of paths) {
+						const rendered = await renderStaticPage(
+							mod, route, pathEntry.params, outDir,
+						);
+						if (rendered) {
+							totalSize += rendered;
+							pageNames.push(`${route.relativePath} [${Object.values(pathEntry.params).join("/")}]`);
+						}
+					}
+					continue;
+				}
+			} catch {
+				// Fall through to skip
+			}
 			dynamicPages.push(route.relativePath);
 			continue;
 		}
@@ -156,6 +177,11 @@ export async function buildProduction(options: {
 		css: cssResult?.filename,
 	});
 
+	// 6. Generate sitemap.xml
+	if (options.baseURL) {
+		await generateSitemap({ outDir, baseURL: options.baseURL, pages: pageNames });
+	}
+
 	// Log dynamic pages info
 	if (dynamicPages.length > 0) {
 		console.log(`  ℹ ${dynamicPages.length} dynamic route(s) skipped (server-only):`);
@@ -172,4 +198,80 @@ export async function buildProduction(options: {
 		totalSize,
 		time,
 	};
+}
+
+/**
+ * Render a single static page with given params (used for SSG of dynamic routes).
+ * Returns the HTML size or null on failure.
+ */
+async function renderStaticPage(
+	mod: Record<string, unknown>,
+	route: { absolutePath: string; segments: string[] },
+	params: Record<string, string>,
+	outDir: string,
+): Promise<number | null> {
+	try {
+		const component = mod.default as (props: Record<string, unknown>) => unknown;
+		if (!component) return null;
+
+		// Run loader with params
+		let data = {};
+		const loader = mod.loader as ((ctx: Record<string, unknown>) => unknown) | undefined;
+		if (loader) {
+			data = (await loader({
+				params,
+				request: new Request("http://localhost/"),
+				headers: new Headers(),
+			})) as Record<string, unknown>;
+		}
+
+		// Auto-detect _layout.tsx
+		let layout: ((props: { children: unknown }) => unknown) | undefined;
+		const layoutPath = join(dirname(route.absolutePath), "_layout.tsx");
+		if (existsSync(layoutPath)) {
+			try {
+				const layoutMod = await import(layoutPath);
+				layout = layoutMod.default;
+			} catch {
+				// Skip
+			}
+		}
+
+		const { renderToString } = await import("virexjs/render/jsx");
+		const { buildDocument, renderMeta } = await import("virexjs/render/index");
+
+		const pageProps = { data, params, url: new URL("http://localhost/") };
+		let vnode = component(pageProps);
+		if (layout) {
+			vnode = (layout as (p: { children: unknown }) => unknown)({ children: vnode });
+		}
+
+		const bodyHtml = renderToString(vnode as Parameters<typeof renderToString>[0]);
+		let headHtml = "";
+		const metaFn = mod.meta as ((ctx: Record<string, unknown>) => Record<string, unknown>) | undefined;
+		if (metaFn) {
+			headHtml = renderMeta(metaFn({ data, params }));
+		}
+
+		const fullHtml = buildDocument({ head: headHtml, body: bodyHtml });
+
+		// Build output path: replace dynamic segments with param values
+		const resolvedSegments = route.segments.map((seg) => {
+			const paramDef = parseSegment(seg);
+			if (paramDef) {
+				return params[paramDef.name] ?? seg;
+			}
+			return seg;
+		});
+
+		const outputPath = join(outDir, ...resolvedSegments, "index.html");
+		mkdirSync(dirname(outputPath), { recursive: true });
+		await Bun.write(outputPath, fullHtml);
+
+		return fullHtml.length;
+	} catch (error) {
+		const msg = error instanceof Error ? error.message : String(error);
+		console.error(`  Failed to render SSG page: ${JSON.stringify(params)}`, msg);
+		return null;
+	}
 }

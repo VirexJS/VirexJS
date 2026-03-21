@@ -9,30 +9,40 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 ## Project Status
 
 > **Phase 1: Foundation MVP** — Complete
-> **Phase 2: Island Hydration** — In Progress
+> **Phase 2: Island Hydration + SSG** — Complete
+> **Phase 3: React Compat + Plugin System** — Complete
 
 | Component | Status | Details |
 |-----------|--------|---------|
 | **@virexjs/router** | Done | File-based routing, trie matcher, dynamic params, catch-all, route groups |
 | **virexjs/render** | Done | Custom JSX runtime, `renderToString`, XSS-safe, streaming HTML, meta tags |
-| **virexjs/server** | Done | Bun.serve wrapper, middleware chain, ETag, gzip, trailing slash, basePath |
-| **@virexjs/bundler** | Done | Dev watcher, HMR WebSocket, island extraction, production build, CSS |
+| **virexjs/server** | Done | Bun.serve wrapper, middleware chain, ETag, gzip, trailing slash, basePath, plugin hooks |
+| **@virexjs/bundler** | Done | Dev watcher, HMR, island bundling, SSG, utility CSS engine, production build |
 | **@virexjs/db** | Done | bun:sqlite typed CRUD query builder with prepared statements |
-| **CLI** | Done | `init`, `dev`, `build`, `preview` commands |
-| **Island Hydration** | Done | Hydration runtime, Bun.build() bundling, 4 strategies |
-| **Tests** | Done | 185 tests across 14 files, 0 failures |
+| **CLI** | Done | `init`, `dev` (--port, --host), `build`, `preview` |
+| **Island Hydration** | Done | Hydration runtime, Bun.build() bundling, 4 strategies, safe DOM |
+| **SSG** | Done | `getStaticPaths()` for pre-rendering dynamic routes at build time |
+| **CSS Engine** | Done | Built-in utility-first CSS generator (Tailwind-compatible classes) |
+| **React Compat** | Done | `createElement`, hooks (SSR stubs), `createContext`/`useContext`, `memo`, `forwardRef`, `Children` |
+| **Plugin System** | Done | `definePlugin()`, lifecycle hooks, `transformHTML`, middleware injection |
+| **Response Helpers** | Done | `redirect()`, `json()`, `html()`, `notFound()`, `setCookie()`, `parseCookies()` |
+| **Tests** | Done | 296 tests across 20 files, 0 failures |
 | **TypeScript** | Done | Strict mode, 0 errors |
 
-### Phase 2 Progress
+### Roadmap
 - [x] Client-side hydration runtime (discoverIslands, scheduleHydration)
 - [x] Island bundling with Bun.build() for browser
 - [x] 4 hydration strategies: `visible`, `interaction`, `idle`, `immediate`
 - [x] Safe DOM APIs (createElement, textContent — no innerHTML)
 - [x] Auto-inject hydration script on pages with islands
-- [ ] React compatibility shim
-- [ ] Tailwind CSS integration
-- [ ] Static site generation for dynamic routes
-- [ ] Plugin system
+- [x] Static site generation with `getStaticPaths()`
+- [x] Built-in utility CSS engine (virex engine)
+- [x] CLI flags: `--port`, `--host`, `--no-hmr`
+- [x] React compatibility shim (`virexjs/compat/react`)
+- [x] Plugin system (`definePlugin`, lifecycle hooks)
+- [x] Response helpers (`redirect`, `json`, `html`, `setCookie`, `parseCookies`)
+- [ ] Head component (programmatic `<head>` management)
+- [ ] Error boundaries
 
 ---
 
@@ -152,6 +162,38 @@ export const POST = defineAPIRoute(async ({ request }) => {
 
 Supported methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`
 
+## Static Site Generation (SSG)
+
+Dynamic routes can be pre-rendered at build time by exporting `getStaticPaths`:
+
+```tsx
+// src/pages/blog/[slug].tsx
+import type { StaticPath } from "virexjs";
+
+export function getStaticPaths(): StaticPath[] {
+  return [
+    { params: { slug: "hello-world" } },
+    { params: { slug: "getting-started" } },
+  ];
+}
+
+export async function loader(ctx) {
+  return getPost(ctx.params.slug);
+}
+
+export default function BlogPost(props) {
+  return <article><h1>{props.data.title}</h1></article>;
+}
+```
+
+Build output:
+```
+dist/blog/hello-world/index.html
+dist/blog/getting-started/index.html
+```
+
+Routes without `getStaticPaths` remain server-only (SSR).
+
 ## Middleware
 
 ```ts
@@ -221,6 +263,48 @@ export default defineConfig({
   },
 });
 ```
+
+## Plugins
+
+Extend VirexJS with the plugin API:
+
+```ts
+// plugins/analytics.ts
+import { definePlugin } from "virexjs";
+
+export default function analytics(trackingId: string) {
+  return definePlugin({
+    name: "virex-analytics",
+    transformHTML(html, ctx) {
+      const script = `<script>track("${trackingId}", "${ctx.pathname}")</script>`;
+      return html.replace("</body>", `${script}</body>`);
+    },
+  });
+}
+```
+
+Register plugins in your config:
+
+```ts
+// virex.config.ts
+import { defineConfig } from "virexjs";
+import analytics from "./plugins/analytics";
+
+export default defineConfig({
+  plugins: [analytics("UA-12345")],
+});
+```
+
+### Plugin Hooks
+
+| Hook | When | Can Return |
+|------|------|------------|
+| `configResolved(config)` | After config is merged | Mutate config |
+| `serverCreated(info)` | Server is ready | — |
+| `buildStart(config)` | Before production build | — |
+| `buildEnd(result)` | After production build | — |
+| `transformHTML(html, ctx)` | Before sending HTML response | Modified HTML |
+| `middleware()` | Server setup | Middleware function(s) |
 
 ## Database
 

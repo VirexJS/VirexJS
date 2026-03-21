@@ -33,6 +33,14 @@ export type LoaderFn<T = Record<string, unknown>> = (ctx: LoaderContext) => T | 
 /** Type for API route handlers */
 export type APIHandler = (ctx: APIContext) => Response | Promise<Response>;
 
+/** Return type for getStaticPaths — used for SSG of dynamic routes */
+export interface StaticPath {
+	params: Record<string, string>;
+}
+
+/** Type for getStaticPaths functions */
+export type GetStaticPathsFn = () => StaticPath[] | Promise<StaticPath[]>;
+
 /**
  * Helper to define a VirexJS config with type safety.
  */
@@ -65,6 +73,9 @@ export function defineAPIRoute(fn: APIHandler): APIHandler {
 }
 
 export { defineMiddleware } from "../server/middleware";
+export { redirect, json, html, notFound, text, setCookie, parseCookies } from "../server/response";
 export type { MiddlewareContext, MiddlewareNext, MiddlewareFn } from "../server/middleware";
 export type { VirexConfig } from "../config/types";
 export type { MetaData } from "../render/meta";
+export { definePlugin } from "../plugin/index";
+export type { VirexPlugin, TransformHTMLContext, BuildResult, ServerInfo } from "../plugin/types";

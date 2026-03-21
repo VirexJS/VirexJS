@@ -12,6 +12,7 @@
     "./server/middleware": "./src/server/middleware.ts",
     "./server/static": "./src/server/static.ts",
     "./server/handler": "./src/server/handler.ts",
+    "./server/response": "./src/server/response.ts",
     "./render": "./src/render/index.ts",
     "./render/jsx": "./src/render/jsx.ts",
     "./render/meta": "./src/render/meta.ts",
@@ -19,7 +20,10 @@
     "./render/index": "./src/render/index.ts",
     "./config": "./src/config/index.ts",
     "./config/types": "./src/config/types.ts",
-    "./config/defaults": "./src/config/defaults.ts"
+    "./config/defaults": "./src/config/defaults.ts",
+    "./compat/react": "./src/compat/react.ts",
+    "./compat": "./src/compat/index.ts",
+    "./plugin": "./src/plugin/index.ts"
   },
   "bin": {
     "virex": "src/cli/index.ts"

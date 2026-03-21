@@ -8,6 +8,7 @@ import { handlePageRequest, handleAPIRequest } from "./handler";
 import { serveStatic, serveBuiltAsset } from "./static";
 import { runMiddleware, type MiddlewareFn } from "./middleware";
 import { renderPage } from "../render/index";
+import { PluginRunner } from "../plugin/runner";
 
 /**
  * Create and start the VirexJS HTTP server.
@@ -27,6 +28,9 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 	const middlewareDir = join(srcDir, "middleware");
 	const publicDir = resolve(cwd, config.publicDir);
 	const outDir = resolve(cwd, config.outDir);
+
+	// Initialize plugin runner
+	const pluginRunner = new PluginRunner(config.plugins ?? []);
 
 	// Register island components and prepare hydration
 	const islands = extractIslands(srcDir);
@@ -62,8 +66,10 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 	const apiRoutes = scanPages(apiDir);
 	const apiTree = buildTree(apiRoutes);
 
-	// Load middleware from src/middleware/
+	// Load middleware from src/middleware/ and plugins
 	const middlewares: MiddlewareFn[] = [];
+	// Plugin middleware runs first (before user middleware)
+	middlewares.push(...pluginRunner.collectMiddleware());
 	const middlewarePromise = loadMiddleware(middlewareDir, middlewares);
 
 	// Check for custom _404.tsx and _error.tsx
@@ -167,6 +173,24 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 				} else {
 					res = await handlePageRequest(pageMatch, request, pageOptions);
 				}
+
+				// Run transformHTML plugin hooks on page responses
+				if (pluginRunner.count > 0) {
+					const contentType = res.headers.get("Content-Type") ?? "";
+					if (contentType.includes("text/html")) {
+						const originalHtml = await res.text();
+						const transformed = await pluginRunner.runTransformHTML(originalHtml, {
+							pathname,
+							params: pageMatch.params,
+							request,
+						});
+						res = new Response(transformed, {
+							status: res.status,
+							headers: res.headers,
+						});
+					}
+				}
+
 				return addTimingHeader(res, startTime);
 			}
 
@@ -199,9 +223,18 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 			);
 	}
 
+	// Run plugin lifecycle hooks
+	pluginRunner.runConfigResolved(config).catch(() => {});
+	pluginRunner.runServerCreated({
+		port: config.port,
+		hostname: config.hostname,
+		routeCount: pageRoutes.length,
+	}).catch(() => {});
+
 	return {
 		server,
 		routeCount: pageRoutes.length,
+		pluginRunner,
 		stop: () => server.stop(),
 	};
 }

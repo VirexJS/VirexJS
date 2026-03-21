@@ -1,3 +1,5 @@
+import type { VirexPlugin } from "../plugin/types";
+
 export interface VirexConfig {
 	port: number;
 	hostname: string;
@@ -26,4 +28,6 @@ export interface VirexConfig {
 		hmr: boolean;
 		hmrPort: number;
 	};
+	/** Registered plugins */
+	plugins: VirexPlugin[];
 }

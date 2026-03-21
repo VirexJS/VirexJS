@@ -25,6 +25,14 @@ const MOCK_POSTS: Record<string, BlogPostData> = {
 	},
 };
 
+/**
+ * SSG: Return all slugs to pre-render at build time.
+ * Each entry becomes a static HTML file in dist/blog/{slug}/index.html.
+ */
+export function getStaticPaths() {
+	return Object.keys(MOCK_POSTS).map((slug) => ({ params: { slug } }));
+}
+
 export async function loader(ctx: LoaderContext) {
 	const slug = ctx.params.slug ?? "";
 	const post = MOCK_POSTS[slug];
