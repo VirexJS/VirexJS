@@ -7,7 +7,7 @@ describe("Image component", () => {
 		const html = renderToString(
 			h(Image, { src: "/hero.jpg", alt: "Hero", width: 800, height: 400 }),
 		);
-		expect(html).toContain('src="/hero.jpg"');
+		expect(html).toContain("/_virex/image"); // optimized via image endpoint
 		expect(html).toContain('alt="Hero"');
 		expect(html).toContain('width="800"');
 		expect(html).toContain('height="400"');

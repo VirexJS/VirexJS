@@ -66,15 +66,29 @@ export function Image(props: ImageProps): VNode {
 		fetchPriority,
 	} = props;
 
+	// Auto-generate optimized src via image optimizer endpoint
+	const isLocal = src.startsWith("/") && !src.startsWith("//");
+	const optimizedSrc = isLocal ? `/_virex/image?url=${encodeURIComponent(src)}&w=${width}&q=80` : src;
+
+	// Auto-generate responsive srcSet if not provided
+	const autoSrcSet =
+		!srcSet && isLocal
+			? [Math.round(width * 0.5), width, Math.round(width * 1.5)]
+					.filter((w) => w > 0)
+					.map((w) => `/_virex/image?url=${encodeURIComponent(src)}&w=${w}&q=80 ${w}w`)
+					.join(", ")
+			: srcSet;
+
+	const autoSizes = !sizes && autoSrcSet ? `(max-width: ${width}px) 100vw, ${width}px` : sizes;
+
 	const imgAttrs: Record<string, unknown> = {
-		src,
+		src: optimizedSrc,
 		alt,
 		width,
 		height,
 		decoding,
 	};
 
-	// Lazy loading — disabled for priority (above-fold) images
 	if (!priority) {
 		imgAttrs.loading = "lazy";
 	}
@@ -84,8 +98,8 @@ export function Image(props: ImageProps): VNode {
 	}
 
 	if (className) imgAttrs.className = className;
-	if (srcSet) imgAttrs.srcset = srcSet;
-	if (sizes) imgAttrs.sizes = sizes;
+	if (autoSrcSet) imgAttrs.srcset = autoSrcSet;
+	if (autoSizes) imgAttrs.sizes = autoSizes;
 
 	// Combine styles with aspect ratio prevention
 	const imgStyle: Record<string, string | number> = {

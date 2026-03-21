@@ -175,9 +175,19 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 			return addTimingHeader(staticResponse, startTime);
 		}
 
-		// 2. Built assets from /_virex/
+		// 2. Image optimization endpoint
+		if (pathname === "/_virex/image") {
+			const { handleImageRequest } = require("./image-optimizer");
+			const imgResponse = await handleImageRequest(request, {
+				publicDir,
+				cacheDir: resolve(outDir, ".image-cache"),
+			});
+			if (imgResponse) return addTimingHeader(imgResponse, startTime);
+		}
+
+		// 3. Built assets from /_virex/
 		if (pathname.startsWith("/_virex/")) {
-			const assetPath = pathname.slice(1); // keep "_virex/..." prefix
+			const assetPath = pathname.slice(1);
 			const assetResponse = await serveBuiltAsset(assetPath, outDir);
 			if (assetResponse) {
 				return addTimingHeader(assetResponse, startTime);
