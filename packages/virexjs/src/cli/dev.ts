@@ -27,16 +27,41 @@ export async function dev(args: string[]): Promise<void> {
 	if (flags.open === true) config.dev.open = true;
 	const srcDir = resolve(process.cwd(), config.srcDir);
 
-	// Start HMR server
+	// Start HMR server (try configured port, fallback to alternatives)
 	let hmrServer: ReturnType<typeof createHMRServer> | null = null;
 	let devScript: string | undefined;
+	let hmrPort = config.dev.hmrPort;
 	if (config.dev.hmr) {
-		hmrServer = createHMRServer(config.dev.hmrPort);
-		devScript = generateHMRClientScript(config.dev.hmrPort);
+		const maxAttempts = 10;
+		for (let attempt = 0; attempt < maxAttempts; attempt++) {
+			try {
+				hmrServer = createHMRServer(hmrPort);
+				devScript = generateHMRClientScript(hmrPort);
+				break;
+			} catch {
+				hmrPort++;
+			}
+		}
+		if (!hmrServer) {
+			console.warn("  ⚠ HMR server could not start (ports in use). Running without HMR.");
+		}
 	}
 
-	// Start HTTP server
-	const { routeCount } = createServer(config, { devScript });
+	// Start HTTP server (retry on port conflict)
+	let routeCount = 0;
+	for (let attempt = 0; attempt < 10; attempt++) {
+		try {
+			const result = createServer(config, { devScript });
+			routeCount = result.routeCount;
+			break;
+		} catch {
+			if (attempt === 9) {
+				console.error(`  Error: Could not start server on port ${config.port}.`);
+				process.exit(1);
+			}
+			config.port++;
+		}
+	}
 
 	// Start file watcher
 	const watcher = startDevMode({
@@ -58,7 +83,7 @@ export async function dev(args: string[]): Promise<void> {
 	console.log(`
   ⚡ VirexJS v0.1.0
 
-  → Local:   http://localhost:${config.port}${networkIP ? `\n  → Network: http://${networkIP}:${config.port}` : ""}${config.dev.hmr ? `\n  → HMR:     ws://localhost:${config.dev.hmrPort}` : ""}
+  → Local:   http://localhost:${config.port}${networkIP ? `\n  → Network: http://${networkIP}:${config.port}` : ""}${hmrServer ? `\n  → HMR:     ws://localhost:${hmrPort}` : ""}
 
   Ready in ${elapsed}ms · ${routeCount} routes found
 `);

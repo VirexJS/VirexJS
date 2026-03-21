@@ -49,7 +49,9 @@ describe("parseEnvFile", () => {
 		expect(result.COLOR).toBe("#ff0000");
 	});
 
+	// biome-ignore lint/suspicious/noTemplateCurlyInString: testing env variable expansion syntax
 	test("variable expansion with ${VAR}", () => {
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: env syntax under test
 		const result = parseEnvFile("BASE=/app\nURL=${BASE}/api");
 		expect(result.URL).toBe("/app/api");
 	});
@@ -60,6 +62,7 @@ describe("parseEnvFile", () => {
 	});
 
 	test("missing variable expands to empty", () => {
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: env syntax under test
 		const result = parseEnvFile("VALUE=${NONEXISTENT}");
 		expect(result.VALUE).toBe("");
 	});

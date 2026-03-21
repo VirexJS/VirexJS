@@ -86,12 +86,12 @@ export function createWSServer(options: { port: number; routes: WSRoute[]; hostn
 					return new Response("Forbidden", { status: 403 });
 				}
 				const data = typeof result === "object" ? result : {};
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				// biome-ignore lint/suspicious/noExplicitAny: required for Bun API compatibility
 				if (server.upgrade(req, { data: { ...data, _route: url.pathname } } as any)) {
 					return;
 				}
 			} else {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				// biome-ignore lint/suspicious/noExplicitAny: required for Bun API compatibility
 				if (server.upgrade(req, { data: { _route: url.pathname } } as any)) {
 					return;
 				}
@@ -137,7 +137,7 @@ export function createWSServer(options: { port: number; routes: WSRoute[]; hostn
 	};
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: required for Bun API compatibility
 function wrapWS(ws: any): WSConnection {
 	return {
 		send: (data: string) => ws.send(data),

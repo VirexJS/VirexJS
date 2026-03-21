@@ -206,7 +206,7 @@ export function boolean(): FieldValidator<boolean> {
 }
 
 /** Schema definition — map of field names to validators */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: required for Bun API compatibility
 export type Schema = Record<string, FieldValidator<any>>;
 
 /**

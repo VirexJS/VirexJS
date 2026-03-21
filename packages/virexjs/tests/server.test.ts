@@ -20,7 +20,7 @@ const testConfig: VirexConfig = {
 // Start server in playground directory
 const originalCwd = process.cwd();
 process.chdir(playgroundDir);
-const { server, stop, routeCount } = createServer(testConfig);
+const { stop, routeCount } = createServer(testConfig);
 process.chdir(originalCwd);
 
 const BASE = `http://localhost:${testConfig.port}`;

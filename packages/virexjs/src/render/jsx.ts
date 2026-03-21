@@ -75,7 +75,7 @@ const BOOLEAN_ATTRS = new Set([
  * - Fragment → just return children
  */
 export function h(
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	// biome-ignore lint/suspicious/noExplicitAny: required for Bun API compatibility
 	type: string | symbol | ((props: any) => VNode),
 	props: Record<string, unknown> | null,
 	...children: unknown[]

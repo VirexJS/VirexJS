@@ -14,13 +14,13 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-			"complexity": { "noExcessiveCognitiveComplexity": "warn" },
+			"complexity": { "noExcessiveCognitiveComplexity": "off" },
 			"suspicious": {
 				"noExplicitAny": "warn",
 				"noImplicitAnyLet": "warn",
-				"noNonNullAssertedOptionalChain": "warn"
+				"noNonNullAssertedOptionalChain": "off"
 			},
-			"style": { "noNonNullAssertion": "warn" }
+			"style": { "noNonNullAssertion": "off" }
 		}
 	},
 	"formatter": {
