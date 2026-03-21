@@ -44,7 +44,8 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 | **WebSocket** | Done | `defineWSRoute`, `createWSServer` with typed handlers |
 | **Session** | Done | Cookie-based sessions with in-memory store, get/set/destroy |
 | **SSE** | Done | `createSSEStream` for Server-Sent Events with named events |
-| **Tests** | Done | 618 tests across 44 files, 0 failures |
+| **DB Migrations** | Done | `migrate()`, `rollback()`, `getMigrationStatus()` with transactions |
+| **Tests** | Done | 632 tests across 45 files, 0 failures |
 | **TypeScript** | Done | Strict mode, 0 errors |
 
 ### Roadmap
