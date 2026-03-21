@@ -13,7 +13,7 @@ VirexJS is a next-generation web framework built on Bun runtime. Ships HTML, not
 ## Commands
 ```bash
 bun install             # Install workspace dependencies
-bun test                # Run all 177 tests
+bun test                # Run all 553 tests
 bun run dev             # Start playground dev server (port 3000)
 bun run build           # Build playground for production
 bunx tsc --noEmit       # TypeScript check (must pass with 0 errors)
@@ -47,7 +47,13 @@ bun test packages/router/   # Test specific package
 
 ## Type Helpers
 ```ts
-import { defineConfig, defineLoader, defineAPIRoute, defineMiddleware } from "virexjs";
+import { defineConfig, defineLoader, defineAPIRoute, defineMiddleware, definePlugin } from "virexjs";
+import { Head, useHead, ErrorBoundary } from "virexjs";
+import { cors, rateLimit, securityHeaders, createLogger, createCache } from "virexjs";
+import { redirect, json, html, notFound, setCookie, parseCookies } from "virexjs";
+import { createI18n, defineTranslations, detectLocale } from "virexjs";
+import { loadEnv } from "virexjs";
+import { renderComponent, createTestRequest, assertHTML } from "virexjs/testing";
 ```
 
 ## Server Features
@@ -59,11 +65,19 @@ import { defineConfig, defineLoader, defineAPIRoute, defineMiddleware } from "vi
 - basePath support
 - Middleware chain with short-circuit
 - Island markers in HTML output
+- Plugin system with lifecycle hooks
+- CORS, rate limiting, security headers middleware
+- In-memory cache with TTL
 
 ## Key Files
 - JSX runtime: `packages/virexjs/src/render/jsx.ts`
+- Head component: `packages/virexjs/src/render/head.ts`
+- Error boundary: `packages/virexjs/src/render/error-boundary.ts`
 - Server entry: `packages/virexjs/src/server/index.ts`
 - Router matcher: `packages/router/src/matcher.ts`
+- Plugin system: `packages/virexjs/src/plugin/`
+- i18n: `packages/virexjs/src/i18n/index.ts`
 - Config types: `packages/virexjs/src/config/types.ts`
 - Public types: `packages/virexjs/src/types/index.ts`
 - CLI entry: `packages/virexjs/src/cli/index.ts`
+- Test utilities: `packages/virexjs/src/testing/index.ts`
