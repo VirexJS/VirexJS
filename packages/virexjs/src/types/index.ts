@@ -103,6 +103,7 @@ export { Link } from "../render/link";
 export type { MetaData } from "../render/meta";
 export type { OGImageOptions } from "../render/og-image";
 export { generateOGImage } from "../render/og-image";
+export { cachedRender, clearRenderCache, renderCacheStats } from "../render/render-cache";
 export { defineRoute, route } from "../render/routes";
 export type { ScriptProps } from "../render/script";
 export { Script } from "../render/script";

@@ -4,6 +4,8 @@ import Accordion from "../islands/Accordion";
 import ColorPicker from "../islands/ColorPicker";
 import Counter from "../islands/Counter";
 import LikeButton from "../islands/LikeButton";
+import Modal from "../islands/Modal";
+import SearchBox from "../islands/SearchBox";
 import Tabs from "../islands/Tabs";
 import Timer from "../islands/Timer";
 import TodoList from "../islands/TodoList";
@@ -27,7 +29,7 @@ export default function Islands(_props: PageProps) {
 					client. Only island JavaScript is shipped — the rest of the page is pure HTML.
 				</p>
 				<p style={{ color: "#999", fontSize: "13px", margin: 0 }}>
-					8 islands on this page, each with its own bundle.
+					10 islands on this page, each with its own bundle.
 				</p>
 			</div>
 
@@ -111,6 +113,26 @@ export default function Islands(_props: PageProps) {
 					</p>
 					<ErrorBoundary fallback={(err) => <p style={{ color: "red" }}>{err.message}</p>}>
 						<LikeButton />
+					</ErrorBoundary>
+				</section>
+
+				<section>
+					<h2 style={{ fontSize: "18px", margin: "0 0 12px", color: "#333" }}>Search Box</h2>
+					<p style={{ color: "#666", fontSize: "14px", margin: "0 0 12px" }}>
+						Live filtering with input. Type to search VirexJS features.
+					</p>
+					<ErrorBoundary fallback={(err) => <p style={{ color: "red" }}>{err.message}</p>}>
+						<SearchBox />
+					</ErrorBoundary>
+				</section>
+
+				<section>
+					<h2 style={{ fontSize: "18px", margin: "0 0 12px", color: "#333" }}>Modal</h2>
+					<p style={{ color: "#666", fontSize: "14px", margin: "0 0 12px" }}>
+						Overlay dialog. Server-renders as a button, hydrates to show modal on click.
+					</p>
+					<ErrorBoundary fallback={(err) => <p style={{ color: "red" }}>{err.message}</p>}>
+						<Modal />
 					</ErrorBoundary>
 				</section>
 			</div>
