@@ -1,7 +1,7 @@
 # VirexJS — Claude Code Instructions
 
 ## Project Overview
-VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not JavaScript. Zero external npm dependencies. 671 tests, TypeScript strict with 0 errors.
+VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not JavaScript. Zero external npm dependencies. 804 tests (100% coverage), TypeScript strict with 0 errors.
 
 ## Architecture
 - **Monorepo** with Bun workspaces: `packages/*` and `playground`
@@ -13,7 +13,7 @@ VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not Java
 ## Commands
 ```bash
 bun install             # Install workspace dependencies
-bun test                # Run all 671 tests
+bun test                # Run all 804 tests
 bun run dev             # Start playground dev server (port 3000)
 bun run build           # Build playground for production
 bunx tsc --noEmit       # TypeScript check (must pass with 0 errors)

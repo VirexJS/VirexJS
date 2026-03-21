@@ -25,7 +25,7 @@ bun run dev
 - **Plugin system** — 6 lifecycle hooks for extensibility
 - **Real-time** — WebSocket routes and Server-Sent Events
 - **Database** — SQLite ORM with typed CRUD and migrations
-- **Security** — CORS, rate limiting, CSP, HSTS, XSS prevention
+- **Security** — CORS, rate limiting, CSP, HSTS, CSRF, body size limiter
 - **SEO** — `useHead()`, `<Head>`, JSON-LD structured data
 - **DX** — HMR, error overlay, CLI scaffolding, test utilities
 - **Zero dependencies** — Everything built on Bun native APIs
@@ -92,7 +92,7 @@ virex generate <type> <name>   Scaffold page, component, api, middleware, island
 
 ```bash
 bun install              # Install workspace dependencies
-bun test                 # Run all 671 tests
+bun test                 # Run all 804 tests
 bun run dev              # Start playground (port 3000)
 bun run build            # Build playground for production
 bunx tsc --noEmit        # TypeScript check (strict, 0 errors)
@@ -106,7 +106,7 @@ bunx tsc --noEmit        # TypeScript check (strict, 0 errors)
 | Language | TypeScript 5.x (strict) |
 | Server | Bun.serve() |
 | Database | bun:sqlite |
-| Tests | bun:test (671 tests) |
+| Tests | bun:test (804 tests, 100% coverage) |
 | Linter | Biome |
 
 ## License
