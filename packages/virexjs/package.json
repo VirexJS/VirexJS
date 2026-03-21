@@ -1,0 +1,22 @@
+{
+  "name": "virexjs",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/types/index.ts",
+  "types": "src/types/index.ts",
+  "exports": {
+    ".": "./src/types/index.ts",
+    "./jsx-runtime": "./jsx-runtime.ts",
+    "./jsx-dev-runtime": "./jsx-dev-runtime.ts"
+  },
+  "bin": {
+    "virex": "src/cli/index.ts"
+  },
+  "license": "MIT",
+  "author": "ECOSTACK TECHNOLOGY OÜ",
+  "dependencies": {
+    "@virexjs/router": "workspace:*",
+    "@virexjs/bundler": "workspace:*",
+    "@virexjs/db": "workspace:*"
+  }
+}

@@ -1,0 +1,80 @@
+import { resolve } from "node:path";
+import { networkInterfaces } from "node:os";
+import { loadConfig } from "../config/index";
+import { createServer } from "../server/index";
+import { startDevMode } from "@virexjs/bundler";
+import { createHMRServer, generateHMRClientScript } from "@virexjs/bundler";
+
+/**
+ * `virex dev` command:
+ * 1. Print startup banner
+ * 2. Load config from virex.config.ts (or defaults)
+ * 3. Scan routes
+ * 4. Start HTTP server (Bun.serve)
+ * 5. Start HMR WebSocket server
+ * 6. Start file watcher
+ * 7. Print ready message with URL and timing
+ */
+export async function dev(_args: string[]): Promise<void> {
+	const startTime = performance.now();
+
+	// Load config
+	const config = await loadConfig();
+	const srcDir = resolve(process.cwd(), config.srcDir);
+
+	// Start HMR server
+	let hmrServer: ReturnType<typeof createHMRServer> | null = null;
+	let devScript: string | undefined;
+	if (config.dev.hmr) {
+		hmrServer = createHMRServer(config.dev.hmrPort);
+		devScript = generateHMRClientScript(config.dev.hmrPort);
+	}
+
+	// Start HTTP server
+	const { routeCount } = createServer(config, { devScript });
+
+	// Start file watcher
+	const watcher = startDevMode({
+		srcDir,
+		onFileChange: (filePath, event) => {
+			if (hmrServer) {
+				if (filePath.endsWith(".css")) {
+					hmrServer.broadcast({ type: "css-update", href: filePath });
+				} else {
+					hmrServer.broadcast({ type: "full-reload" });
+				}
+			}
+		},
+	});
+
+	const elapsed = Math.round(performance.now() - startTime);
+	const networkIP = getNetworkIP();
+
+	console.log(`
+  ⚡ VirexJS v0.1.0
+
+  → Local:   http://localhost:${config.port}${networkIP ? `\n  → Network: http://${networkIP}:${config.port}` : ""}${config.dev.hmr ? `\n  → HMR:     ws://localhost:${config.dev.hmrPort}` : ""}
+
+  Ready in ${elapsed}ms · ${routeCount} routes found
+`);
+
+	// Handle graceful shutdown
+	process.on("SIGINT", () => {
+		watcher.stop();
+		hmrServer?.stop();
+		process.exit(0);
+	});
+}
+
+function getNetworkIP(): string | null {
+	const interfaces = networkInterfaces();
+	for (const iface of Object.values(interfaces)) {
+		if (!iface) continue;
+		for (const alias of iface) {
+			if (alias.family === "IPv4" && !alias.internal) {
+				return alias.address;
+			}
+		}
+	}
+	return null;
+}
