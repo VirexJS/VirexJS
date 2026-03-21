@@ -10,7 +10,8 @@
     "test:bundler": "bun test packages/bundler/",
     "test:db": "bun test packages/db/",
     "lint": "bunx @biomejs/biome check .",
-    "typecheck": "bunx tsc --noEmit"
+    "typecheck": "bunx tsc --noEmit",
+    "check": "bun test && bunx tsc --noEmit"
   },
   "devDependencies": {
     "@biomejs/biome": "latest",
