@@ -2,12 +2,24 @@
 
 **Ship HTML, not JavaScript.**
 
+[![Tests](https://img.shields.io/badge/tests-951%20passing-brightgreen)](https://github.com/virex-js/virexjs)
+[![TypeScript](https://img.shields.io/badge/typescript-strict-blue)](https://github.com/virex-js/virexjs)
+[![Dependencies](https://img.shields.io/badge/dependencies-0-orange)](https://github.com/virex-js/virexjs)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 A full-stack web framework built on [Bun](https://bun.sh). Zero client-side JS by default, islands architecture for selective hydration, file-based routing, and built-in everything — no external dependencies.
+
+[Website](https://virexjs.com) | [Docs](./docs/getting-started.md) | [API Reference](./docs/api-reference.md) | [Playground](./playground)
 
 ## Quick Start
 
 ```bash
+# Interactive wizard (recommended)
+bunx virexjs create my-app
+
+# Or quick scaffold
 bunx virexjs init my-app
+
 cd my-app
 bun install
 bun run dev
@@ -98,7 +110,7 @@ virex generate <type> <name>   Scaffold page, component, api, middleware, island
 
 ```bash
 bun install              # Install workspace dependencies
-bun test                 # Run all 864 tests
+bun test                 # Run all 951+ tests
 bun run dev              # Start playground (port 3000)
 bun run build            # Build playground for production
 bunx tsc --noEmit        # TypeScript check (strict, 0 errors)
@@ -112,7 +124,7 @@ bunx tsc --noEmit        # TypeScript check (strict, 0 errors)
 | Language | TypeScript 5.x (strict) |
 | Server | Bun.serve() |
 | Database | bun:sqlite |
-| Tests | bun:test (864 tests, 71 files) |
+| Tests | bun:test (951+ tests, 84+ files) |
 | Linter | Biome |
 
 ## License

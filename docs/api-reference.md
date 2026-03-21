@@ -83,14 +83,76 @@ Validators are chainable: `.required()`, `.min(n)`, `.max(n)`, `.pattern(regex)`
 | `defineTranslations(translations)` | Type-safe translation definitions |
 | `detectLocale(header, locales, default)` | Detect locale from Accept-Language |
 
+## Components
+
+| Export | Description |
+|--------|-------------|
+| `Link` | `<a>` with optional native prefetch |
+| `Image` | `<img>` with lazy loading, responsive |
+| `Script` | Smart script loading (defer/async/lazy/idle) |
+| `Font` | Google Fonts or custom font optimization |
+
+## Rendering
+
+| Export | Description |
+|--------|-------------|
+| `generateOGImage(options)` | Dynamic SVG social preview image |
+| `cachedRender(key, props, render)` | Memoized component render |
+| `route(pattern, params)` | Type-safe URL builder |
+| `defineRoute(pattern)` | Typed route builder factory |
+
+## Directives
+
+| Export | Description |
+|--------|-------------|
+| `serverAction(fn)` | Mark function as server-only |
+| `registerAction(name, fn)` | Register RPC action |
+| `hasDirective(file, directive)` | Check file directive |
+| `isClientComponent(file)` | Check "use client"/"use island" |
+| `isCachedPage(file)` | Check "use cache" |
+| `withCache(path, ttl, render)` | ISR cache wrapper |
+
+## ISR
+
+| Export | Description |
+|--------|-------------|
+| `getISRCache(path)` | Get cached response |
+| `setISRCache(path, html, ttl)` | Store in cache |
+| `invalidateISR(pathOrRegex)` | Invalidate cache entries |
+| `getISRStats()` | Cache statistics |
+
+## i18n
+
+| Export | Description |
+|--------|-------------|
+| `createI18n(options)` | Create i18n instance |
+| `defineTranslations(translations)` | Type-safe translation definitions |
+| `detectLocale(header, locales, default)` | Detect locale from Accept-Language |
+| `i18nRouting(options)` | Locale-based URL routing middleware |
+| `setLocaleCookie(response, locale)` | Persist locale preference |
+
+## Draft Mode
+
+| Export | Description |
+|--------|-------------|
+| `isDraftMode(request)` | Check if preview mode active |
+| `enableDraftMode(response)` | Enable CMS preview |
+| `disableDraftMode(response)` | Disable preview |
+
 ## Utilities
 
 | Export | Description |
 |--------|-------------|
 | `createCache(options?)` | In-memory TTL cache |
 | `createLogger(options?)` | Structured leveled logger |
+| `createScheduler()` | Cron-like task scheduler |
+| `createInstrumentation()` | Request metrics tracking |
 | `loadEnv(mode?, cwd?)` | Load .env files |
+| `defineEnv(schema)` | Type-safe env validation |
 | `parseEnvFile(content)` | Parse .env file content |
+| `parseUpload(request, opts?)` | Multipart file upload parsing |
+| `generateAPIDocs(apiDir)` | Auto-generate API docs |
+| `renderAPIDocsHTML(docs)` | Render docs as HTML |
 
 ## Real-time
 
@@ -137,19 +199,44 @@ Validators are chainable: `.required()`, `.min(n)`, `.max(n)`, `.pattern(regex)`
 
 ```ts
 import type {
+  // Core
   PageProps, LoaderContext, MetaContext, APIContext,
   VirexConfig, MetaData, StaticPath,
+  // Server
   MiddlewareFn, MiddlewareContext, MiddlewareNext,
-  VirexPlugin, TransformHTMLContext, BuildResult, ServerInfo,
-  WSRoute, WSConnection, SSEController,
-  JWTPayload, JWTOptions, SessionOptions, SessionStore,
   CORSOptions, RateLimitOptions, SecurityOptions, GuardOptions,
+  SessionOptions, SessionStore, ShutdownOptions, ShutdownHandle,
+  // Plugin
+  VirexPlugin, TransformHTMLContext, BuildResult, ServerInfo,
+  // Auth
+  JWTPayload, JWTOptions,
+  // Validation
   ValidationResult, ValidationError, FieldValidator, Schema,
+  // i18n
   I18n, Translations, LocaleMap,
-  Logger, LogLevel, Cache,
-  ActionContext, ActionHandler,
-  UseHeadOptions, ErrorBoundaryProps,
+  // Real-time
+  WSRoute, WSConnection, SSEController,
+  // Components
+  LinkProps, ImageProps, ScriptProps, FontProps,
+  ErrorBoundaryProps, UseHeadOptions, OGImageOptions,
+  // Utilities
+  Logger, LogLevel, Cache, ActionContext, ActionHandler,
+  Scheduler, ScheduledTask, Instrumentation, MetricsStats,
+  UploadedFile, UploadResult, UploadOptions,
+  APIDocs, APIEndpoint,
+  // SEO
   StructuredData, ArticleLD, BreadcrumbLD, FAQLD,
-  ShutdownOptions, ShutdownHandle,
 } from "virexjs";
+```
+
+## CLI Commands
+
+```
+virex create              Interactive project wizard (4 templates)
+virex init <name>         Quick project scaffold
+virex dev                 Dev server with HMR + widget
+virex build               Production SSG build
+virex preview             Preview production build
+virex generate <type>     Scaffold page/component/api/middleware/island
+virex info                Show project statistics
 ```
