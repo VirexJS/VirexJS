@@ -6,7 +6,7 @@
 		"playground"
 	],
 	"scripts": {
-		"dev": "cd playground && bun run ../packages/virexjs/src/cli/index.ts dev",
+		"dev": "cd playground && bun --watch ../packages/virexjs/src/cli/index.ts dev",
 		"build": "cd playground && bun run ../packages/virexjs/src/cli/index.ts build",
 		"test": "bun test --recursive packages/",
 		"test:router": "bun test packages/router/",
