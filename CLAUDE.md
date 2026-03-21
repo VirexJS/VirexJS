@@ -1,7 +1,7 @@
 # VirexJS — Claude Code Instructions
 
 ## Project Overview
-VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not JavaScript. Zero external npm dependencies. 804 tests (100% coverage), TypeScript strict with 0 errors.
+VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not JavaScript. Zero external npm dependencies. 886 tests across 74 files, TypeScript strict with 0 errors, Biome lint 0 errors.
 
 ## Architecture
 - **Monorepo** with Bun workspaces: `packages/*` and `playground`
@@ -13,7 +13,7 @@ VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not Java
 ## Commands
 ```bash
 bun install             # Install workspace dependencies
-bun test                # Run all 804 tests
+bun test                # Run all 886 tests
 bun run dev             # Start playground dev server (port 3000)
 bun run build           # Build playground for production
 bunx tsc --noEmit       # TypeScript check (must pass with 0 errors)
@@ -40,20 +40,34 @@ bun test packages/router/   # Test specific package
 - `[slug]` — Dynamic param, `[...rest]` — Catch-all
 - `(group)` — Route group (no URL segment)
 - `_404.tsx` — Custom 404, `_error.tsx` — Custom error, `_layout.tsx` — Layout
-- `src/islands/` — Island components (or `// "use island"` directive)
+- `src/islands/` — Island components (`"use island"` or `"use client"` directive)
 - `src/api/` — API routes (`GET`, `POST`, `PUT`, `DELETE` exports)
 - `src/middleware/` — Auto-loaded middleware functions
+- `_middleware.ts` — Per-route middleware (auto-discovered)
+
+## Directives
+- `"use client"` — Client-side island (alias for `"use island"`)
+- `"use server"` — Server-only function (RPC-callable)
+- `"use cache"` — ISR cached page + `export const revalidate = 60`
 
 ## Exports (from "virexjs")
 ```ts
 // Core
 defineConfig, defineLoader, defineAPIRoute, defineMiddleware, definePlugin, defineAction
 // Rendering
-Head, useHead, ErrorBoundary, JsonLd, createBreadcrumbs, createFAQ
+Head, useHead, ErrorBoundary, JsonLd, createBreadcrumbs, createFAQ, Link, Image, Script
+// OG Image
+generateOGImage
 // Server & Middleware
-cors, rateLimit, securityHeaders, session, guard, createCache, createLogger
+cors, rateLimit, securityHeaders, session, guard, createCache, createLogger, csrf, bodyLimit, requestId, healthCheck, gracefulShutdown
 // Response
 redirect, json, html, notFound, text, setCookie, parseCookies, actionRedirect, actionJson, parseFormData
+// ISR
+getISRCache, setISRCache, invalidateISR, withCache
+// Routes
+route, defineRoute, loadRouteMiddleware
+// Directives
+serverAction, registerAction, hasDirective, isClientComponent, isCachedPage
 // Auth
 createJWT, verifyJWT, decodeJWT, JWTError
 // Validation
@@ -61,7 +75,7 @@ validate, parseBody, string, number, boolean
 // i18n
 createI18n, defineTranslations, detectLocale
 // Config
-loadEnv, parseEnvFile
+loadEnv, parseEnvFile, defineEnv
 // Real-time
 defineWSRoute, createWSServer, createSSEStream
 // Testing (from "virexjs/testing")
@@ -82,11 +96,18 @@ renderComponent, createTestRequest, createTestLoaderContext, createTestMiddlewar
 - CLI entry: `packages/virexjs/src/cli/index.ts`
 - Test utilities: `packages/virexjs/src/testing/index.ts`
 - DB migrations: `packages/db/src/migrate.ts`
+- Directives: `packages/virexjs/src/directives/index.ts`
+- Link/Image/Script: `packages/virexjs/src/render/link.ts`, `image.ts`, `script.ts`
+- ISR cache: `packages/virexjs/src/server/isr.ts`
+- OG image: `packages/virexjs/src/render/og-image.ts`
+- API docs: `packages/virexjs/src/server/api-docs.ts`
+- Benchmark: `benchmark.ts`
 
 ## Documentation
 See `docs/` directory for detailed guides:
 - `docs/getting-started.md` — Quick start
 - `docs/routing.md` — Pages, API routes, SSG, form actions
 - `docs/middleware.md` — CORS, rate limit, JWT, sessions, guards
+- `docs/directives.md` — "use client", "use server", "use cache"
 - `docs/configuration.md` — Config, .env, plugins
 - `docs/api-reference.md` — Complete export reference

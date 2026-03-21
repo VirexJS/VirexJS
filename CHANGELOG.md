@@ -75,4 +75,18 @@
 - `.env` file loader with mode support and variable expansion
 - Test utilities (renderComponent, createTestRequest, assertHTML)
 - CSRF protection, body size limiter, graceful shutdown
-- 804 tests across 65 files, TypeScript strict mode, 0 errors, Biome lint 0 errors
+- `<Link>` component with native browser prefetch
+- `<Image>` component with native lazy loading
+- `<Script>` component with loading strategies (defer/async/lazy/idle)
+- ISR (Incremental Static Regeneration) with SWR cache pattern
+- Type-safe routes: `route()` and `defineRoute()`
+- Per-route middleware (`_middleware.ts` auto-discovery)
+- Next.js directives: `"use client"`, `"use server"`, `"use cache"`
+- `defineEnv()` for type-safe environment variables
+- `generateOGImage()` for dynamic social preview SVGs
+- Auto API docs: `generateAPIDocs()` + HTML renderer
+- Dev widget (bottom-right HMR status indicator)
+- Smart reload (body swap without full page reload)
+- Benchmark suite: 6.4M ops/sec JSX, 85K pages/sec render
+- Auth system: JWT login/register, password hashing, admin panel
+- 886 tests across 74 files, TypeScript strict mode, 0 errors, Biome lint 0 errors

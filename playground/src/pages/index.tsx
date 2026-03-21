@@ -25,7 +25,7 @@ export async function loader(_ctx: LoaderContext) {
 			},
 		],
 		serverTime: new Date().toLocaleTimeString(),
-		stats: { tests: 804, packages: 4, islands: 7, routes: 13 },
+		stats: { tests: 886, packages: 4, islands: 8, routes: 19 },
 	};
 }
 
@@ -35,7 +35,12 @@ export default function Home(props: PageProps<HomeData>) {
 	const head = useHead({
 		title: "VirexJS — Ship HTML, not JavaScript",
 		description: "A full-stack web framework built on Bun. Zero dependencies.",
-		og: { title: "VirexJS", description: "Ship HTML, not JavaScript.", type: "website" },
+		og: {
+			title: "VirexJS",
+			description: "Ship HTML, not JavaScript.",
+			type: "website",
+			image: "/api/og?title=VirexJS&subtitle=Ship+HTML,+not+JavaScript",
+		},
 	});
 
 	const statItems = [
