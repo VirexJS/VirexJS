@@ -22,6 +22,14 @@
         "typescript": "^5.7.0",
       },
     },
+    "examples/saas": {
+      "name": "virexjs-saas-starter",
+      "version": "1.0.0",
+      "dependencies": {
+        "@virexjs/db": "workspace:*",
+        "virexjs": "workspace:*",
+      },
+    },
     "packages/bundler": {
       "name": "@virexjs/bundler",
       "version": "0.1.0",
@@ -97,5 +105,7 @@
     "virexjs-blog": ["virexjs-blog@workspace:examples/blog"],
 
     "virexjs-playground": ["virexjs-playground@workspace:playground"],
+
+    "virexjs-saas-starter": ["virexjs-saas-starter@workspace:examples/saas"],
   }
 }
