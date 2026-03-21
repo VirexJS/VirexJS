@@ -1,12 +1,15 @@
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { MatchResult } from "@virexjs/router";
+import { getRevalidateTime, isCachedPage, withCache } from "../directives/index";
 import { renderPage } from "../render/index";
 import type { VNode } from "../render/jsx";
 import type { MetaData } from "../render/meta";
 
 interface PageModule {
 	default: (props: Record<string, unknown>) => VNode;
+	/** ISR revalidation time in seconds */
+	revalidate?: number;
 	loader?: (ctx: {
 		params: Record<string, string>;
 		request: Request;
@@ -63,37 +66,71 @@ export async function handlePageRequest(
 			return new Response("Page module has no default export", { status: 500 });
 		}
 
-		// Run loader
-		let data: Record<string, unknown> = {};
-		if (mod.loader) {
-			data = await mod.loader({
-				params: match.params,
-				request,
-				headers: request.headers,
-			});
+		// "use cache" / revalidate — ISR support
+		const revalidate =
+			getRevalidateTime(mod as unknown as Record<string, unknown>) ??
+			(isCachedPage(match.route.filePath!) ? 60 : null);
+
+		if (revalidate) {
+			const url = new URL(request.url);
+			return withCache(url.pathname, revalidate, () =>
+				renderPageFull(mod, match, request, options),
+			);
 		}
 
-		// Get meta
-		let metaData: MetaData | undefined;
-		if (mod.meta) {
-			metaData = mod.meta({ data, params: match.params });
-		}
-
-		// Auto-detect _layout.tsx in the page's directory or parent directories
-		let layout = options?.layout;
-		if (!layout) {
-			layout = await findLayout(match.route.filePath!);
-		}
-
-		return renderPage({
-			component,
-			layout,
-			data: { data, params: match.params, url: new URL(request.url) },
-			meta: metaData,
-			cssLinks: options?.cssLinks,
-			devScript: options?.devScript,
-		});
+		return renderPageFull(mod, match, request, options);
 	} catch (error) {
+		return handlePageError(error, request, options);
+	}
+}
+
+/** Full page render pipeline */
+async function renderPageFull(
+	mod: PageModule,
+	match: MatchResult,
+	request: Request,
+	options?: PageRequestOptions,
+): Promise<Response> {
+	// Run loader
+	let data: Record<string, unknown> = {};
+	if (mod.loader) {
+		data = await mod.loader({
+			params: match.params,
+			request,
+			headers: request.headers,
+		});
+	}
+
+	// Get meta
+	let metaData: MetaData | undefined;
+	if (mod.meta) {
+		metaData = mod.meta({ data, params: match.params });
+	}
+
+	// Auto-detect _layout.tsx in the page's directory or parent directories
+	let layout = options?.layout;
+	if (!layout) {
+		layout = await findLayout(match.route.filePath!);
+	}
+
+	const component = mod.default;
+	return renderPage({
+		component,
+		layout,
+		data: { data, params: match.params, url: new URL(request.url) },
+		meta: metaData,
+		cssLinks: options?.cssLinks,
+		devScript: options?.devScript,
+	});
+}
+
+/** Handle page rendering errors */
+async function handlePageError(
+	error: unknown,
+	request: Request,
+	options?: PageRequestOptions,
+): Promise<Response> {
+	{
 		const isDev = process.env.NODE_ENV !== "production";
 		const message = error instanceof Error ? error.message : "Unknown error";
 		const safeMessage = isDev ? message : "Internal Server Error";

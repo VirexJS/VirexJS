@@ -16,7 +16,8 @@ export default function Footer() {
 			}}
 		>
 			<p style={{ margin: "0 0 6px" }}>
-				Built with <strong style={{ color: "#6b7280" }}>VirexJS</strong> — Ship HTML, not JavaScript. JavaScript.
+				Built with <strong style={{ color: "#6b7280" }}>VirexJS</strong> — Ship HTML, not
+				JavaScript. JavaScript.
 			</p>
 			<p style={{ margin: 0 }}>
 				<Link href="/api/hello">API</Link>

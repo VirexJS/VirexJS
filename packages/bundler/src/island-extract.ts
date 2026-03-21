@@ -97,7 +97,10 @@ function scanForDirectives(
 			if (
 				firstLine.includes('"use island"') ||
 				firstLine.includes("'use island'") ||
-				firstLine.includes('// "use island"')
+				firstLine.includes('// "use island"') ||
+				firstLine.includes('"use client"') ||
+				firstLine.includes("'use client'") ||
+				firstLine.includes('// "use client"')
 			) {
 				const name = basename(entry, extname(entry));
 				if (!islands.has(name)) {

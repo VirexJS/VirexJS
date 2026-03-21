@@ -76,6 +76,16 @@ export type { JWTOptions, JWTPayload } from "../auth/jwt";
 export { createJWT, decodeJWT, JWTError, verifyJWT } from "../auth/jwt";
 export { loadEnv, parseEnvFile } from "../config/env";
 export type { VirexConfig } from "../config/types";
+export {
+	getAction,
+	hasDirective,
+	isCachedPage,
+	isClientComponent,
+	listActions,
+	registerAction,
+	serverAction,
+	withCache,
+} from "../directives/index";
 export type { I18n, LocaleMap, Translations } from "../i18n/index";
 export { createI18n, defineTranslations, detectLocale } from "../i18n/index";
 export { definePlugin } from "../plugin/index";
