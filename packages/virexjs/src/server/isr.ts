@@ -44,6 +44,7 @@ export function getISRCache(path: string): Response | null {
 	const response = new Response(entry.html, {
 		status: entry.status,
 		headers: {
+			"Content-Type": "text/html; charset=utf-8",
 			...entry.headers,
 			"X-VirexJS-Cache": isStale ? "STALE" : "HIT",
 			"X-VirexJS-Age": String(Math.round((now - entry.createdAt) / 1000)),

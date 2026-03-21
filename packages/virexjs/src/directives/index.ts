@@ -103,13 +103,17 @@ export async function withCache(
 	// No cache — render and store
 	const response = await render();
 	const html = await response.text();
-	setISRCache(path, html, revalidateSeconds, response.status);
+	const hdrs = Object.fromEntries(response.headers.entries());
+	setISRCache(path, html, revalidateSeconds, response.status, {
+		"Content-Type": hdrs["content-type"] ?? "text/html; charset=utf-8",
+	});
 
-	// Return fresh response
+	// Return fresh response with correct Content-Type
 	return new Response(html, {
 		status: response.status,
 		headers: {
-			...Object.fromEntries(response.headers.entries()),
+			"Content-Type": "text/html; charset=utf-8",
+			...hdrs,
 			"X-VirexJS-Cache": "MISS",
 		},
 	});
