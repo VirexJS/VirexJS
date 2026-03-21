@@ -26,7 +26,8 @@
 		"./compat": "./src/compat/index.ts",
 		"./plugin": "./src/plugin/index.ts",
 		"./i18n": "./src/i18n/index.ts",
-		"./testing": "./src/testing/index.ts"
+		"./testing": "./src/testing/index.ts",
+		"./server/api-docs": "./src/server/api-docs.ts"
 	},
 	"bin": {
 		"virex": "src/cli/index.ts"

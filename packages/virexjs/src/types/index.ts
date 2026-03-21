@@ -95,6 +95,8 @@ export type { UseHeadOptions } from "../render/use-head";
 export { useHead } from "../render/use-head";
 export type { ActionContext, ActionHandler } from "../server/action";
 export { actionJson, actionRedirect, defineAction, parseFormData } from "../server/action";
+export type { APIDocs, APIEndpoint } from "../server/api-docs";
+export { generateAPIDocs, renderAPIDocsHTML } from "../server/api-docs";
 export { bodyLimit } from "../server/body-limit";
 export type { Cache } from "../server/cache";
 export { createCache } from "../server/cache";
