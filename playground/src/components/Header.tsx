@@ -13,6 +13,7 @@ export default function Header() {
 		{ href: "/db-demo", label: "Database" },
 		{ href: "/realtime", label: "Realtime" },
 		{ href: "/i18n-demo", label: "i18n" },
+		{ href: "/admin", label: "Admin" },
 	];
 
 	return (
