@@ -23,7 +23,8 @@
     "./config/defaults": "./src/config/defaults.ts",
     "./compat/react": "./src/compat/react.ts",
     "./compat": "./src/compat/index.ts",
-    "./plugin": "./src/plugin/index.ts"
+    "./plugin": "./src/plugin/index.ts",
+    "./i18n": "./src/i18n/index.ts"
   },
   "bin": {
     "virex": "src/cli/index.ts"

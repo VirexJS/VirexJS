@@ -78,7 +78,11 @@ export type { MiddlewareContext, MiddlewareNext, MiddlewareFn } from "../server/
 export type { VirexConfig } from "../config/types";
 export type { MetaData } from "../render/meta";
 export { Head } from "../render/head";
+export { useHead } from "../render/use-head";
+export type { UseHeadOptions } from "../render/use-head";
 export { ErrorBoundary } from "../render/error-boundary";
 export type { ErrorBoundaryProps } from "../render/error-boundary";
 export { definePlugin } from "../plugin/index";
+export { createI18n, defineTranslations, detectLocale } from "../i18n/index";
+export type { I18n, Translations, LocaleMap } from "../i18n/index";
 export type { VirexPlugin, TransformHTMLContext, BuildResult, ServerInfo } from "../plugin/types";

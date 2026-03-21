@@ -113,5 +113,7 @@ export { registerIsland, clearIslands, getIslandRegistry } from "./jsx";
 export { Head, resetHeadCollector, flushHeadTags } from "./head";
 export { ErrorBoundary } from "./error-boundary";
 export type { ErrorBoundaryProps } from "./error-boundary";
+export { useHead } from "./use-head";
+export type { UseHeadOptions } from "./use-head";
 export type { VNode, VElement } from "./jsx";
 export type { MetaData } from "./meta";

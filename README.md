@@ -28,7 +28,9 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 | **Response Helpers** | Done | `redirect()`, `json()`, `html()`, `notFound()`, `setCookie()`, `parseCookies()` |
 | **Head Component** | Done | Declarative `<Head>` for `<title>`, `<meta>`, `<link>` with deduplication |
 | **Error Boundaries** | Done | `ErrorBoundary` component with fallback UI, `onError` callback |
-| **Tests** | Done | 330 tests across 22 files, 0 failures |
+| **useHead()** | Done | Programmatic head management with SEO, OG, Twitter Card support |
+| **i18n** | Done | `createI18n()`, interpolation, pluralization, `detectLocale()` from Accept-Language |
+| **Tests** | Done | 368 tests across 24 files, 0 failures |
 | **TypeScript** | Done | Strict mode, 0 errors |
 
 ### Roadmap
@@ -45,8 +47,8 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 - [x] Response helpers (`redirect`, `json`, `html`, `setCookie`, `parseCookies`)
 - [x] Head component (declarative `<Head>` with deduplication)
 - [x] Error boundaries (`ErrorBoundary` with fallback + `onError`)
-- [ ] `useHead()` hook for dynamic head management
-- [ ] i18n / locale support
+- [x] `useHead()` hook for programmatic SEO/OG/Twitter head management
+- [x] i18n: `createI18n()`, interpolation, pluralization, `detectLocale()`
 
 ---
 
@@ -351,6 +353,36 @@ export default defineConfig({
 | `buildEnd(result)` | After production build | — |
 | `transformHTML(html, ctx)` | Before sending HTML response | Modified HTML |
 | `middleware()` | Server setup | Middleware function(s) |
+
+## i18n
+
+Built-in internationalization with zero dependencies:
+
+```ts
+import { createI18n, detectLocale, defineTranslations } from "virexjs";
+
+const en = defineTranslations({
+  greeting: "Hello {name}",
+  items: { one: "1 item", other: "{count} items", zero: "No items" },
+  nav: { home: "Home", about: "About" },
+});
+
+const tr = defineTranslations({
+  greeting: "Merhaba {name}",
+  items: { one: "1 öğe", other: "{count} öğe", zero: "Öğe yok" },
+  nav: { home: "Ana Sayfa", about: "Hakkımızda" },
+});
+
+const i18n = createI18n({ defaultLocale: "en", locales: { en, tr } });
+
+// In middleware: detect locale from request
+const locale = detectLocale(request.headers.get("Accept-Language"), i18n.locales, "en");
+const t = i18n.withLocale(locale).t;
+
+t("greeting", { name: "World" });  // "Hello World" or "Merhaba World"
+t("items", { count: 3 });          // "3 items" or "3 öğe"
+t("nav.home");                     // "Home" or "Ana Sayfa"
+```
 
 ## Database
 
