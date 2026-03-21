@@ -1,3 +1,5 @@
+import { dirname, join } from "node:path";
+import { existsSync } from "node:fs";
 import type { MatchResult } from "@virexjs/router";
 import { renderPage } from "../render/index";
 import type { VNode } from "../render/jsx";
@@ -17,6 +19,13 @@ interface APIModule {
 	PATCH?: (ctx: { request: Request; params: Record<string, string> }) => Response | Promise<Response>;
 }
 
+export interface PageRequestOptions {
+	layout?: (props: { children: unknown }) => VNode;
+	cssLinks?: string[];
+	devScript?: string;
+	errorPagePath?: string;
+}
+
 /**
  * Handle a matched page route:
  * 1. Import the page module dynamically
@@ -24,11 +33,12 @@ interface APIModule {
  * 3. Call meta() export (if exists) with { data }
  * 4. Render page component with { data }
  * 5. Return streaming HTML Response
+ * 6. On error: render _error.tsx if available, otherwise fallback
  */
 export async function handlePageRequest(
 	match: MatchResult,
 	request: Request,
-	options?: { layout?: (props: { children: unknown }) => VNode; cssLinks?: string[]; devScript?: string },
+	options?: PageRequestOptions,
 ): Promise<Response> {
 	try {
 		const mod = await import(match.route.filePath!) as PageModule;
@@ -54,9 +64,15 @@ export async function handlePageRequest(
 			metaData = mod.meta({ data, params: match.params });
 		}
 
+		// Auto-detect _layout.tsx in the page's directory or parent directories
+		let layout = options?.layout;
+		if (!layout) {
+			layout = await findLayout(match.route.filePath!);
+		}
+
 		return renderPage({
 			component,
-			layout: options?.layout,
+			layout,
 			data: { data, params: match.params, url: new URL(request.url) },
 			meta: metaData,
 			cssLinks: options?.cssLinks,
@@ -64,6 +80,28 @@ export async function handlePageRequest(
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
+		const stack = error instanceof Error ? error.stack : undefined;
+
+		// Try custom _error.tsx page
+		if (options?.errorPagePath) {
+			try {
+				const errorMod = await import(options.errorPagePath);
+				if (errorMod.default) {
+					const response = renderPage({
+						component: errorMod.default,
+						data: { data: { error: message, stack }, params: {}, url: new URL(request.url) },
+						devScript: options?.devScript,
+					});
+					return new Response(response.body, {
+						status: 500,
+						headers: response.headers,
+					});
+				}
+			} catch {
+				// Fall through to default error page
+			}
+		}
+
 		return new Response(`<h1>500 — Server Error</h1><pre>${escapeForHtml(message)}</pre>`, {
 			status: 500,
 			headers: { "Content-Type": "text/html" },
@@ -102,6 +140,39 @@ export async function handleAPIRequest(
 			{ status: 500, headers: { "Content-Type": "application/json" } },
 		);
 	}
+}
+
+/**
+ * Walk up from a page's directory looking for _layout.tsx.
+ * Stops when it reaches a directory that no longer contains pages or the src root.
+ */
+async function findLayout(
+	pageFilePath: string,
+): Promise<((props: { children: unknown }) => VNode) | undefined> {
+	let dir = dirname(pageFilePath);
+	const maxDepth = 10;
+	let depth = 0;
+
+	while (depth < maxDepth) {
+		const layoutPath = join(dir, "_layout.tsx");
+		if (existsSync(layoutPath)) {
+			try {
+				const mod = await import(layoutPath);
+				if (mod.default) {
+					return mod.default as (props: { children: unknown }) => VNode;
+				}
+			} catch {
+				// Invalid layout file, skip
+			}
+		}
+
+		const parentDir = dirname(dir);
+		if (parentDir === dir) break;
+		dir = parentDir;
+		depth++;
+	}
+
+	return undefined;
 }
 
 function escapeForHtml(str: string): string {

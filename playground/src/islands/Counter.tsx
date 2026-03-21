@@ -2,8 +2,11 @@
 
 /**
  * Interactive counter island component.
- * In Phase 1, this renders as static HTML server-side.
- * Phase 2 will add client-side hydration.
+ * Server-side: renders static HTML with current count.
+ * Client-side: after hydration, buttons become interactive.
+ *
+ * The `onClick` handlers are stripped during server rendering
+ * and re-attached by the hydration runtime on the client.
  */
 export default function Counter(props: { initial?: number }) {
 	const count = props.initial ?? 0;
@@ -12,13 +15,20 @@ export default function Counter(props: { initial?: number }) {
 		<div style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "16px", display: "inline-block" }}>
 			<p style={{ margin: "0 0 8px 0", fontSize: "14px", color: "#666" }}>Island Component</p>
 			<div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-				<button disabled style={{ padding: "4px 12px", cursor: "not-allowed" }}>-</button>
-				<span style={{ fontSize: "24px", fontWeight: "bold" }}>{count}</span>
-				<button disabled style={{ padding: "4px 12px", cursor: "not-allowed" }}>+</button>
+				<button
+					onClick={() => {}}
+					style={{ padding: "4px 12px", fontSize: "16px", cursor: "pointer", border: "1px solid #ccc", borderRadius: "4px", background: "#f9f9f9" }}
+				>
+					-
+				</button>
+				<span style={{ fontSize: "24px", fontWeight: "bold", minWidth: "40px", textAlign: "center" }}>{count}</span>
+				<button
+					onClick={() => {}}
+					style={{ padding: "4px 12px", fontSize: "16px", cursor: "pointer", border: "1px solid #ccc", borderRadius: "4px", background: "#f9f9f9" }}
+				>
+					+
+				</button>
 			</div>
-			<p style={{ margin: "8px 0 0 0", fontSize: "12px", color: "#999" }}>
-				(Interactive in Phase 2)
-			</p>
 		</div>
 	);
 }

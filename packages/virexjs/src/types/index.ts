@@ -27,13 +27,44 @@ export interface APIContext {
 	params: Record<string, string>;
 }
 
+/** Type for loader functions */
+export type LoaderFn<T = Record<string, unknown>> = (ctx: LoaderContext) => T | Promise<T>;
+
+/** Type for API route handlers */
+export type APIHandler = (ctx: APIContext) => Response | Promise<Response>;
+
 /**
  * Helper to define a VirexJS config with type safety.
- * Merges user config with defaults.
  */
 export function defineConfig(config: Partial<VirexConfig>): VirexConfig {
 	return { ...DEFAULT_CONFIG, ...config } as VirexConfig;
 }
 
+/**
+ * Helper to define a type-safe loader function.
+ * Usage:
+ *   export const loader = defineLoader(async (ctx) => {
+ *     return { posts: await getPosts(ctx.params.slug) };
+ *   });
+ */
+export function defineLoader<T extends Record<string, unknown>>(
+	fn: LoaderFn<T>,
+): LoaderFn<T> {
+	return fn;
+}
+
+/**
+ * Helper to define a type-safe API route handler.
+ * Usage:
+ *   export const GET = defineAPIRoute(async (ctx) => {
+ *     return Response.json({ id: ctx.params.id });
+ *   });
+ */
+export function defineAPIRoute(fn: APIHandler): APIHandler {
+	return fn;
+}
+
+export { defineMiddleware } from "../server/middleware";
+export type { MiddlewareContext, MiddlewareNext, MiddlewareFn } from "../server/middleware";
 export type { VirexConfig } from "../config/types";
 export type { MetaData } from "../render/meta";

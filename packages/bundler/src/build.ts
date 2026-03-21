@@ -1,17 +1,26 @@
-import { join, resolve } from "node:path";
-import { readdirSync, statSync, mkdirSync, cpSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { readdirSync, mkdirSync, cpSync, existsSync } from "node:fs";
 import { scanPages } from "@virexjs/router";
+import { parseSegment } from "@virexjs/router";
 import { processCSS } from "./css";
 import { writeBuildManifest } from "./manifest";
 
 /**
+ * Check if a route has dynamic segments (e.g., [slug] or [...rest]).
+ */
+function isDynamicRoute(segments: string[]): boolean {
+	return segments.some((s) => parseSegment(s) !== null);
+}
+
+/**
  * Production build pipeline:
  * 1. Scan all pages (via router scanner)
- * 2. For each page: import → call loader (if static/hybrid) → render → write HTML
- * 3. Collect all CSS imports → concatenate → minify → write to dist/
- * 4. Copy public/ → dist/
- * 5. Generate build manifest
- * 6. Return build stats
+ * 2. For each static page: import → call loader → render → write HTML
+ * 3. Skip dynamic pages (they require runtime params) — log them
+ * 4. Collect all CSS → concatenate → minify → write to dist/
+ * 5. Copy public/ → dist/
+ * 6. Generate build manifest
+ * 7. Return build stats
  */
 export async function buildProduction(options: {
 	srcDir: string;
@@ -37,8 +46,23 @@ export async function buildProduction(options: {
 	// 2. Render pages to HTML
 	let totalSize = 0;
 	const pageNames: string[] = [];
+	const dynamicPages: string[] = [];
+	const skippedPages: string[] = [];
 
 	for (const route of routes) {
+		// Skip special pages (_404, _error, _layout)
+		const fileName = route.segments[route.segments.length - 1] ?? "";
+		if (fileName.startsWith("_")) {
+			skippedPages.push(route.relativePath);
+			continue;
+		}
+
+		// Dynamic routes can't be pre-rendered without params
+		if (isDynamicRoute(route.segments)) {
+			dynamicPages.push(route.relativePath);
+			continue;
+		}
+
 		try {
 			const mod = await import(route.absolutePath);
 			const component = mod.default;
@@ -54,12 +78,29 @@ export async function buildProduction(options: {
 				});
 			}
 
-			// Render using the component — pass PageProps format
+			// Auto-detect _layout.tsx
+			let layout: ((props: { children: unknown }) => unknown) | undefined;
+			const layoutPath = join(dirname(route.absolutePath), "_layout.tsx");
+			if (existsSync(layoutPath)) {
+				try {
+					const layoutMod = await import(layoutPath);
+					layout = layoutMod.default;
+				} catch {
+					// Skip invalid layout
+				}
+			}
+
+			// Render
 			const { renderToString } = await import("virexjs/render/jsx");
 			const { buildDocument, renderMeta } = await import("virexjs/render/index");
 
 			const pageProps = { data, params: {}, url: new URL("http://localhost/") };
-			const vnode = component(pageProps);
+			let vnode = component(pageProps);
+
+			if (layout) {
+				vnode = layout({ children: vnode });
+			}
+
 			const bodyHtml = renderToString(vnode);
 			let headHtml = "";
 			if (mod.meta) {
@@ -73,14 +114,15 @@ export async function buildProduction(options: {
 				? join(outDir, "index.html")
 				: join(outDir, ...route.segments, "index.html");
 
-			const outputDir = outputPath.slice(0, outputPath.lastIndexOf("/") >= 0 ? outputPath.lastIndexOf("/") : outputPath.lastIndexOf("\\"));
+			const outputDir = dirname(outputPath);
 			mkdirSync(outputDir, { recursive: true });
 			await Bun.write(outputPath, fullHtml);
 
 			totalSize += fullHtml.length;
 			pageNames.push(route.relativePath);
 		} catch (error) {
-			console.error(`Failed to build page: ${route.relativePath}`, error);
+			const msg = error instanceof Error ? error.message : String(error);
+			console.error(`Failed to build page: ${route.relativePath}`, msg);
 		}
 	}
 
@@ -113,6 +155,14 @@ export async function buildProduction(options: {
 		assets: {},
 		css: cssResult?.filename,
 	});
+
+	// Log dynamic pages info
+	if (dynamicPages.length > 0) {
+		console.log(`  ℹ ${dynamicPages.length} dynamic route(s) skipped (server-only):`);
+		for (const p of dynamicPages) {
+			console.log(`    → ${p}`);
+		}
+	}
 
 	const time = Math.round(performance.now() - startTime);
 

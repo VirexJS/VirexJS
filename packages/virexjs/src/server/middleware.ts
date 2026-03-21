@@ -8,6 +8,15 @@ export type MiddlewareNext = () => Promise<Response>;
 export type MiddlewareFn = (ctx: MiddlewareContext, next: MiddlewareNext) => Promise<Response | void>;
 
 /**
+ * Helper to define a middleware function with full type inference.
+ * Usage:
+ *   export default defineMiddleware(async (ctx, next) => { ... });
+ */
+export function defineMiddleware(fn: MiddlewareFn): MiddlewareFn {
+	return fn;
+}
+
+/**
  * Run a chain of middleware functions.
  * If any middleware returns a Response, short-circuit.
  * Otherwise, call next() to proceed to the next middleware or final handler.

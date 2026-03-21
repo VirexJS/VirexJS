@@ -14,6 +14,9 @@ switch (command) {
 	case "preview":
 		await import("./preview").then((m) => m.preview(args.slice(1)));
 		break;
+	case "init":
+		await import("./init").then((m) => m.init(args.slice(1)));
+		break;
 	case "--version":
 	case "-v":
 		console.log("virexjs 0.1.0");
@@ -31,6 +34,7 @@ function printHelp(): void {
   Usage: virex <command>
 
   Commands:
+    init      Create a new VirexJS project
     dev       Start development server with HMR
     build     Build for production
     preview   Preview production build locally

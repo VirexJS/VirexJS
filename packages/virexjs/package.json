@@ -7,7 +7,19 @@
   "exports": {
     ".": "./src/types/index.ts",
     "./jsx-runtime": "./jsx-runtime.ts",
-    "./jsx-dev-runtime": "./jsx-dev-runtime.ts"
+    "./jsx-dev-runtime": "./jsx-dev-runtime.ts",
+    "./server": "./src/server/index.ts",
+    "./server/middleware": "./src/server/middleware.ts",
+    "./server/static": "./src/server/static.ts",
+    "./server/handler": "./src/server/handler.ts",
+    "./render": "./src/render/index.ts",
+    "./render/jsx": "./src/render/jsx.ts",
+    "./render/meta": "./src/render/meta.ts",
+    "./render/island-marker": "./src/render/island-marker.ts",
+    "./render/index": "./src/render/index.ts",
+    "./config": "./src/config/index.ts",
+    "./config/types": "./src/config/types.ts",
+    "./config/defaults": "./src/config/defaults.ts"
   },
   "bin": {
     "virex": "src/cli/index.ts"

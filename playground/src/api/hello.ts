@@ -1,7 +1,9 @@
-export function GET() {
-	return Response.json({ message: "Hello from VirexJS!", timestamp: Date.now() });
-}
+import { defineAPIRoute } from "virexjs";
 
-export function POST({ request }: { request: Request }) {
+export const GET = defineAPIRoute(() => {
+	return Response.json({ message: "Hello from VirexJS!", timestamp: Date.now() });
+});
+
+export const POST = defineAPIRoute(({ request }) => {
 	return Response.json({ received: true }, { status: 201 });
-}
+});
