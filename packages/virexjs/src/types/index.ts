@@ -132,12 +132,16 @@ export { rateLimit } from "../server/rate-limit";
 export { requestId } from "../server/request-id";
 export { html, json, notFound, parseCookies, redirect, setCookie, text } from "../server/response";
 export { loadRouteMiddleware } from "../server/route-middleware";
+export type { ScheduledTask, Scheduler } from "../server/scheduler";
+export { createScheduler } from "../server/scheduler";
 export type { SecurityOptions } from "../server/security";
 export { securityHeaders } from "../server/security";
 export type { SessionOptions, SessionStore } from "../server/session";
 export { createMemoryStore, session } from "../server/session";
 export type { SSEController } from "../server/sse";
 export { createSSEStream } from "../server/sse";
+export type { UploadedFile, UploadOptions, UploadResult } from "../server/upload";
+export { parseUpload } from "../server/upload";
 export type { WSConnection, WSRoute } from "../server/ws";
 export { createWSServer, defineWSRoute } from "../server/ws";
 export type {

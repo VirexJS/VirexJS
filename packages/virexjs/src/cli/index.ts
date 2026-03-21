@@ -21,6 +21,9 @@ switch (command) {
 	case "g":
 		await import("./generate").then((m) => m.generate(args.slice(1)));
 		break;
+	case "info":
+		await import("./info").then((m) => m.info(args.slice(1)));
+		break;
 	case "--version":
 	case "-v":
 		console.log("virexjs 0.1.0");
@@ -40,7 +43,8 @@ function printHelp(): void {
     dev       Start development server with HMR
     build     Build for production
     preview   Preview production build
-    generate  Scaffold a page, component, API route, middleware, or island locally
+    generate  Scaffold a page, component, API route, middleware, or island
+    info      Show project information (routes, islands, config)
 
   Options:
     --help    Show this help message
