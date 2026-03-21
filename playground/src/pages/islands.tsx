@@ -3,6 +3,7 @@ import { ErrorBoundary, useHead } from "virexjs";
 import Accordion from "../islands/Accordion";
 import ColorPicker from "../islands/ColorPicker";
 import Counter from "../islands/Counter";
+import LikeButton from "../islands/LikeButton";
 import Tabs from "../islands/Tabs";
 import Timer from "../islands/Timer";
 import TodoList from "../islands/TodoList";
@@ -26,7 +27,7 @@ export default function Islands(_props: PageProps) {
 					client. Only island JavaScript is shipped — the rest of the page is pure HTML.
 				</p>
 				<p style={{ color: "#999", fontSize: "13px", margin: 0 }}>
-					7 islands on this page, each with its own bundle.
+					8 islands on this page, each with its own bundle.
 				</p>
 			</div>
 
@@ -98,6 +99,18 @@ export default function Islands(_props: PageProps) {
 					</p>
 					<ErrorBoundary fallback={(err) => <p style={{ color: "red" }}>{err.message}</p>}>
 						<Accordion />
+					</ErrorBoundary>
+				</section>
+
+				<section>
+					<h2 style={{ fontSize: "18px", margin: "0 0 12px", color: "#333" }}>
+						Like Button <code style={{ fontSize: "12px", color: "#9ca3af" }}>{'"use client"'}</code>
+					</h2>
+					<p style={{ color: "#666", fontSize: "14px", margin: "0 0 12px" }}>
+						Uses the Next.js-compatible {'"use client"'} directive. Toggle like state.
+					</p>
+					<ErrorBoundary fallback={(err) => <p style={{ color: "red" }}>{err.message}</p>}>
+						<LikeButton />
 					</ErrorBoundary>
 				</section>
 			</div>

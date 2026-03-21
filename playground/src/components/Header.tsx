@@ -12,6 +12,7 @@ export default function Header() {
 	const secondaryNav = [
 		{ href: "/about", label: "About" },
 		{ href: "/contact", label: "Contact" },
+		{ href: "/cached", label: "ISR" },
 		{ href: "/api-demo", label: "API" },
 		{ href: "/db-demo", label: "DB" },
 		{ href: "/realtime", label: "RT" },

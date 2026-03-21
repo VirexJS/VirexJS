@@ -86,13 +86,14 @@ virex generate <type> <name>   Scaffold page, component, api, middleware, island
 | [Routing](./docs/routing.md) | Pages, dynamic params, SSG, API routes, form actions |
 | [Middleware & Auth](./docs/middleware.md) | CORS, rate limit, JWT, sessions, route guards |
 | [Configuration](./docs/configuration.md) | Config options, .env files, plugins |
+| [Directives](./docs/directives.md) | "use client", "use server", "use cache", ISR |
 | [API Reference](./docs/api-reference.md) | Complete export list with types |
 
 ## Development
 
 ```bash
 bun install              # Install workspace dependencies
-bun test                 # Run all 804 tests
+bun test                 # Run all 864 tests
 bun run dev              # Start playground (port 3000)
 bun run build            # Build playground for production
 bunx tsc --noEmit        # TypeScript check (strict, 0 errors)
@@ -106,7 +107,7 @@ bunx tsc --noEmit        # TypeScript check (strict, 0 errors)
 | Language | TypeScript 5.x (strict) |
 | Server | Bun.serve() |
 | Database | bun:sqlite |
-| Tests | bun:test (804 tests, 65 files) |
+| Tests | bun:test (864 tests, 71 files) |
 | Linter | Biome |
 
 ## License
