@@ -94,9 +94,12 @@ import Component from "${importPath}";
  * Replaces the static HTML with an interactive version using safe DOM APIs.
  */
 export function mount(container, props) {
-  const state = { ...props };
+  const state = { ...props, count: props.initial ?? props.count ?? 0 };
 
   function rerender() {
+    // Inject state helpers so onClick handlers can trigger updates
+    state._state = state;
+    state._rerender = rerender;
     const vnode = Component(state);
     // Clear existing children safely
     while (container.firstChild) container.removeChild(container.firstChild);

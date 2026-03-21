@@ -2,14 +2,21 @@
 
 /**
  * Interactive counter island component.
- * Server-side: renders static HTML with current count.
- * Client-side: after hydration, buttons become interactive.
  *
- * The `onClick` handlers are stripped during server rendering
- * and re-attached by the hydration runtime on the client.
+ * Server-side: renders static HTML with initial count (onClick stripped).
+ * Client-side: mount() injects _state and _rerender into props.
+ *   onClick handlers mutate state.count and call _rerender() to update DOM.
  */
-export default function Counter(props: { initial?: number }) {
-	const count = props.initial ?? 0;
+
+interface CounterProps {
+	initial?: number;
+	count?: number;
+	_state?: Record<string, unknown>;
+	_rerender?: () => void;
+}
+
+export default function Counter(props: CounterProps) {
+	const count = props.count ?? props.initial ?? 0;
 
 	return (
 		<div
@@ -24,7 +31,12 @@ export default function Counter(props: { initial?: number }) {
 			<div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
 				<button
 					type="button"
-					onClick={() => {}}
+					onClick={() => {
+						if (props._state && props._rerender) {
+							props._state.count = count - 1;
+							props._rerender();
+						}
+					}}
 					style={{
 						padding: "4px 12px",
 						fontSize: "16px",
@@ -37,13 +49,23 @@ export default function Counter(props: { initial?: number }) {
 					-
 				</button>
 				<span
-					style={{ fontSize: "24px", fontWeight: "bold", minWidth: "40px", textAlign: "center" }}
+					style={{
+						fontSize: "24px",
+						fontWeight: "bold",
+						minWidth: "40px",
+						textAlign: "center",
+					}}
 				>
 					{count}
 				</span>
 				<button
 					type="button"
-					onClick={() => {}}
+					onClick={() => {
+						if (props._state && props._rerender) {
+							props._state.count = count + 1;
+							props._rerender();
+						}
+					}}
 					style={{
 						padding: "4px 12px",
 						fontSize: "16px",
