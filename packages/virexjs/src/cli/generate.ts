@@ -128,7 +128,7 @@ function generateMiddleware(cwd: string, name: string): void {
 	const content = `import { defineMiddleware } from "virexjs";
 
 export default defineMiddleware(async (ctx, next) => {
-\t// TODO: Implement ${name} middleware
+\t// Add your ${name} middleware logic here
 \treturn next();
 });
 `;

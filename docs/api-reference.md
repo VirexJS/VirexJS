@@ -33,6 +33,11 @@ All exports available from the `"virexjs"` package.
 | `securityHeaders(options?)` | Security headers (CSP, HSTS, etc.) |
 | `session(options?)` | Cookie-based session middleware |
 | `guard(options)` | Route guard middleware |
+| `csrf(options?)` | CSRF protection middleware |
+| `bodyLimit(options?)` | Request body size limiter |
+| `requestId(options?)` | Unique request ID header |
+| `healthCheck(options?)` | Health check endpoint (/health) |
+| `gracefulShutdown(server, opts?)` | Graceful server shutdown handler |
 
 ## Response Helpers
 
@@ -145,5 +150,6 @@ import type {
   ActionContext, ActionHandler,
   UseHeadOptions, ErrorBoundaryProps,
   StructuredData, ArticleLD, BreadcrumbLD, FAQLD,
+  ShutdownOptions, ShutdownHandle,
 } from "virexjs";
 ```

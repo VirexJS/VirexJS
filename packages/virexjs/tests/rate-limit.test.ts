@@ -12,14 +12,6 @@ function makeCtx(ip?: string): MiddlewareContext {
 	};
 }
 
-async function _runRL(
-	options: Parameters<typeof rateLimit>[0],
-	ctx: MiddlewareContext,
-): Promise<Response> {
-	const mw = rateLimit(options);
-	return runMiddleware([mw], ctx, async () => new Response("ok"));
-}
-
 // ─── Basic rate limiting ────────────────────────────────────────────────────
 
 describe("rateLimit", () => {

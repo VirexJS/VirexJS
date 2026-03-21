@@ -151,3 +151,71 @@ export async function loader(ctx) {
   // ctx.locals.session.destroy() to logout
 }
 ```
+
+## CSRF Protection
+
+```ts
+import { csrf } from "virexjs";
+
+// src/middleware/csrf.ts
+export default csrf();
+
+// Skip CSRF for webhooks
+export default csrf({ ignorePaths: ["/api/webhook"] });
+```
+
+The token is available at `ctx.locals.csrfToken`. Include it in forms:
+```html
+<input type="hidden" name="_csrf" value={ctx.locals.csrfToken} />
+```
+
+## Body Size Limiter
+
+```ts
+import { bodyLimit } from "virexjs";
+
+// Limit to 1MB (default)
+export default bodyLimit();
+
+// Limit to 100KB
+export default bodyLimit({ maxSize: 102_400, message: "Request too large" });
+```
+
+## Health Check
+
+```ts
+import { healthCheck } from "virexjs";
+
+export default healthCheck({
+  path: "/health",
+  checks: {
+    database: async () => { await db.query("SELECT 1"); return true; },
+    cache: () => cache.size >= 0,
+  },
+});
+```
+
+Returns `200 { status: "healthy" }` or `503 { status: "unhealthy" }` with per-check timing.
+
+## Request ID
+
+```ts
+import { requestId } from "virexjs";
+export default requestId();
+// Sets X-Request-ID header and ctx.locals.requestId
+```
+
+## Graceful Shutdown
+
+```ts
+import { gracefulShutdown } from "virexjs";
+
+const { server } = createServer(config);
+gracefulShutdown(server, {
+  timeout: 10_000,
+  onShutdown: async () => {
+    await db.close();
+    console.log("Cleanup complete");
+  },
+});
+```

@@ -55,6 +55,9 @@
 		"directory": "packages/virexjs"
 	},
 	"bugs": "https://github.com/virex-js/virexjs/issues",
+	"engines": {
+		"bun": ">=1.2"
+	},
 	"license": "MIT",
 	"author": "ECOSTACK TECHNOLOGY OÜ",
 	"dependencies": {

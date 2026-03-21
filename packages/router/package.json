@@ -21,6 +21,9 @@
 		"url": "https://github.com/virex-js/virexjs.git",
 		"directory": "packages/router"
 	},
+	"engines": {
+		"bun": ">=1.2"
+	},
 	"license": "MIT",
 	"author": "ECOSTACK TECHNOLOGY OÜ"
 }

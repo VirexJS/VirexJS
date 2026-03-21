@@ -1,6 +1,6 @@
 import { defineAPIRoute, json } from "virexjs";
 
-export const GET = defineAPIRoute(({ params }) => {
+export const GET = defineAPIRoute(() => {
 	return json({ message: "Hello from VirexJS!", timestamp: Date.now() });
 });
 

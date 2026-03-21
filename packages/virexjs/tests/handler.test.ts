@@ -1,12 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { join } from "node:path";
-import { handleAPIRequest } from "../src/server/handler";
-
-const _fixturesDir = join(import.meta.dir, "fixtures");
-
 // Create inline test API modules via temp files
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { handleAPIRequest } from "../src/server/handler";
 
 const testDir = join(tmpdir(), `virex-handler-test-${Date.now()}`);
 

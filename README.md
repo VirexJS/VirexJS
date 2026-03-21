@@ -106,7 +106,7 @@ bunx tsc --noEmit        # TypeScript check (strict, 0 errors)
 | Language | TypeScript 5.x (strict) |
 | Server | Bun.serve() |
 | Database | bun:sqlite |
-| Tests | bun:test (804 tests, 100% coverage) |
+| Tests | bun:test (804 tests, 65 files) |
 | Linter | Biome |
 
 ## License

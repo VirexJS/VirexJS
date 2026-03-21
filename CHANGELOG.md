@@ -74,4 +74,5 @@
 - In-memory TTL cache with maxSize eviction
 - `.env` file loader with mode support and variable expansion
 - Test utilities (renderComponent, createTestRequest, assertHTML)
-- 671 tests, TypeScript strict mode, 0 errors
+- CSRF protection, body size limiter, graceful shutdown
+- 804 tests across 65 files, TypeScript strict mode, 0 errors, Biome lint 0 errors
