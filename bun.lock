@@ -10,6 +10,18 @@
         "typescript": "^5.7.0",
       },
     },
+    "examples/blog": {
+      "name": "virexjs-blog",
+      "version": "1.0.0",
+      "dependencies": {
+        "@virexjs/db": "workspace:*",
+        "virexjs": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "typescript": "^5.7.0",
+      },
+    },
     "packages/bundler": {
       "name": "@virexjs/bundler",
       "version": "0.1.0",
@@ -81,6 +93,8 @@
     "undici-types": ["undici-types@7.18.2", "", {}, "sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w=="],
 
     "virexjs": ["virexjs@workspace:packages/virexjs"],
+
+    "virexjs-blog": ["virexjs-blog@workspace:examples/blog"],
 
     "virexjs-playground": ["virexjs-playground@workspace:playground"],
   }

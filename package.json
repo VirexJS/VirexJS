@@ -3,7 +3,8 @@
 	"private": true,
 	"workspaces": [
 		"packages/*",
-		"playground"
+		"playground",
+		"examples/*"
 	],
 	"scripts": {
 		"dev": "cd playground && bun run ../packages/virexjs/src/cli/index.ts dev",

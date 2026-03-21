@@ -1,0 +1,19 @@
+{
+	"name": "virexjs-blog",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "virex dev",
+		"build": "virex build",
+		"preview": "virex preview"
+	},
+	"dependencies": {
+		"virexjs": "workspace:*",
+		"@virexjs/db": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"typescript": "^5.7.0"
+	}
+}
