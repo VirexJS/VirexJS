@@ -6,6 +6,7 @@ import Default from "../layouts/Default";
 interface HomeData {
 	posts: { slug: string; title: string; excerpt: string }[];
 	serverTime: string;
+	stats: { tests: number; packages: number; islands: number; routes: number };
 }
 
 export async function loader(_ctx: LoaderContext) {
@@ -24,17 +25,25 @@ export async function loader(_ctx: LoaderContext) {
 			},
 		],
 		serverTime: new Date().toLocaleTimeString(),
+		stats: { tests: 804, packages: 4, islands: 7, routes: 13 },
 	};
 }
 
 export default function Home(props: PageProps<HomeData>) {
-	const { posts, serverTime } = props.data;
+	const { posts, serverTime, stats } = props.data;
 
 	const head = useHead({
 		title: "VirexJS — Ship HTML, not JavaScript",
 		description: "A full-stack web framework built on Bun. Zero dependencies.",
 		og: { title: "VirexJS", description: "Ship HTML, not JavaScript.", type: "website" },
 	});
+
+	const statItems = [
+		{ value: String(stats.tests), label: "Tests" },
+		{ value: String(stats.packages), label: "Packages" },
+		{ value: String(stats.islands), label: "Islands" },
+		{ value: "0", label: "Dependencies" },
+	];
 
 	return (
 		<Default>
@@ -43,158 +52,191 @@ export default function Home(props: PageProps<HomeData>) {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 
-			<div style={{ textAlign: "center", padding: "40px 0 24px" }}>
-				<h1 style={{ fontSize: "36px", margin: "0 0 12px", color: "#111" }}>
-					Ship HTML, not JavaScript.
+			{/* Hero */}
+			<div style={{ textAlign: "center", padding: "48px 0 32px" }}>
+				<p
+					style={{
+						display: "inline-block",
+						padding: "4px 12px",
+						background: "#e8f0fe",
+						color: "#0066cc",
+						borderRadius: "16px",
+						fontSize: "13px",
+						fontWeight: "500",
+						marginBottom: "16px",
+					}}
+				>
+					v0.1.0 — Production Ready
+				</p>
+				<h1 style={{ fontSize: "2.5rem", margin: "0 0 12px", lineHeight: "1.1" }}>
+					Ship HTML,
+					<br />
+					not JavaScript.
 				</h1>
 				<p
 					style={{
-						color: "#666",
+						color: "#4b5563",
 						fontSize: "18px",
-						margin: "0 0 24px",
-						maxWidth: "600px",
-						marginLeft: "auto",
-						marginRight: "auto",
+						margin: "0 auto 24px",
+						maxWidth: "520px",
 					}}
 				>
-					VirexJS is a full-stack web framework built on Bun. Zero client-side JS by default,
-					islands architecture, file-based routing, and 800+ tests.
+					A full-stack web framework built on Bun. Islands architecture, file-based routing, zero
+					dependencies.
 				</p>
-				<div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+				<div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
 					<a
 						href="/features"
 						style={{
-							padding: "10px 24px",
+							padding: "12px 28px",
 							background: "#0066cc",
 							color: "#fff",
-							borderRadius: "6px",
-							textDecoration: "none",
-							fontSize: "14px",
-							fontWeight: "500",
+							borderRadius: "8px",
+							fontWeight: "600",
+							fontSize: "15px",
 						}}
 					>
-						View Features
+						Explore Features
 					</a>
 					<a
-						href="/api-demo"
+						href="/islands"
 						style={{
-							padding: "10px 24px",
-							background: "#f0f0f0",
-							color: "#333",
-							borderRadius: "6px",
-							textDecoration: "none",
-							fontSize: "14px",
-							fontWeight: "500",
+							padding: "12px 28px",
+							background: "#f3f4f6",
+							color: "#111",
+							borderRadius: "8px",
+							fontWeight: "600",
+							fontSize: "15px",
 						}}
 					>
-						API Explorer
+						See Islands
 					</a>
 				</div>
-				<p style={{ color: "#999", fontSize: "12px", marginTop: "16px" }}>
-					Server time: {serverTime} (rendered on the server, zero JS)
-				</p>
 			</div>
 
-			<section style={{ marginTop: "16px" }}>
-				<h2 style={{ fontSize: "20px", margin: "0 0 16px" }}>Latest Posts</h2>
-				<ErrorBoundary fallback={(err) => <p style={{ color: "red" }}>Failed: {err.message}</p>}>
-					<div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-						{posts.map((post) => (
-							<a
-								href={`/blog/${post.slug}`}
-								style={{
-									display: "block",
-									padding: "16px",
-									border: "1px solid #eee",
-									borderRadius: "8px",
-									textDecoration: "none",
-									color: "inherit",
-								}}
-							>
-								<strong style={{ fontSize: "16px", color: "#333" }}>{post.title}</strong>
-								<p style={{ color: "#666", margin: "4px 0 0", fontSize: "14px" }}>{post.excerpt}</p>
-							</a>
-						))}
+			{/* Stats */}
+			<div
+				style={{
+					display: "grid",
+					gridTemplateColumns: "repeat(4, 1fr)",
+					gap: "1px",
+					background: "#e5e7eb",
+					borderRadius: "12px",
+					overflow: "hidden",
+					margin: "0 0 40px",
+				}}
+			>
+				{statItems.map((s) => (
+					<div style={{ background: "#fff", padding: "20px", textAlign: "center" }}>
+						<div style={{ fontSize: "28px", fontWeight: "700", color: "#111" }}>{s.value}</div>
+						<div style={{ fontSize: "13px", color: "#9ca3af" }}>{s.label}</div>
 					</div>
+				))}
+			</div>
+
+			{/* Island Demo */}
+			<section
+				style={{
+					padding: "24px",
+					background: "#f9fafb",
+					borderRadius: "12px",
+					border: "1px solid #e5e7eb",
+					marginBottom: "32px",
+				}}
+			>
+				<div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+					<div>
+						<h2 style={{ margin: "0 0 8px" }}>Interactive Island</h2>
+						<p style={{ color: "#4b5563", fontSize: "14px", margin: "0 0 16px" }}>
+							Server-rendered HTML. Client-hydrated JavaScript. Only this component ships JS.
+						</p>
+					</div>
+					<span
+						style={{
+							padding: "4px 10px",
+							background: "#dcfce7",
+							color: "#16a34a",
+							borderRadius: "6px",
+							fontSize: "12px",
+							fontWeight: "600",
+						}}
+					>
+						HYDRATED
+					</span>
+				</div>
+				<ErrorBoundary fallback={(err) => <p style={{ color: "red" }}>{err.message}</p>}>
+					<Counter initial={0} />
 				</ErrorBoundary>
 			</section>
 
-			<section
-				style={{ marginTop: "32px", padding: "24px", background: "#f8f9fa", borderRadius: "8px" }}
-			>
-				<h2 style={{ fontSize: "20px", margin: "0 0 12px" }}>Interactive Island</h2>
-				<p style={{ color: "#666", margin: "0 0 16px", fontSize: "14px" }}>
-					This counter is server-rendered as static HTML, then hydrated on the client. Only this
-					component ships JavaScript — the rest of the page is pure HTML.
-				</p>
-				<Counter initial={0} />
-			</section>
-
-			<section style={{ marginTop: "32px" }}>
-				<h2 style={{ fontSize: "20px", margin: "0 0 16px" }}>Quick Links</h2>
-				<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-					<a
-						href="/features"
-						style={{
-							padding: "12px",
-							border: "1px solid #eee",
-							borderRadius: "8px",
-							textDecoration: "none",
-							color: "#333",
-						}}
-					>
-						<strong>Features</strong>
-						<p style={{ margin: "4px 0 0", color: "#999", fontSize: "13px" }}>
-							12 feature categories
-						</p>
-					</a>
-					<a
-						href="/contact"
-						style={{
-							padding: "12px",
-							border: "1px solid #eee",
-							borderRadius: "8px",
-							textDecoration: "none",
-							color: "#333",
-						}}
-					>
-						<strong>Contact</strong>
-						<p style={{ margin: "4px 0 0", color: "#999", fontSize: "13px" }}>
-							Form validation demo
-						</p>
-					</a>
-					<a
-						href="/i18n-demo"
-						style={{
-							padding: "12px",
-							border: "1px solid #eee",
-							borderRadius: "8px",
-							textDecoration: "none",
-							color: "#333",
-						}}
-					>
-						<strong>i18n Demo</strong>
-						<p style={{ margin: "4px 0 0", color: "#999", fontSize: "13px" }}>
-							Locale detection + plurals
-						</p>
-					</a>
-					<a
-						href="/api-demo"
-						style={{
-							padding: "12px",
-							border: "1px solid #eee",
-							borderRadius: "8px",
-							textDecoration: "none",
-							color: "#333",
-						}}
-					>
-						<strong>API Explorer</strong>
-						<p style={{ margin: "4px 0 0", color: "#999", fontSize: "13px" }}>
-							REST endpoints + curl
-						</p>
-					</a>
+			{/* Blog Posts */}
+			<section style={{ marginBottom: "32px" }}>
+				<h2 style={{ margin: "0 0 16px" }}>Latest Posts</h2>
+				<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+					{posts.map((post) => (
+						<a
+							href={`/blog/${post.slug}`}
+							style={{
+								display: "flex",
+								justifyContent: "space-between",
+								alignItems: "center",
+								padding: "14px 16px",
+								border: "1px solid #e5e7eb",
+								borderRadius: "8px",
+								color: "inherit",
+							}}
+						>
+							<div>
+								<strong style={{ fontSize: "15px" }}>{post.title}</strong>
+								<p style={{ color: "#9ca3af", margin: "2px 0 0", fontSize: "13px" }}>
+									{post.excerpt}
+								</p>
+							</div>
+							<span style={{ color: "#9ca3af", fontSize: "18px" }}>&rarr;</span>
+						</a>
+					))}
 				</div>
 			</section>
+
+			{/* Quick Links */}
+			<section>
+				<h2 style={{ margin: "0 0 16px" }}>Explore</h2>
+				<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+					{[
+						{ href: "/features", title: "Features", desc: "12 categories" },
+						{ href: "/islands", title: "Islands", desc: "7 interactive demos" },
+						{ href: "/contact", title: "Contact", desc: "Form validation" },
+						{ href: "/db-demo", title: "Database", desc: "Live SQLite CRUD" },
+						{ href: "/api-demo", title: "API Explorer", desc: "7 endpoints" },
+						{ href: "/realtime", title: "Realtime", desc: "SSE + WebSocket" },
+					].map((item) => (
+						<a
+							href={item.href}
+							style={{
+								padding: "16px",
+								border: "1px solid #e5e7eb",
+								borderRadius: "8px",
+								color: "inherit",
+							}}
+						>
+							<strong style={{ fontSize: "14px" }}>{item.title}</strong>
+							<p style={{ margin: "4px 0 0", color: "#9ca3af", fontSize: "12px" }}>{item.desc}</p>
+						</a>
+					))}
+				</div>
+			</section>
+
+			{/* Server info */}
+			<p
+				style={{
+					textAlign: "center",
+					color: "#d1d5db",
+					fontSize: "12px",
+					marginTop: "32px",
+				}}
+			>
+				Server rendered at {serverTime} — zero client JavaScript
+			</p>
 		</Default>
 	);
 }

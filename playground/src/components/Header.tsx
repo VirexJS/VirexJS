@@ -1,68 +1,76 @@
 /** Server-only header with navigation */
 export default function Header() {
-	const linkStyle = { textDecoration: "none", color: "#555", fontSize: "14px" };
+	const link = { textDecoration: "none", color: "#4b5563", fontSize: "14px" };
+
+	const navItems = [
+		{ href: "/", label: "Home" },
+		{ href: "/about", label: "About" },
+		{ href: "/features", label: "Features" },
+		{ href: "/islands", label: "Islands" },
+		{ href: "/blog", label: "Blog" },
+		{ href: "/contact", label: "Contact" },
+		{ href: "/api-demo", label: "API" },
+		{ href: "/db-demo", label: "Database" },
+		{ href: "/realtime", label: "Realtime" },
+		{ href: "/i18n-demo", label: "i18n" },
+	];
 
 	return (
-		<header
-			style={{
-				borderBottom: "2px solid #f0f0f0",
-				padding: "12px 0",
-				background: "#fafafa",
-			}}
-		>
+		<header style={{ borderBottom: "1px solid #e5e7eb", background: "#fff" }}>
 			<nav
 				style={{
 					display: "flex",
 					alignItems: "center",
-					gap: "20px",
+					gap: "6px",
 					maxWidth: "900px",
 					margin: "0 auto",
-					padding: "0 16px",
+					padding: "10px 16px",
 					flexWrap: "wrap",
 				}}
 			>
 				<a
 					href="/"
 					style={{
-						fontWeight: "bold",
-						fontSize: "18px",
+						fontWeight: "700",
+						fontSize: "17px",
 						textDecoration: "none",
 						color: "#111",
 						marginRight: "auto",
+						display: "flex",
+						alignItems: "center",
+						gap: "6px",
 					}}
 				>
+					<span
+						style={{
+							background: "#0066cc",
+							color: "#fff",
+							width: "24px",
+							height: "24px",
+							borderRadius: "6px",
+							display: "inline-flex",
+							alignItems: "center",
+							justifyContent: "center",
+							fontSize: "13px",
+							fontWeight: "800",
+						}}
+					>
+						V
+					</span>
 					VirexJS
 				</a>
-				<a href="/" style={linkStyle}>
-					Home
-				</a>
-				<a href="/about" style={linkStyle}>
-					About
-				</a>
-				<a href="/blog" style={linkStyle}>
-					Blog
-				</a>
-				<a href="/features" style={linkStyle}>
-					Features
-				</a>
-				<a href="/contact" style={linkStyle}>
-					Contact
-				</a>
-				<a href="/i18n-demo" style={linkStyle}>
-					i18n
-				</a>
-				<a href="/api-demo" style={linkStyle}>
-					API
-				</a>
-				<a href="/db-demo" style={linkStyle}>
-					DB
-				</a>
-				<a href="/islands" style={linkStyle}>
-					Islands
-				</a>
-				<a href="/realtime" style={linkStyle}>
-					Realtime
-				</a>
+				{navItems.map((item) => (
+					<a
+						href={item.href}
+						style={{
+							...link,
+							padding: "4px 10px",
+							borderRadius: "6px",
+						}}
+					>
+						{item.label}
+					</a>
+				))}
 			</nav>
 		</header>
 	);
