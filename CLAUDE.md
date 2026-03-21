@@ -1,19 +1,19 @@
 # VirexJS — Claude Code Instructions
 
 ## Project Overview
-VirexJS is a next-generation web framework built on Bun runtime. Ships HTML, not JavaScript. Zero external npm dependencies.
+VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not JavaScript. Zero external npm dependencies. 671 tests, TypeScript strict with 0 errors.
 
 ## Architecture
 - **Monorepo** with Bun workspaces: `packages/*` and `playground`
-- **virexjs** — Core: CLI, server, JSX renderer, config system
+- **virexjs** — Core: CLI, server, JSX renderer, config, middleware, auth, validation, i18n, plugins
 - **@virexjs/router** — File-based routing: scanner, trie, matcher, params
-- **@virexjs/bundler** — Dev mode, HMR WebSocket, island extraction, production build, CSS
-- **@virexjs/db** — bun:sqlite typed CRUD query builder
+- **@virexjs/bundler** — Dev mode, HMR, island bundling, SSG, CSS engine, HTML minifier
+- **@virexjs/db** — bun:sqlite typed CRUD query builder + migrations
 
 ## Commands
 ```bash
 bun install             # Install workspace dependencies
-bun test                # Run all 553 tests
+bun test                # Run all 671 tests
 bun run dev             # Start playground dev server (port 3000)
 bun run build           # Build playground for production
 bunx tsc --noEmit       # TypeScript check (must pass with 0 errors)
@@ -23,8 +23,9 @@ bun test packages/router/   # Test specific package
 ## CLI Commands
 - `virex init <name>` — Scaffold new project
 - `virex dev` — Dev server with HMR
-- `virex build` — Production build (static pages only, dynamic routes skipped)
+- `virex build` — Production build (SSG)
 - `virex preview` — Preview production build
+- `virex generate <type> <name>` — Scaffold page, component, api, middleware, island
 
 ## Code Conventions
 - TypeScript strict mode, no `any`
@@ -38,46 +39,54 @@ bun test packages/router/   # Test specific package
 - `src/pages/` — File-based routing
 - `[slug]` — Dynamic param, `[...rest]` — Catch-all
 - `(group)` — Route group (no URL segment)
-- `_404.tsx` — Custom 404 page
-- `_error.tsx` — Custom error page
-- `_layout.tsx` — Auto-wrap layout (per-directory)
+- `_404.tsx` — Custom 404, `_error.tsx` — Custom error, `_layout.tsx` — Layout
 - `src/islands/` — Island components (or `// "use island"` directive)
 - `src/api/` — API routes (`GET`, `POST`, `PUT`, `DELETE` exports)
 - `src/middleware/` — Auto-loaded middleware functions
 
-## Type Helpers
+## Exports (from "virexjs")
 ```ts
-import { defineConfig, defineLoader, defineAPIRoute, defineMiddleware, definePlugin } from "virexjs";
-import { Head, useHead, ErrorBoundary } from "virexjs";
-import { cors, rateLimit, securityHeaders, createLogger, createCache } from "virexjs";
-import { redirect, json, html, notFound, setCookie, parseCookies } from "virexjs";
-import { createI18n, defineTranslations, detectLocale } from "virexjs";
-import { loadEnv } from "virexjs";
-import { renderComponent, createTestRequest, assertHTML } from "virexjs/testing";
+// Core
+defineConfig, defineLoader, defineAPIRoute, defineMiddleware, definePlugin, defineAction
+// Rendering
+Head, useHead, ErrorBoundary, JsonLd, createBreadcrumbs, createFAQ
+// Server & Middleware
+cors, rateLimit, securityHeaders, session, guard, createCache, createLogger
+// Response
+redirect, json, html, notFound, text, setCookie, parseCookies, actionRedirect, actionJson, parseFormData
+// Auth
+createJWT, verifyJWT, decodeJWT, JWTError
+// Validation
+validate, parseBody, string, number, boolean
+// i18n
+createI18n, defineTranslations, detectLocale
+// Config
+loadEnv, parseEnvFile
+// Real-time
+defineWSRoute, createWSServer, createSSEStream
+// Testing (from "virexjs/testing")
+renderComponent, createTestRequest, createTestLoaderContext, createTestMiddlewareContext, assertHTML
 ```
-
-## Server Features
-- Streaming HTML (head-first TTFB)
-- Gzip compression (auto for Accept-Encoding: gzip)
-- ETag + 304 Not Modified for static files
-- X-Response-Time header
-- Trailing slash redirect (301)
-- basePath support
-- Middleware chain with short-circuit
-- Island markers in HTML output
-- Plugin system with lifecycle hooks
-- CORS, rate limiting, security headers middleware
-- In-memory cache with TTL
 
 ## Key Files
 - JSX runtime: `packages/virexjs/src/render/jsx.ts`
 - Head component: `packages/virexjs/src/render/head.ts`
-- Error boundary: `packages/virexjs/src/render/error-boundary.ts`
 - Server entry: `packages/virexjs/src/server/index.ts`
 - Router matcher: `packages/router/src/matcher.ts`
 - Plugin system: `packages/virexjs/src/plugin/`
+- Auth (JWT/guards): `packages/virexjs/src/auth/`
+- Validation: `packages/virexjs/src/validation/index.ts`
 - i18n: `packages/virexjs/src/i18n/index.ts`
 - Config types: `packages/virexjs/src/config/types.ts`
 - Public types: `packages/virexjs/src/types/index.ts`
 - CLI entry: `packages/virexjs/src/cli/index.ts`
 - Test utilities: `packages/virexjs/src/testing/index.ts`
+- DB migrations: `packages/db/src/migrate.ts`
+
+## Documentation
+See `docs/` directory for detailed guides:
+- `docs/getting-started.md` — Quick start
+- `docs/routing.md` — Pages, API routes, SSG, form actions
+- `docs/middleware.md` — CORS, rate limit, JWT, sessions, guards
+- `docs/configuration.md` — Config, .env, plugins
+- `docs/api-reference.md` — Complete export reference
