@@ -37,7 +37,8 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 | **Security Headers** | Done | Helmet-like middleware: CSP, HSTS, X-Frame-Options, Referrer-Policy |
 | **Cache** | Done | In-memory TTL cache with maxSize eviction, typed API |
 | **HTML Minifier** | Done | Comment removal, whitespace collapse, attribute optimization |
-| **Tests** | Done | 528 tests across 37 files, 0 failures |
+| **Test Utilities** | Done | `renderComponent`, `createTestRequest`, `assertHTML` helpers |
+| **Tests** | Done | 553 tests across 38 files, 0 failures |
 | **TypeScript** | Done | Strict mode, 0 errors |
 
 ### Roadmap
@@ -457,6 +458,28 @@ virex build           Build for production (static pages only)
 virex preview         Preview production build locally
 virex --help          Show help
 virex --version       Show version
+```
+
+## Testing
+
+Test helpers for VirexJS applications:
+
+```ts
+import { renderComponent, createTestRequest, createTestLoaderContext, assertHTML } from "virexjs/testing";
+
+// Render a component
+const { html, head } = renderComponent(MyPage, { data: { title: "Test" } });
+expect(html).toContain("Test");
+
+// Test a loader
+const ctx = createTestLoaderContext({ slug: "hello" });
+const data = await loader(ctx);
+expect(data.title).toBe("Hello");
+
+// HTML assertions
+assertHTML(html).contains("h1", "Hello");
+assertHTML(html).hasAttribute("a", "href", "/about");
+assertHTML(html).notContains("script");
 ```
 
 ## Tech Stack
