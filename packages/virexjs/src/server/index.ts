@@ -48,9 +48,17 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 			srcDir,
 			outDir,
 			minify: false,
-		}).catch((err) => {
-			console.error("Failed to bundle islands:", err);
-		});
+		})
+			.then((result) => {
+				if (result.bundles.size > 0) {
+					console.log(
+						`  Islands: ${result.bundles.size} bundled (${(result.totalSize / 1024).toFixed(1)} KB)`,
+					);
+				}
+			})
+			.catch((err) => {
+				console.error("  Failed to bundle islands:", err);
+			});
 	}
 
 	// Combine dev script with hydration script
@@ -131,7 +139,7 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 
 		// 2. Built assets from /_virex/
 		if (pathname.startsWith("/_virex/")) {
-			const assetPath = pathname.slice(8);
+			const assetPath = pathname.slice(1); // keep "_virex/..." prefix
 			const assetResponse = await serveBuiltAsset(assetPath, outDir);
 			if (assetResponse) {
 				return addTimingHeader(assetResponse, startTime);

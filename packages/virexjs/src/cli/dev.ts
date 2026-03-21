@@ -47,16 +47,20 @@ export async function dev(args: string[]): Promise<void> {
 		}
 	}
 
-	// Start HTTP server (retry on port conflict)
+	// Start HTTP server (auto-find available port)
 	let routeCount = 0;
 	for (let attempt = 0; attempt < 10; attempt++) {
 		try {
 			const result = createServer(config, { devScript });
 			routeCount = result.routeCount;
 			break;
-		} catch {
-			if (attempt === 9) {
-				console.error(`  Error: Could not start server on port ${config.port}.`);
+		} catch (err) {
+			const isPortInUse =
+				err instanceof Error && "code" in err && (err as { code: string }).code === "EADDRINUSE";
+			if (!isPortInUse || attempt === 9) {
+				console.error(
+					`  Error: Could not start server — ${err instanceof Error ? err.message : err}`,
+				);
 				process.exit(1);
 			}
 			config.port++;

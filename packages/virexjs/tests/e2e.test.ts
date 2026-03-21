@@ -34,7 +34,11 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-	serverProc?.kill();
+	try {
+		serverProc?.kill(9);
+	} catch {
+		// Already dead
+	}
 });
 
 describe("E2E: dev server", () => {

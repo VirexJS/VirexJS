@@ -47,7 +47,7 @@ export async function bundleIslands(options: {
 				outdir: islandsOutDir,
 				minify,
 				target: "browser",
-				naming: `${name}.[hash].js`,
+				naming: `${name}.js`,
 			});
 
 			if (result.success && result.outputs.length > 0) {
