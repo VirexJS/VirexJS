@@ -57,6 +57,9 @@ export default function Header() {
 				<a href="/db-demo" style={linkStyle}>
 					DB
 				</a>
+				<a href="/islands" style={linkStyle}>
+					Islands
+				</a>
 				<a href="/realtime" style={linkStyle}>
 					Realtime
 				</a>
