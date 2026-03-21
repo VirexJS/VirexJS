@@ -26,7 +26,9 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 | **React Compat** | Done | `createElement`, hooks (SSR stubs), `createContext`/`useContext`, `memo`, `forwardRef`, `Children` |
 | **Plugin System** | Done | `definePlugin()`, lifecycle hooks, `transformHTML`, middleware injection |
 | **Response Helpers** | Done | `redirect()`, `json()`, `html()`, `notFound()`, `setCookie()`, `parseCookies()` |
-| **Tests** | Done | 296 tests across 20 files, 0 failures |
+| **Head Component** | Done | Declarative `<Head>` for `<title>`, `<meta>`, `<link>` with deduplication |
+| **Error Boundaries** | Done | `ErrorBoundary` component with fallback UI, `onError` callback |
+| **Tests** | Done | 330 tests across 22 files, 0 failures |
 | **TypeScript** | Done | Strict mode, 0 errors |
 
 ### Roadmap
@@ -41,8 +43,10 @@ A next-generation web framework built on [Bun](https://bun.sh) runtime. Zero cli
 - [x] React compatibility shim (`virexjs/compat/react`)
 - [x] Plugin system (`definePlugin`, lifecycle hooks)
 - [x] Response helpers (`redirect`, `json`, `html`, `setCookie`, `parseCookies`)
-- [ ] Head component (programmatic `<head>` management)
-- [ ] Error boundaries
+- [x] Head component (declarative `<Head>` with deduplication)
+- [x] Error boundaries (`ErrorBoundary` with fallback + `onError`)
+- [ ] `useHead()` hook for dynamic head management
+- [ ] i18n / locale support
 
 ---
 
@@ -236,6 +240,48 @@ Output HTML includes hydration markers:
 ```
 
 > Client-side hydration is Phase 2. In Phase 1, islands render as static HTML with markers.
+
+## Head Component
+
+Inject `<head>` tags from anywhere in your component tree:
+
+```tsx
+import { Head } from "virexjs";
+
+export default function BlogPost(props: PageProps<{ title: string }>) {
+  return (
+    <>
+      <Head>
+        <title>{props.data.title}</title>
+        <meta name="description" content="Blog post" />
+        <link rel="stylesheet" href="/blog.css" />
+      </Head>
+      <article>...</article>
+    </>
+  );
+}
+```
+
+Tags are automatically deduplicated — later `<title>` overrides earlier, `<meta>` deduped by `name`/`property`.
+
+## Error Boundaries
+
+Catch rendering errors with fallback UI:
+
+```tsx
+import { ErrorBoundary } from "virexjs";
+
+export default function App() {
+  return (
+    <ErrorBoundary
+      fallback={(err) => <p>Something went wrong: {err.message}</p>}
+      onError={(err) => console.error("Render error:", err)}
+    >
+      <RiskyComponent />
+    </ErrorBoundary>
+  );
+}
+```
 
 ## Configuration
 

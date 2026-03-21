@@ -75,7 +75,8 @@ const BOOLEAN_ATTRS = new Set([
  * - Fragment → just return children
  */
 export function h(
-	type: string | symbol | ((props: Record<string, unknown>) => VNode),
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	type: string | symbol | ((props: any) => VNode),
 	props: Record<string, unknown> | null,
 	...children: unknown[]
 ): VNode {
@@ -134,6 +135,11 @@ export function renderToString(node: VNode): string {
 	}
 
 	const { type, props } = node;
+
+	// Handle pre-rendered raw HTML (from ErrorBoundary)
+	if (type === "__vrx_raw__") {
+		return props.html as string;
+	}
 
 	// Handle context provider (inserted by compat/react createContext)
 	if (type === "__vrx_context__") {

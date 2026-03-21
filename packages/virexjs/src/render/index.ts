@@ -1,5 +1,6 @@
 import { renderToString, h } from "./jsx";
 import { renderMeta, type MetaData } from "./meta";
+import { resetHeadCollector, flushHeadTags } from "./head";
 import type { VNode } from "./jsx";
 
 /**
@@ -20,6 +21,9 @@ export function renderPage(options: {
 }): Response {
 	const { component, layout, data = {}, meta, cssLinks = [], devScript } = options;
 
+	// Reset head collector before rendering
+	resetHeadCollector();
+
 	// Render page component
 	let pageVNode: VNode = component(data);
 
@@ -29,7 +33,11 @@ export function renderPage(options: {
 	}
 
 	const bodyHtml = renderToString(pageVNode);
-	const headHtml = meta ? renderMeta(meta) : "";
+
+	// Collect head tags from <Head> components + meta() export
+	const metaHtml = meta ? renderMeta(meta) : "";
+	const headComponentHtml = flushHeadTags();
+	const headHtml = [metaHtml, headComponentHtml].filter(Boolean).join("\n    ");
 
 	const cssLinkTags = cssLinks
 		.map((href) => `<link rel="stylesheet" href="${href}">`)
@@ -102,5 +110,8 @@ export function buildDocument(options: {
 
 export { renderToString, h, renderMeta };
 export { registerIsland, clearIslands, getIslandRegistry } from "./jsx";
+export { Head, resetHeadCollector, flushHeadTags } from "./head";
+export { ErrorBoundary } from "./error-boundary";
+export type { ErrorBoundaryProps } from "./error-boundary";
 export type { VNode, VElement } from "./jsx";
 export type { MetaData } from "./meta";

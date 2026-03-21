@@ -77,5 +77,8 @@ export { redirect, json, html, notFound, text, setCookie, parseCookies } from ".
 export type { MiddlewareContext, MiddlewareNext, MiddlewareFn } from "../server/middleware";
 export type { VirexConfig } from "../config/types";
 export type { MetaData } from "../render/meta";
+export { Head } from "../render/head";
+export { ErrorBoundary } from "../render/error-boundary";
+export type { ErrorBoundaryProps } from "../render/error-boundary";
 export { definePlugin } from "../plugin/index";
 export type { VirexPlugin, TransformHTMLContext, BuildResult, ServerInfo } from "../plugin/types";
