@@ -205,6 +205,67 @@ export default requestId();
 // Sets X-Request-ID header and ctx.locals.requestId
 ```
 
+## Compression (v0.2)
+
+Gzip responses for bandwidth savings:
+
+```ts
+import { compress, compressionMiddleware } from "virexjs";
+
+// As middleware (auto-gzip all text responses)
+// src/middleware/compress.ts
+export default compressionMiddleware();
+
+// Per-route
+export async function GET(ctx) {
+  const data = await fetchLargeDataset();
+  return compress(ctx.request, Response.json(data));
+}
+```
+
+Smart: skips small responses (<1KB), non-text types, and non-200 status codes.
+
+## ETag Caching (v0.2)
+
+Automatic 304 Not Modified for bandwidth savings:
+
+```ts
+import { withETag, etagMiddleware } from "virexjs";
+
+// As middleware (auto-ETag all GET responses)
+// src/middleware/etag.ts
+export default etagMiddleware();
+
+// Per-route
+export async function GET(ctx) {
+  const data = await db.select("posts").all();
+  return withETag(ctx.request, Response.json(data));
+}
+```
+
+## Per-Route Middleware (v0.2)
+
+Place `_middleware.ts` in any page directory:
+
+```ts
+// src/pages/admin/_middleware.ts
+import { defineMiddleware, redirect } from "virexjs";
+
+export default defineMiddleware(async (ctx, next) => {
+  if (!ctx.locals.user?.isAdmin) {
+    return redirect("/login");
+  }
+  return next();
+});
+```
+
+Middleware stacks: parent `_middleware.ts` runs before child.
+
+```
+src/pages/_middleware.ts        → runs for ALL pages
+src/pages/admin/_middleware.ts  → runs for /admin/* only
+```
+
 ## Graceful Shutdown
 
 ```ts

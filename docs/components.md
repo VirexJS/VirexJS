@@ -103,6 +103,34 @@ import { JsonLd, createFAQ } from "virexjs";
 ])} />
 ```
 
+## `<Preload>` (v0.2)
+
+Preload critical resources for faster page load:
+
+```tsx
+import { Preload, Preconnect, DNSPrefetch } from "virexjs";
+
+<Head>
+  {/* Preload fonts (crossorigin added automatically) */}
+  <Preload href="/fonts/inter.woff2" as="font" type="font/woff2" />
+
+  {/* Preload hero image */}
+  <Preload href="/hero.jpg" as="image" />
+
+  {/* Preload critical CSS */}
+  <Preload href="/critical.css" as="style" />
+
+  {/* Responsive preload */}
+  <Preload href="/mobile.css" as="style" media="(max-width: 768px)" />
+
+  {/* Preconnect to third-party origins */}
+  <Preconnect href="https://fonts.gstatic.com" crossorigin />
+
+  {/* DNS prefetch for CDN */}
+  <DNSPrefetch href="https://cdn.example.com" />
+</Head>
+```
+
 ## `useHead()`
 
 Programmatic head management:

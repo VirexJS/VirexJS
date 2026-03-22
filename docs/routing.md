@@ -50,8 +50,10 @@ export default function BlogPost(props: PageProps<{ post: Post }>) {
 | File | Purpose |
 |------|---------|
 | `_layout.tsx` | Wraps all pages in the same directory |
-| `_404.tsx` | Custom 404 page |
+| `_loading.tsx` | Loading shell for async streaming (v0.2) |
 | `_error.tsx` | Custom error page |
+| `_404.tsx` | Custom 404 page |
+| `_middleware.ts` | Per-route middleware (v0.2) |
 
 ## Static Site Generation (SSG)
 
@@ -118,3 +120,53 @@ export const action = defineAction(async ({ request }) => {
   return actionRedirect("/thank-you");
 });
 ```
+
+## Parallel Data Loading (v0.2)
+
+Dashboard pages often need data from multiple sources. Load them concurrently:
+
+```tsx
+import { defineParallelLoader } from "virexjs";
+import type { PageProps } from "virexjs";
+
+export const loader = defineParallelLoader({
+  user:    (ctx) => db.select("users").where({ id: ctx.params.id }),
+  posts:   (ctx) => db.select("posts").where({ authorId: ctx.params.id }),
+  stats:   () => fetch("/api/stats").then(r => r.json()),
+  notifications: () => getNotifications(),
+});
+
+export default function Dashboard(props: PageProps) {
+  const { user, posts, stats, notifications } = props.data;
+  // All 4 sources loaded in parallel — no sequential waterfall
+}
+```
+
+For fault-tolerant loading (failed sources return `null`):
+
+```tsx
+export const loader = defineParallelLoader({
+  user:  (ctx) => db.findOne({ id: ctx.params.id }),
+  stats: () => fetch("/api/stats").then(r => r.json()),
+}, { settled: true });
+```
+
+## Async Streaming (v0.2)
+
+When a page has an async loader and a `_loading.tsx` file exists, VirexJS sends the loading shell instantly while data loads:
+
+```tsx
+// src/pages/_loading.tsx
+export default function Loading() {
+  return <div class="spinner">Loading...</div>;
+}
+
+// src/pages/dashboard.tsx
+export async function loader(ctx) {
+  // This might take 500ms+ — loading shell shows instantly
+  const data = await slowDatabaseQuery();
+  return data;
+}
+```
+
+The browser sees the loading UI immediately (fast TTFB), then the real content swaps in when data is ready. No client JavaScript required.
