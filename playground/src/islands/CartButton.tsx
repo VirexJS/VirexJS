@@ -1,25 +1,25 @@
 "use island";
-import { useIslandState, useSharedStore } from "virexjs";
+import { useSharedStore } from "virexjs";
 
 /**
  * CartButton — adds items to a shared cart.
  * Demonstrates cross-island communication via useSharedStore.
- * When this button is clicked, CartBadge and CartSummary update automatically.
  */
 export default function CartButton(props: { item?: string; price?: number }) {
-	const { get } = useIslandState(props, { item: "Widget", price: 29 });
+	const item = props.item ?? "Widget";
+	const price = props.price ?? 29;
 	const store = useSharedStore(props);
 	store.subscribe("cart.items");
 
 	const items = (store.get("cart.items") ?? []) as Array<{ name: string; price: number }>;
-	const item = get("item") as string;
-	const price = get("price") as number;
 
 	return (
 		<button
 			type="button"
 			onClick={() => {
-				store.set("cart.items", [...items, { name: item, price }]);
+				// Read CURRENT items from store at click time
+				const current = (store.get("cart.items") ?? []) as Array<{ name: string; price: number }>;
+				store.set("cart.items", [...current, { name: item, price }]);
 			}}
 			style={{
 				padding: "10px 20px",

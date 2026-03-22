@@ -197,11 +197,22 @@ export function onIslandEvent(event: string, cb: (d: unknown) => void): () => vo
   return () => { _events[event] = (_events[event] || []).filter((f: (d: unknown) => void) => f !== cb); };
 }
 
+// Track which rerender functions are already subscribed to which keys
+const _subbed = (globalThis as any).__vrx_subbed ??= new Set<string>();
+
 export function useSharedStore(props: any) {
+  const rerender = props._rerender;
   return {
     get: getShared,
     set: setShared,
-    subscribe: (key: string) => { if (props._rerender) subscribeShared(key, props._rerender); },
+    subscribe: (key: string) => {
+      if (!rerender) return;
+      // Dedup: don't subscribe same rerender to same key twice
+      const id = key + ":" + (rerender.__vrx_id ??= Math.random().toString(36).slice(2));
+      if (_subbed.has(id)) return;
+      _subbed.add(id);
+      subscribeShared(key, rerender);
+    },
     emit: emitIslandEvent,
     on: onIslandEvent,
   };
@@ -269,7 +280,7 @@ export function mount(container, props) {
     if (dom) container.appendChild(dom);
   }
 
-  Component(state);
+  // Single initial render (not two)
   rerender();
 }
 
