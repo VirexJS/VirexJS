@@ -17,10 +17,12 @@ COPY --from=deps /app/node_modules node_modules
 COPY . .
 RUN cd playground && bun run ../packages/virexjs/src/cli/index.ts build
 
-# Production
+# Production — serve playground as virexjs.com
 FROM base AS runner
 ENV NODE_ENV=production
+ENV PORT=3000
 COPY --from=builder /app .
 
 EXPOSE 3000
-CMD ["bun", "run", "playground/../packages/virexjs/src/cli/index.ts", "preview"]
+WORKDIR /app/playground
+CMD ["bun", "run", "../packages/virexjs/src/cli/index.ts", "dev", "--no-hmr"]
