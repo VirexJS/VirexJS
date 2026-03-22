@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { extractIslands } from "./island-extract";
 
@@ -10,8 +10,11 @@ export interface IslandBundleResult {
 /**
  * Bundle all island components for client-side hydration.
  *
- * Strategy: bundle all islands together with shared chunks so the
- * JSX runtime (h, Fragment, etc.) is only included ONCE.
+ * Strategy:
+ * 1. Write a browser-side shim for virexjs (useIslandState, useSharedStore, etc.)
+ * 2. Rewrite island sources to import from shim instead of "virexjs"
+ * 3. Bundle all islands together with shared chunks
+ * 4. Clean up temp files
  */
 export async function bundleIslands(options: {
 	srcDir: string;
@@ -31,94 +34,68 @@ export async function bundleIslands(options: {
 	const bundles = new Map<string, string>();
 	let totalSize = 0;
 
+	// Write browser-side virexjs shim
+	const shimPath = join(islandsOutDir, "_vrx_shim.ts");
+	writeFileSync(shimPath, generateBrowserShim());
+
 	// Create entry files for all islands
 	const entrypoints: string[] = [];
-	const entryPaths: string[] = [];
+	const tempFiles: string[] = [shimPath];
 
 	for (const [name, island] of islands) {
-		const entryContent = generateClientEntry(island.filePath, name);
+		// Rewrite island source to use browser shim instead of "virexjs"
+		const clientSource = rewriteForBrowser(island.filePath, shimPath);
+		const clientPath = join(islandsOutDir, `_src_${name}.tsx`);
+		writeFileSync(clientPath, clientSource);
+		tempFiles.push(clientPath);
+
+		// Create mount entry
+		const entryContent = generateClientEntry(clientPath);
 		const entryPath = join(islandsOutDir, `_entry_${name}.tsx`);
 		writeFileSync(entryPath, entryContent);
 		entrypoints.push(entryPath);
-		entryPaths.push(entryPath);
+		tempFiles.push(entryPath);
 	}
 
 	try {
-		// Bundle ALL islands together — Bun will create shared chunks
+		// Bundle ALL islands together — Bun creates shared chunks
 		const result = await Bun.build({
 			entrypoints,
 			outdir: islandsOutDir,
 			minify,
 			target: "browser",
-			splitting: true, // Enable code splitting for shared runtime
+			splitting: true,
 			naming: "[name].js",
 		});
 
 		if (result.success) {
 			for (const output of result.outputs) {
-				const name = output.path
+				const fileName = output.path
 					.replace(/\\/g, "/")
 					.split("/")
 					.pop()
 					?.replace("_entry_", "")
 					.replace(".js", "");
-				if (name && islands.has(name)) {
-					bundles.set(name, output.path);
+				if (fileName && islands.has(fileName)) {
+					bundles.set(fileName, output.path);
 					totalSize += output.size ?? 0;
 				} else {
-					// Shared chunk
 					totalSize += output.size ?? 0;
 				}
 			}
 		} else {
-			// Fallback: bundle individually if splitting fails
-			for (const [name, island] of islands) {
-				try {
-					const entryPath = join(islandsOutDir, `_entry_${name}.tsx`);
-					const r = await Bun.build({
-						entrypoints: [entryPath],
-						outdir: islandsOutDir,
-						minify,
-						target: "browser",
-						naming: `${name}.js`,
-					});
-					if (r.success && r.outputs[0]) {
-						bundles.set(name, r.outputs[0].path);
-						totalSize += r.outputs[0].size ?? 0;
-					}
-				} catch {
-					console.error(`Failed to bundle island "${name}"`);
-				}
-			}
+			// Fallback: bundle individually
+			await bundleIndividually(entrypoints, islandsOutDir, minify, islands, bundles);
 		}
-	} catch (error) {
+	} catch {
 		console.error("Island bundle failed, trying individual bundles...");
-		// Fallback to individual bundling
-		for (const [name, island] of islands) {
-			try {
-				const entryPath = join(islandsOutDir, `_entry_${name}.tsx`);
-				const r = await Bun.build({
-					entrypoints: [entryPath],
-					outdir: islandsOutDir,
-					minify,
-					target: "browser",
-					naming: `${name}.js`,
-				});
-				if (r.success && r.outputs[0]) {
-					bundles.set(name, r.outputs[0].path);
-					totalSize += r.outputs[0].size ?? 0;
-				}
-			} catch {
-				// Skip failed island
-			}
-		}
+		await bundleIndividually(entrypoints, islandsOutDir, minify, islands, bundles);
 	}
 
-	// Clean up entry files
-	for (const entryPath of entryPaths) {
+	// Clean up temp files
+	for (const f of tempFiles) {
 		try {
-			const { unlinkSync } = await import("node:fs");
-			unlinkSync(entryPath);
+			unlinkSync(f);
 		} catch {
 			// Ignore
 		}
@@ -127,12 +104,153 @@ export async function bundleIslands(options: {
 	return { bundles, totalSize };
 }
 
+async function bundleIndividually(
+	entrypoints: string[],
+	outDir: string,
+	minify: boolean,
+	islands: Map<string, { filePath: string; name: string }>,
+	bundles: Map<string, string>,
+): Promise<void> {
+	for (const entryPath of entrypoints) {
+		const name = entryPath
+			.replace(/\\/g, "/")
+			.split("/")
+			.pop()
+			?.replace("_entry_", "")
+			.replace(".tsx", "");
+		if (!name || !islands.has(name)) continue;
+
+		try {
+			const r = await Bun.build({
+				entrypoints: [entryPath],
+				outdir: outDir,
+				minify,
+				target: "browser",
+				naming: `${name}.js`,
+			});
+			if (r.success && r.outputs[0]) {
+				bundles.set(name, r.outputs[0].path);
+			}
+		} catch {
+			console.error(`Failed to bundle island "${name}"`);
+		}
+	}
+}
+
+/**
+ * Rewrite an island source file for browser bundling.
+ * Replaces `import { ... } from "virexjs"` with import from browser shim.
+ */
+function rewriteForBrowser(filePath: string, shimPath: string): string {
+	let source: string;
+	try {
+		source = readFileSync(filePath, "utf-8");
+	} catch {
+		return "";
+	}
+
+	const shimImport = shimPath.replace(/\\/g, "/");
+
+	// Replace all imports from "virexjs" with imports from the shim
+	return source.replace(
+		/import\s*\{([^}]+)\}\s*from\s*["']virexjs["'];?/g,
+		`import { $1 } from "${shimImport}";`,
+	);
+}
+
+/**
+ * Generate browser-side shim for virexjs island APIs.
+ * Provides useIslandState, useSharedStore, and shared store functions.
+ */
+function generateBrowserShim(): string {
+	return `
+// VirexJS Browser Shim — client-side implementations of island APIs
+// This replaces server-side "virexjs" imports in bundled islands
+
+// ─── Shared Store (cross-island communication) ─────────────────
+const _state = (globalThis as any).__vrx_store ??= {};
+const _subs = (globalThis as any).__vrx_subs ??= {} as Record<string, Array<() => void>>;
+const _events = (globalThis as any).__vrx_events ??= {} as Record<string, Array<(d: any) => void>>;
+
+export function getShared(key: string): unknown { return _state[key]; }
+
+export function setShared(key: string, value: unknown): void {
+  _state[key] = value;
+  const subs = _subs[key];
+  if (subs) for (const fn of subs) fn();
+}
+
+export function subscribeShared(key: string, cb: () => void): () => void {
+  if (!_subs[key]) _subs[key] = [];
+  _subs[key].push(cb);
+  return () => { _subs[key] = (_subs[key] || []).filter((f: () => void) => f !== cb); };
+}
+
+export function emitIslandEvent(event: string, data?: unknown): void {
+  const listeners = _events[event];
+  if (listeners) for (const fn of listeners) fn(data);
+}
+
+export function onIslandEvent(event: string, cb: (d: unknown) => void): () => void {
+  if (!_events[event]) _events[event] = [];
+  _events[event].push(cb);
+  return () => { _events[event] = (_events[event] || []).filter((f: (d: unknown) => void) => f !== cb); };
+}
+
+export function useSharedStore(props: any) {
+  return {
+    get: getShared,
+    set: setShared,
+    subscribe: (key: string) => { if (props._rerender) subscribeShared(key, props._rerender); },
+    emit: emitIslandEvent,
+    on: onIslandEvent,
+  };
+}
+
+// ─── Island State (per-island local state) ─────────────────────
+export function useIslandState(props: any, defaults: Record<string, unknown>) {
+  const hydrated = !!props._state;
+  if (props._state) {
+    for (const key of Object.keys(defaults)) {
+      if (props._state[key] === undefined) {
+        props._state[key] = props[key] !== undefined ? props[key] : defaults[key];
+      }
+    }
+  }
+  return {
+    get(key: string) {
+      if (props._state && key in props._state) return props._state[key];
+      return props[key] !== undefined ? props[key] : defaults[key];
+    },
+    set(key: string, value: unknown) {
+      if (props._state && props._rerender) { props._state[key] = value; props._rerender(); }
+    },
+    update(partial: Record<string, unknown>) {
+      if (props._state && props._rerender) { Object.assign(props._state, partial); props._rerender(); }
+    },
+    hydrated,
+  };
+}
+
+// ─── No-op exports for other virexjs imports ───────────────────
+export function useHead() { return null; }
+export function Head() { return null; }
+export function Link(props: any) { return props; }
+export function Image(props: any) { return props; }
+export function ErrorBoundary(props: any) { return props.children; }
+export function defineConfig(c: any) { return c; }
+export function defineLoader(f: any) { return f; }
+export function defineAPIRoute(f: any) { return f; }
+export function defineMiddleware(f: any) { return f; }
+`;
+}
+
 /**
  * Generate client-side mount entry for an island.
  * Uses safe DOM APIs (no innerHTML).
  */
-function generateClientEntry(filePath: string, name: string): string {
-	const importPath = filePath.replace(/\\/g, "/");
+function generateClientEntry(componentPath: string): string {
+	const importPath = componentPath.replace(/\\/g, "/");
 
 	return `
 import Component from "${importPath}";
