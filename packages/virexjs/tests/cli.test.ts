@@ -36,12 +36,12 @@ function runCLIIn(cwd: string, ...args: string[]): { stdout: string; exitCode: n
 describe("CLI — version", () => {
 	test("--version prints version", () => {
 		const result = runCLI("--version");
-		expect(result.trim()).toBe("virexjs 0.1.0");
+		expect(result.trim()).toBe("virexjs 0.2.0");
 	});
 
 	test("-v prints version", () => {
 		const result = runCLI("-v");
-		expect(result.trim()).toBe("virexjs 0.1.0");
+		expect(result.trim()).toBe("virexjs 0.2.0");
 	});
 });
 
@@ -58,6 +58,11 @@ describe("CLI — help", () => {
 	test("no args shows help", () => {
 		const result = runCLI();
 		expect(result).toContain("Usage:");
+	});
+
+	test("help includes check command", () => {
+		const result = runCLI("--help");
+		expect(result).toContain("check");
 	});
 });
 

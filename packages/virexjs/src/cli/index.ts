@@ -27,9 +27,12 @@ switch (command) {
 	case "info":
 		await import("./info").then((m) => m.info(args.slice(1)));
 		break;
+	case "check":
+		await import("./check").then((m) => m.check(args.slice(1)));
+		break;
 	case "--version":
 	case "-v":
-		console.log("virexjs 0.1.0");
+		console.log("virexjs 0.2.0");
 		break;
 	default:
 		printHelp();
@@ -37,7 +40,7 @@ switch (command) {
 
 function printHelp(): void {
 	console.log(`
-  ⚡ VirexJS v0.1.0 — Ship HTML, not JavaScript.
+  ⚡ VirexJS v0.2.0 — Ship HTML, not JavaScript.
 
   Usage: virex <command>
 
@@ -48,6 +51,7 @@ function printHelp(): void {
     build     Build for production
     preview   Preview production build
     generate  Scaffold a page, component, API route, middleware, or island
+    check     Validate project structure, TypeScript, and config
     info      Show project information (routes, islands, config)
 
   Options:
