@@ -160,7 +160,11 @@ export default function Islands(_props: PageProps) {
 						immediate)
 					</li>
 					<li>
-						State is managed via <code>_state</code> + <code>_rerender</code> pattern
+						State via <code>useIslandState()</code> — local state per island
+					</li>
+					<li>
+						Cross-island state via <code>useSharedStore()</code> —{" "}
+						<a href="/shared-islands" style={{ color: "#2563eb" }}>see demo</a>
 					</li>
 				</ol>
 			</div>

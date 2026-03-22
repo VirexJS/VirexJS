@@ -106,6 +106,11 @@ Validators are chainable: `.required()`, `.min(n)`, `.max(n)`, `.pattern(regex)`
 |--------|-------------|
 | `generateOGImage(options)` | Dynamic SVG social preview image |
 | `renderPageAsync(options)` | Suspense-like async streaming render (v0.2) |
+| `useSharedStore(props)` | Cross-island shared state + event bus (v0.2) |
+| `getShared(key)` | Read from shared island store (v0.2) |
+| `setShared(key, value)` | Write to shared store, notify subscribers (v0.2) |
+| `emitIslandEvent(event, data?)` | Send event to other islands (v0.2) |
+| `onIslandEvent(event, callback)` | Listen for island events (v0.2) |
 | `cachedRender(key, props, render)` | Memoized component render |
 | `useIslandState(props, defaults)` | Island state management hook (v0.2) |
 | `route(pattern, params)` | Type-safe URL builder |

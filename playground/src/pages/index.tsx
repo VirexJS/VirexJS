@@ -216,6 +216,7 @@ export default function Home(props: PageProps<HomeData>) {
 						{ href: "/realtime", title: "Realtime", desc: "SSE + WebSocket" },
 						{ href: "/dashboard", title: "Dashboard", desc: "Parallel loaders" },
 						{ href: "/streaming", title: "Streaming", desc: "Async streaming" },
+						{ href: "/shared-islands", title: "Shared", desc: "Cross-island state" },
 					].map((item) => (
 						<a
 							href={item.href}

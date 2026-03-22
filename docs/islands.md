@@ -166,9 +166,81 @@ export default function Greeting(props: Record<string, unknown>) {
 }
 ```
 
+## Cross-Island Communication (v0.2)
+
+Islands are independent by default. Use `useSharedStore()` to share state:
+
+```tsx
+// CartButton island — PRODUCER
+"use island";
+import { useSharedStore } from "virexjs";
+
+export default function CartButton(props) {
+  const store = useSharedStore(props);
+  store.subscribe("cart.items");
+  const items = (store.get("cart.items") ?? []) as Array<{ name: string }>;
+
+  return (
+    <button onClick={() => store.set("cart.items", [...items, { name: "Widget" }])}>
+      Add to Cart ({items.length})
+    </button>
+  );
+}
+```
+
+```tsx
+// CartBadge island — CONSUMER (different island!)
+"use island";
+import { useSharedStore } from "virexjs";
+
+export default function CartBadge(props) {
+  const store = useSharedStore(props);
+  store.subscribe("cart.items"); // re-renders when cart changes
+
+  const count = ((store.get("cart.items") ?? []) as Array<unknown>).length;
+  return <span>Cart: {count}</span>;
+}
+```
+
+Both islands react to the same `"cart.items"` key. When CartButton adds an item, CartBadge re-renders automatically.
+
+### Shared Store API
+
+| Method | Description |
+|--------|-------------|
+| `store.get(key)` | Read a shared value |
+| `store.set(key, value)` | Set value — all subscribers re-render |
+| `store.subscribe(key)` | Re-render this island when key changes |
+| `store.emit(event, data?)` | Send event to other islands |
+| `store.on(event, callback)` | Listen for events from other islands |
+
+### Event Bus
+
+For fire-and-forget messaging between islands:
+
+```tsx
+// Sidebar island
+const store = useSharedStore(props);
+store.emit("sidebar:toggle", { open: true });
+
+// Header island
+const store = useSharedStore(props);
+store.on("sidebar:toggle", (data) => {
+  // Update header when sidebar toggles
+});
+```
+
+### When to use what?
+
+| Pattern | Use case |
+|---------|----------|
+| `useIslandState()` | Local state (counter, toggle, form) |
+| `useSharedStore()` | Cross-island state (cart, theme, auth) |
+| `store.emit/on` | One-time events (notifications, navigation) |
+
 ## Examples
 
-The playground includes 10 islands:
+The playground includes 13 islands:
 
 | Island | State | Description |
 |--------|-------|-------------|
@@ -182,3 +254,6 @@ The playground includes 10 islands:
 | LikeButton | `liked: boolean, count: number` | Like with animation |
 | SearchBox | `query: string` | Live search filter |
 | Modal | `isOpen: boolean` | Modal dialog |
+| CartButton | shared `cart.items` | Cross-island producer |
+| CartBadge | shared `cart.items` | Cross-island consumer |
+| CartSummary | shared `cart.items` | Cross-island list + total |

@@ -5,6 +5,7 @@ export default function Header() {
 	const mainNav = [
 		{ href: "/features", label: "Features" },
 		{ href: "/islands", label: "Islands" },
+		{ href: "/shared-islands", label: "Shared" },
 		{ href: "/blog", label: "Blog" },
 		{ href: "/dashboard", label: "Dashboard" },
 		{ href: "/admin", label: "Admin" },
