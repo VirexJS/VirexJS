@@ -1,4 +1,5 @@
 import { Head } from "virexjs";
+import ThemeToggle from "../islands/ThemeToggle";
 
 const NAV = [
 	{ href: "/", label: "Home" },
@@ -34,6 +35,7 @@ export default function Layout(props: { children: unknown; title?: string }) {
 							</a>
 						))}
 					</div>
+					<ThemeToggle />
 				</div>
 			</nav>
 			<main>{props.children}</main>
