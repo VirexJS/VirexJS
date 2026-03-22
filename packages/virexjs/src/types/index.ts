@@ -118,6 +118,7 @@ export { DNSPrefetch, Preconnect, Preload } from "../render/preload";
 export { renderPageAsync } from "../render/index";
 export { defineParallelLoader } from "../server/parallel-loader";
 export { etagMiddleware, withETag } from "../server/etag";
+export { compress, compressionMiddleware } from "../server/compress";
 export type { ActionContext, ActionHandler } from "../server/action";
 export { actionJson, actionRedirect, defineAction, parseFormData } from "../server/action";
 export type { APIDocs, APIEndpoint } from "../server/api-docs";
