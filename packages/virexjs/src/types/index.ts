@@ -113,6 +113,14 @@ export { Script } from "../render/script";
 export type { UseHeadOptions } from "../render/use-head";
 export { useHead } from "../render/use-head";
 export { useIslandState } from "../render/use-island-state";
+export {
+	emitIslandEvent,
+	getShared,
+	onIslandEvent,
+	setShared,
+	subscribeShared,
+	useSharedStore,
+} from "../render/island-store";
 export type { PreloadProps } from "../render/preload";
 export { DNSPrefetch, Preconnect, Preload } from "../render/preload";
 export { renderPageAsync } from "../render/index";
