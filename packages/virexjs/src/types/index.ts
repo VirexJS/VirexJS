@@ -112,6 +112,7 @@ export type { ScriptProps } from "../render/script";
 export { Script } from "../render/script";
 export type { UseHeadOptions } from "../render/use-head";
 export { useHead } from "../render/use-head";
+export { useIslandState } from "../render/use-island-state";
 export type { ActionContext, ActionHandler } from "../server/action";
 export { actionJson, actionRedirect, defineAction, parseFormData } from "../server/action";
 export type { APIDocs, APIEndpoint } from "../server/api-docs";

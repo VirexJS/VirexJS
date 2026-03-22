@@ -3,18 +3,15 @@ import { join } from "node:path";
 import { extractIslands } from "./island-extract";
 
 export interface IslandBundleResult {
-	/** Island name → output JS file path */
 	bundles: Map<string, string>;
-	/** Total bundle size in bytes */
 	totalSize: number;
 }
 
 /**
  * Bundle all island components for client-side hydration.
- * Each island gets its own small JS file that exports a `mount` function.
  *
- * The mount function receives a container element and props,
- * then takes over the DOM inside that container with interactive behavior.
+ * Strategy: bundle all islands together with shared chunks so the
+ * JSX runtime (h, Fragment, etc.) is only included ONCE.
  */
 export async function bundleIslands(options: {
 	srcDir: string;
@@ -34,42 +31,96 @@ export async function bundleIslands(options: {
 	const bundles = new Map<string, string>();
 	let totalSize = 0;
 
+	// Create entry files for all islands
+	const entrypoints: string[] = [];
+	const entryPaths: string[] = [];
+
 	for (const [name, island] of islands) {
-		try {
-			// Create a client entry that wraps the island with a mount function
-			const entryContent = generateClientEntry(island.filePath, name);
-			const entryPath = join(islandsOutDir, `_entry_${name}.tsx`);
-			writeFileSync(entryPath, entryContent);
+		const entryContent = generateClientEntry(island.filePath, name);
+		const entryPath = join(islandsOutDir, `_entry_${name}.tsx`);
+		writeFileSync(entryPath, entryContent);
+		entrypoints.push(entryPath);
+		entryPaths.push(entryPath);
+	}
 
-			// Bundle with Bun.build()
-			const result = await Bun.build({
-				entrypoints: [entryPath],
-				outdir: islandsOutDir,
-				minify,
-				target: "browser",
-				naming: `${name}.js`,
-			});
+	try {
+		// Bundle ALL islands together — Bun will create shared chunks
+		const result = await Bun.build({
+			entrypoints,
+			outdir: islandsOutDir,
+			minify,
+			target: "browser",
+			splitting: true, // Enable code splitting for shared runtime
+			naming: "[name].js",
+		});
 
-			if (result.success && result.outputs.length > 0) {
-				const output = result.outputs[0];
-				if (!output) continue;
-				const outputPath = output.path;
-				const size = output.size ?? 0;
-
-				bundles.set(name, outputPath);
-				totalSize += size;
+		if (result.success) {
+			for (const output of result.outputs) {
+				const name = output.path
+					.replace(/\\/g, "/")
+					.split("/")
+					.pop()
+					?.replace("_entry_", "")
+					.replace(".js", "");
+				if (name && islands.has(name)) {
+					bundles.set(name, output.path);
+					totalSize += output.size ?? 0;
+				} else {
+					// Shared chunk
+					totalSize += output.size ?? 0;
+				}
 			}
-
-			// Clean up entry file
+		} else {
+			// Fallback: bundle individually if splitting fails
+			for (const [name, island] of islands) {
+				try {
+					const entryPath = join(islandsOutDir, `_entry_${name}.tsx`);
+					const r = await Bun.build({
+						entrypoints: [entryPath],
+						outdir: islandsOutDir,
+						minify,
+						target: "browser",
+						naming: `${name}.js`,
+					});
+					if (r.success && r.outputs[0]) {
+						bundles.set(name, r.outputs[0].path);
+						totalSize += r.outputs[0].size ?? 0;
+					}
+				} catch {
+					console.error(`Failed to bundle island "${name}"`);
+				}
+			}
+		}
+	} catch (error) {
+		console.error("Island bundle failed, trying individual bundles...");
+		// Fallback to individual bundling
+		for (const [name, island] of islands) {
 			try {
-				const { unlinkSync } = await import("node:fs");
-				unlinkSync(entryPath);
+				const entryPath = join(islandsOutDir, `_entry_${name}.tsx`);
+				const r = await Bun.build({
+					entrypoints: [entryPath],
+					outdir: islandsOutDir,
+					minify,
+					target: "browser",
+					naming: `${name}.js`,
+				});
+				if (r.success && r.outputs[0]) {
+					bundles.set(name, r.outputs[0].path);
+					totalSize += r.outputs[0].size ?? 0;
+				}
 			} catch {
-				// Ignore cleanup errors
+				// Skip failed island
 			}
-		} catch (error) {
-			const msg = error instanceof Error ? error.message : String(error);
-			console.error(`Failed to bundle island "${name}": ${msg}`);
+		}
+	}
+
+	// Clean up entry files
+	for (const entryPath of entryPaths) {
+		try {
+			const { unlinkSync } = await import("node:fs");
+			unlinkSync(entryPath);
+		} catch {
+			// Ignore
 		}
 	}
 
@@ -77,11 +128,8 @@ export async function bundleIslands(options: {
 }
 
 /**
- * Generate a client-side entry file for an island component.
- *
- * The generated mount function uses safe DOM APIs (createElement,
- * textContent, setAttribute) instead of innerHTML to prevent XSS.
- * All text content is inserted via textContent which is inherently safe.
+ * Generate client-side mount entry for an island.
+ * Uses safe DOM APIs (no innerHTML).
  */
 function generateClientEntry(filePath: string, name: string): string {
 	const importPath = filePath.replace(/\\/g, "/");
@@ -89,10 +137,6 @@ function generateClientEntry(filePath: string, name: string): string {
 	return `
 import Component from "${importPath}";
 
-/**
- * Mount the ${name} island into a container element.
- * Replaces the static HTML with an interactive version using safe DOM APIs.
- */
 export function mount(container, props) {
   const state = { ...props };
   state._state = state;
@@ -107,8 +151,6 @@ export function mount(container, props) {
     if (dom) container.appendChild(dom);
   }
 
-  // First silent render: lets the component write defaults into state
-  // (components check props.X ?? default and write to _state on first call)
   Component(state);
   rerender();
 }
@@ -140,7 +182,6 @@ function vnodeToDom(node, state, rerender) {
       else children.push(value);
       continue;
     }
-    // Bind event handlers
     if (key.startsWith("on") && typeof value === "function") {
       const event = key.slice(2).toLowerCase();
       el.addEventListener(event, value);

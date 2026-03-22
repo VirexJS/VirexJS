@@ -68,7 +68,9 @@ export function Image(props: ImageProps): VNode {
 
 	// Auto-generate optimized src via image optimizer endpoint
 	const isLocal = src.startsWith("/") && !src.startsWith("//");
-	const optimizedSrc = isLocal ? `/_virex/image?url=${encodeURIComponent(src)}&w=${width}&q=80` : src;
+	const optimizedSrc = isLocal
+		? `/_virex/image?url=${encodeURIComponent(src)}&w=${width}&q=80`
+		: src;
 
 	// Auto-generate responsive srcSet if not provided
 	const autoSrcSet =

@@ -1,26 +1,14 @@
 // "use island"
 
+import { useIslandState } from "virexjs";
+
 /**
- * Interactive counter island component.
- *
- * Server-side: renders static HTML with initial count (onClick stripped).
- * Client-side: mount() injects _state and _rerender into props.
- *   onClick handlers mutate state.count and call _rerender() to update DOM.
+ * Counter island — uses useIslandState() for clean state management.
+ * No more manual _state/_rerender boilerplate.
  */
-
-interface CounterProps {
-	initial?: number;
-	count?: number;
-	_state?: Record<string, unknown>;
-	_rerender?: () => void;
-}
-
-export default function Counter(props: CounterProps) {
-	const count = props.count ?? props.initial ?? 0;
-	// Bootstrap state on first hydration call
-	if (props._state && props._state.count === undefined) {
-		props._state.count = count;
-	}
+export default function Counter(props: { initial?: number }) {
+	const { get, set } = useIslandState(props, { count: props.initial ?? 0 });
+	const count = get("count");
 
 	return (
 		<div
@@ -35,12 +23,7 @@ export default function Counter(props: CounterProps) {
 			<div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
 				<button
 					type="button"
-					onClick={() => {
-						if (props._state && props._rerender) {
-							props._state.count = count - 1;
-							props._rerender();
-						}
-					}}
+					onClick={() => set("count", count - 1)}
 					style={{
 						padding: "4px 12px",
 						fontSize: "16px",
@@ -64,12 +47,7 @@ export default function Counter(props: CounterProps) {
 				</span>
 				<button
 					type="button"
-					onClick={() => {
-						if (props._state && props._rerender) {
-							props._state.count = count + 1;
-							props._rerender();
-						}
-					}}
+					onClick={() => set("count", count + 1)}
 					style={{
 						padding: "4px 12px",
 						fontSize: "16px",
