@@ -49,13 +49,13 @@
 		"server-rendering",
 		"typescript"
 	],
-	"homepage": "https://github.com/virex-js/virexjs",
+	"homepage": "https://github.com/virexjs/virexjs",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/virex-js/virexjs.git",
+		"url": "https://github.com/virexjs/virexjs.git",
 		"directory": "packages/virexjs"
 	},
-	"bugs": "https://github.com/virex-js/virexjs/issues",
+	"bugs": "https://github.com/virexjs/virexjs/issues",
 	"engines": {
 		"bun": ">=1.2"
 	},

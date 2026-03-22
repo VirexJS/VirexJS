@@ -3,7 +3,7 @@
 ## Setup
 
 ```bash
-git clone https://github.com/virex-js/virexjs.git
+git clone https://github.com/virexjs/virexjs.git
 cd virexjs
 bun install
 ```

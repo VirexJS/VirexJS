@@ -15,10 +15,10 @@
 		"bun",
 		"virexjs"
 	],
-	"homepage": "https://github.com/virex-js/virexjs",
+	"homepage": "https://github.com/virexjs/virexjs",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/virex-js/virexjs.git",
+		"url": "https://github.com/virexjs/virexjs.git",
 		"directory": "packages/router"
 	},
 	"engines": {

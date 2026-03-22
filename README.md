@@ -2,9 +2,9 @@
 
 **Ship HTML, not JavaScript.**
 
-[![Tests](https://img.shields.io/badge/tests-952%20passing-brightgreen)](https://github.com/virex-js/virexjs)
-[![TypeScript](https://img.shields.io/badge/typescript-strict-blue)](https://github.com/virex-js/virexjs)
-[![Dependencies](https://img.shields.io/badge/dependencies-0-orange)](https://github.com/virex-js/virexjs)
+[![Tests](https://img.shields.io/badge/tests-952%20passing-brightgreen)](https://github.com/virexjs/virexjs)
+[![TypeScript](https://img.shields.io/badge/typescript-strict-blue)](https://github.com/virexjs/virexjs)
+[![Dependencies](https://img.shields.io/badge/dependencies-0-orange)](https://github.com/virexjs/virexjs)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A full-stack web framework built on [Bun](https://bun.sh). Zero client-side JS by default, islands architecture, file-based routing, and built-in everything — auth, database, validation, i18n, real-time — with zero external dependencies.
