@@ -9,4 +9,5 @@ export { generateHydrationRuntime } from "./hydration-runtime";
 export { bundleIslands, type IslandBundleResult } from "./island-bundle";
 export { extractIslands } from "./island-extract";
 export { type BuildManifest, writeBuildManifest } from "./manifest";
+export { type RobotsConfig, generateRobotsTxt } from "./robots";
 export { generateSitemap } from "./sitemap";

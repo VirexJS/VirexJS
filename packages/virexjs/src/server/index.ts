@@ -8,6 +8,7 @@ import { renderPage } from "../render/index";
 import { registerIsland } from "../render/jsx";
 import { handleAPIRequest, handlePageRequest } from "./handler";
 import { type MiddlewareFn, runMiddleware } from "./middleware";
+import { loadRouteMiddleware } from "./route-middleware";
 import { serveBuiltAsset, serveStatic } from "./static";
 
 /**
@@ -211,14 +212,23 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 				devScript: combinedDevScript || undefined,
 				errorPagePath: hasErrorPage ? customErrorPath : undefined,
 			};
+
+			// Load per-route _middleware.ts files (parent → child order)
+			const routeMiddlewares = pageMatch.route.filePath
+				? await loadRouteMiddleware(pageMatch.route.filePath)
+				: [];
+
+			// Combine global + route middleware
+			const allMiddlewares = [...middlewares, ...routeMiddlewares];
+
 			let res: Response;
-			if (middlewares.length > 0) {
+			if (allMiddlewares.length > 0) {
 				const ctx = {
 					request,
 					params: pageMatch.params,
 					locals: {},
 				};
-				res = await runMiddleware(middlewares, ctx, () =>
+				res = await runMiddleware(allMiddlewares, ctx, () =>
 					handlePageRequest(pageMatch, request, pageOptions),
 				);
 			} else {

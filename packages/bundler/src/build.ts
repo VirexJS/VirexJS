@@ -3,6 +3,8 @@ import { dirname, join } from "node:path";
 import { parseSegment, scanPages } from "@virexjs/router";
 import { processCSS } from "./css";
 import { writeBuildManifest } from "./manifest";
+import type { RobotsConfig } from "./robots";
+import { generateRobotsTxt } from "./robots";
 import { generateSitemap } from "./sitemap";
 
 /**
@@ -28,6 +30,7 @@ export async function buildProduction(options: {
 	publicDir: string;
 	minify: boolean;
 	baseURL?: string;
+	robots?: RobotsConfig;
 }): Promise<{
 	pages: number;
 	assets: number;
@@ -177,9 +180,10 @@ export async function buildProduction(options: {
 		css: cssResult?.filename,
 	});
 
-	// 6. Generate sitemap.xml
+	// 6. Generate sitemap.xml + robots.txt
 	if (options.baseURL) {
 		await generateSitemap({ outDir, baseURL: options.baseURL, pages: pageNames });
+		await generateRobotsTxt({ outDir, baseURL: options.baseURL, config: options.robots });
 	}
 
 	// Log dynamic pages info
