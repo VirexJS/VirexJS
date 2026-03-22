@@ -113,6 +113,8 @@ export { Script } from "../render/script";
 export type { UseHeadOptions } from "../render/use-head";
 export { useHead } from "../render/use-head";
 export { useIslandState } from "../render/use-island-state";
+export type { PreloadProps } from "../render/preload";
+export { DNSPrefetch, Preconnect, Preload } from "../render/preload";
 export { renderPageAsync } from "../render/index";
 export { defineParallelLoader } from "../server/parallel-loader";
 export { etagMiddleware, withETag } from "../server/etag";

@@ -1,4 +1,5 @@
 export { buildProduction } from "./build";
+export { asyncCSSLoader, extractCriticalCSS } from "./critical-css";
 export { processCSS } from "./css";
 export { generateUtilityCSS } from "./css-engine";
 export { startDevMode } from "./dev";
