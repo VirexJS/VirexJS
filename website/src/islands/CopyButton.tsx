@@ -14,22 +14,22 @@ export default function CopyButton(props: { text?: string }) {
 				setTimeout(() => set("copied", false), 2000);
 			}}
 			style={{
-				padding: "10px 20px",
-				background: copied ? "#16a34a" : "#1e293b",
-				color: "#fff",
+				padding: "12px 24px",
+				background: copied ? "rgba(34,197,94,0.15)" : "#3b82f6",
+				color: copied ? "#4ade80" : "#fff",
 				border: "none",
-				borderRadius: "8px",
+				borderRadius: "10px",
 				cursor: "pointer",
 				fontSize: "14px",
 				fontWeight: "600",
-				fontFamily: "monospace",
+				fontFamily: "'JetBrains Mono',monospace",
 				display: "inline-flex",
 				alignItems: "center",
-				gap: "8px",
-				transition: "background 0.2s",
+				gap: "10px",
+				transition: "all 0.2s",
 			}}
 		>
-			{copied ? "Copied!" : "$ bun add virexjs"}
+			{copied ? "Copied!" : `$ ${props.text ?? "bun add virexjs"}`}
 		</button>
 	);
 }
