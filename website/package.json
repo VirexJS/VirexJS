@@ -1,0 +1,15 @@
+{
+	"name": "virexjs-website",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "bun run ../packages/virexjs/src/cli/index.ts dev",
+		"build": "bun run ../packages/virexjs/src/cli/index.ts build"
+	},
+	"dependencies": {
+		"virexjs": "workspace:*",
+		"@virexjs/router": "workspace:*",
+		"@virexjs/bundler": "workspace:*"
+	}
+}
