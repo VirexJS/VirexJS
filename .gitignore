@@ -1,20 +1,72 @@
-node_modules
-dist
-.out
-*.log
+# Dependencies
+node_modules/
 
-# Environment
+# Build output
+dist/
+.out/
+*.tsbuildinfo
+
+# VirexJS build artifacts
+.cache/
+.image-cache/
+_virex/
+_entry_*.js
+_src_*.tsx
+_vrx_shim*
+*.__client__.tsx
+_tailwind_input.css
+
+# Environment variables
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.test
 
-# IDE
-.vscode/settings.json
-.idea
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Test artifacts
+__test_*
+coverage/
+.nyc_output/
+
+# Bun
+bun.lockb
 
 # OS
 .DS_Store
 Thumbs.db
+Desktop.ini
+ehthumbs.db
 
-# Bun
-bun.lockb
+# IDE
+.vscode/settings.json
+.vscode/*.code-workspace
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# Package managers
+.npm/
+.yarn/
+.pnpm-store/
+
+# Misc
+*.tgz
+*.tar.gz
+.cache/
+tmp/
+temp/
