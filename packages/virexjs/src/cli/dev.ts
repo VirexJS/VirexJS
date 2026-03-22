@@ -86,7 +86,7 @@ export async function dev(args: string[]): Promise<void> {
 	const networkIP = getNetworkIP();
 
 	console.log(`
-  ⚡ VirexJS v0.1.0
+  ⚡ VirexJS v0.2.0
 
   → Local:   http://localhost:${config.port}${networkIP ? `\n  → Network: http://${networkIP}:${config.port}` : ""}${hmrServer ? `\n  → HMR:     ws://localhost:${hmrPort}` : ""}
 

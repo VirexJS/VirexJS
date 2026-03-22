@@ -6,6 +6,7 @@ export default function Header() {
 		{ href: "/features", label: "Features" },
 		{ href: "/islands", label: "Islands" },
 		{ href: "/blog", label: "Blog" },
+		{ href: "/dashboard", label: "Dashboard" },
 		{ href: "/admin", label: "Admin" },
 	];
 

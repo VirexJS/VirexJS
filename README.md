@@ -2,7 +2,7 @@
 
 **Ship HTML, not JavaScript.**
 
-[![Tests](https://img.shields.io/badge/tests-952%20passing-brightgreen)](https://github.com/virexjs/virexjs)
+[![Tests](https://img.shields.io/badge/tests-987%20passing-brightgreen)](https://github.com/virexjs/virexjs)
 [![TypeScript](https://img.shields.io/badge/typescript-strict-blue)](https://github.com/virexjs/virexjs)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-orange)](https://github.com/virexjs/virexjs)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -48,6 +48,7 @@ Open [http://localhost:3000](http://localhost:3000)
 - **Zero JS by default** — Pages ship pure server-rendered HTML
 - **Islands architecture** — Only interactive components ship JavaScript
 - **Streaming HTML** — Head-first TTFB with `ReadableStream`
+- **Async Streaming** — Suspense-like: loading shell + data swap (v0.2)
 - **Nested layouts** — `_layout.tsx` per directory with cascade
 - **Loading states** — `_loading.tsx` streaming shell
 - **Error boundaries** — `_error.tsx` per route segment
@@ -58,6 +59,8 @@ Open [http://localhost:3000](http://localhost:3000)
 - **ISR** — `"use cache"` + `export const revalidate = 60`
 - **API routes** — `GET`, `POST`, `PUT`, `DELETE`, `PATCH` exports
 - **Redirects & rewrites** — config-based URL management
+- **Parallel loaders** — `defineParallelLoader()` for concurrent data fetching (v0.2)
+- **ETag caching** — automatic 304 responses with `withETag()` (v0.2)
 
 ### Built-in
 - **Auth** — JWT (HS256), cookie sessions, route guards, CSRF
@@ -69,7 +72,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Components
 - `<Link>` with native browser prefetch
-- `<Image>` with native lazy loading
+- `<Image>` with lazy loading + sharp resize/WebP/blur placeholder (v0.2)
 - `<Head>` with tag deduplication
 - `<Script>` with loading strategies
 - `<Font>` with preload + font-display
@@ -79,7 +82,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### DX
 - **Directives** — `"use client"`, `"use server"`, `"use cache"`
-- **HMR** — WebSocket hot reload with dev widget
+- **HMR** — WebSocket hot reload with heartbeat, debounce, dev widget (v0.2)
 - **CLI** — `create`, `init`, `dev`, `build`, `preview`, `generate`, `info`
 - **Test utilities** — `renderComponent`, `assertHTML`
 - **Auto API docs** — generated endpoint documentation
@@ -210,7 +213,7 @@ Production build:            60ms (19 pages)
 
 ```bash
 bun install              # Install workspace dependencies
-bun test                 # Run 952 tests (85 files)
+bun test                 # Run 987 tests
 bun run dev              # Start playground (port 3000)
 bun run build            # Build for production
 bunx tsc --noEmit        # TypeScript check (strict, 0 errors)
@@ -223,8 +226,8 @@ bun benchmark.ts         # Performance benchmark
 VirexJS is not a drop-in Next.js replacement. Be aware of these differences:
 
 - **No React ecosystem** — Can't use React component libraries (MUI, shadcn, etc.)
-- **No Suspense streaming** — Body streams in chunks but not component-level like React Suspense
-- **Image optimization is basic** — Native lazy loading only, no resize/WebP/blur placeholder
+- **Streaming is page-level** — Suspense-like async streaming but not per-component like React
+- **Image optimization requires sharp** — Install `sharp` for resize/WebP/AVIF (optional peer dep)
 - **Hot reload is page-level** — File changes reload the page, not individual components
 - **ISR cache is local** — Disk + memory backed, not CDN-integrated like Vercel
 - **Young project** — Not battle-tested at scale like Next.js (5+ years, millions of users)
@@ -242,7 +245,7 @@ VirexJS is not a drop-in Next.js replacement. Be aware of these differences:
 | **Language** | TypeScript 5.x (strict) |
 | **Server** | Bun.serve() |
 | **Database** | bun:sqlite |
-| **Tests** | bun:test — 952 tests |
+| **Tests** | bun:test — 987 tests |
 | **Linter** | Biome 2.x |
 | **CI** | GitHub Actions |
 | **Deploy** | Docker / Fly.io / Railway |

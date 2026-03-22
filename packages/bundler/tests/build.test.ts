@@ -94,7 +94,7 @@ describe("buildProduction", () => {
 		expect(existsSync(manifestPath)).toBe(true);
 
 		const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
-		expect(manifest.version).toBe("0.1.0");
+		expect(manifest.version).toBe("0.2.0");
 		expect(Array.isArray(manifest.pages)).toBe(true);
 	});
 

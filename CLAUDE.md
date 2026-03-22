@@ -1,7 +1,7 @@
 # VirexJS — Claude Code Instructions
 
 ## Project Overview
-VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not JavaScript. Zero external npm dependencies. 886 tests across 74 files, TypeScript strict with 0 errors, Biome lint 0 errors.
+VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not JavaScript. Zero external npm dependencies. 987 tests, TypeScript strict with 0 errors, Biome lint 0 errors.
 
 ## Architecture
 - **Monorepo** with Bun workspaces: `packages/*` and `playground`
@@ -78,6 +78,8 @@ createI18n, defineTranslations, detectLocale
 loadEnv, parseEnvFile, defineEnv
 // Real-time
 defineWSRoute, createWSServer, createSSEStream
+// Async Streaming (v0.2)
+renderPageAsync, defineParallelLoader, withETag, etagMiddleware, useIslandState
 // Testing (from "virexjs/testing")
 renderComponent, createTestRequest, createTestLoaderContext, createTestMiddlewareContext, assertHTML
 ```
@@ -102,6 +104,13 @@ renderComponent, createTestRequest, createTestLoaderContext, createTestMiddlewar
 - OG image: `packages/virexjs/src/render/og-image.ts`
 - API docs: `packages/virexjs/src/server/api-docs.ts`
 - Benchmark: `benchmark.ts`
+- Async streaming: `packages/virexjs/src/render/index.ts` (renderPageAsync)
+- Parallel loader: `packages/virexjs/src/server/parallel-loader.ts`
+- ETag caching: `packages/virexjs/src/server/etag.ts`
+- Image optimizer: `packages/virexjs/src/server/image-optimizer.ts`
+- Island state hook: `packages/virexjs/src/render/use-island-state.ts`
+- CSS engine: `packages/bundler/src/css-engine.ts`
+- Sitemap generator: `packages/bundler/src/sitemap.ts`
 
 ## Documentation
 See `docs/` directory for detailed guides:

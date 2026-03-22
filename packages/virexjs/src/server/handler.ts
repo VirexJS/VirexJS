@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { MatchResult } from "@virexjs/router";
 import { getRevalidateTime, isCachedPage, withCache } from "../directives/index";
-import { renderPage } from "../render/index";
+import { renderPage, renderPageAsync } from "../render/index";
 import type { VNode } from "../render/jsx";
 import { h, renderToString } from "../render/jsx";
 import type { MetaData } from "../render/meta";
@@ -88,7 +88,51 @@ async function renderPageFull(
 	request: Request,
 	options?: PageRequestOptions,
 ): Promise<Response> {
-	// Run loader
+	// Find _loading.tsx for this route (used as fallback shell)
+	const loadingComponent = await findSpecialFile(match.route.filePath!, "_loading.tsx");
+
+	// Find ALL nested layouts (root → leaf order)
+	const layouts = options?.layout
+		? [options.layout]
+		: await findNestedLayouts(match.route.filePath!);
+
+	// Build layout wrapper function
+	const wrapInLayouts = (inner: VNode): VNode => {
+		let node = inner;
+		for (let i = layouts.length - 1; i >= 0; i--) {
+			const layout = layouts[i]!;
+			node = h(layout, { children: node });
+		}
+		return node;
+	};
+
+	// Async streaming: if page has async loader + loading component,
+	// send loading shell immediately while data loads (Suspense-like)
+	if (mod.loader && loadingComponent) {
+		const dataPromise = Promise.resolve(
+			mod.loader({ params: match.params, request, headers: request.headers }),
+		);
+
+		return renderPageAsync({
+			component: (data) => {
+				const pageVNode = h(mod.default, {
+					data,
+					params: match.params,
+					url: new URL(request.url),
+				});
+				return wrapInLayouts(pageVNode);
+			},
+			dataPromise,
+			metaFn: mod.meta
+				? (data) => mod.meta!({ data, params: match.params })
+				: undefined,
+			cssLinks: options?.cssLinks,
+			devScript: options?.devScript,
+			loadingComponent,
+		});
+	}
+
+	// Sync path: await data, then render
 	let data: Record<string, unknown> = {};
 	if (mod.loader) {
 		data = await mod.loader({
@@ -104,23 +148,10 @@ async function renderPageFull(
 		metaData = mod.meta({ data, params: match.params });
 	}
 
-	// Find ALL nested layouts (root → leaf order)
-	const layouts = options?.layout
-		? [options.layout]
-		: await findNestedLayouts(match.route.filePath!);
-
 	// Build component tree: Layout1 → Layout2 → ... → Page
 	const component = mod.default;
 	let pageVNode: VNode = h(component, { data, params: match.params, url: new URL(request.url) });
-
-	// Wrap in layouts from innermost to outermost
-	for (let i = layouts.length - 1; i >= 0; i--) {
-		const layout = layouts[i]!;
-		pageVNode = h(layout, { children: pageVNode });
-	}
-
-	// Find _loading.tsx for this route (used as fallback shell)
-	const loadingComponent = await findSpecialFile(match.route.filePath!, "_loading.tsx");
+	pageVNode = wrapInLayouts(pageVNode);
 
 	// Render with streaming — send loading shell first if available
 	return renderPageStreaming(pageVNode, metaData, options, loadingComponent);

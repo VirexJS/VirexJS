@@ -25,7 +25,7 @@ export async function loader(_ctx: LoaderContext) {
 			},
 		],
 		serverTime: new Date().toLocaleTimeString(),
-		stats: { tests: 886, packages: 4, islands: 8, routes: 19 },
+		stats: { tests: 987, packages: 4, islands: 10, routes: 22 },
 	};
 }
 
@@ -71,7 +71,7 @@ export default function Home(props: PageProps<HomeData>) {
 						marginBottom: "16px",
 					}}
 				>
-					v0.1.0 — Production Ready
+					v0.2.0 — Async Streaming + Image Optimization
 				</p>
 				<h1 style={{ fontSize: "2.5rem", margin: "0 0 12px", lineHeight: "1.1" }}>
 					Ship HTML,
@@ -214,6 +214,7 @@ export default function Home(props: PageProps<HomeData>) {
 						{ href: "/db-demo", title: "Database", desc: "Live SQLite CRUD" },
 						{ href: "/api-demo", title: "API Explorer", desc: "7 endpoints" },
 						{ href: "/realtime", title: "Realtime", desc: "SSE + WebSocket" },
+						{ href: "/dashboard", title: "Dashboard", desc: "Parallel loaders" },
 					].map((item) => (
 						<a
 							href={item.href}

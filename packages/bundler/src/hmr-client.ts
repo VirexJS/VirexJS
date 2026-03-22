@@ -194,6 +194,7 @@ export function generateHMRClientScript(hmrPort: number): string {
       try { msg = JSON.parse(event.data); } catch(e) { return; }
       switch (msg.type) {
         case "connected": break;
+        case "ping": ws.send(JSON.stringify({type:"pong"})); break;
         case "full-reload": smartReload(); break;
         case "css-update": updateCSS(msg.href); break;
         case "page-update": smartReload(); break;

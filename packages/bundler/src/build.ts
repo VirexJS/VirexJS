@@ -170,7 +170,7 @@ export async function buildProduction(options: {
 
 	// 5. Generate manifest
 	await writeBuildManifest(outDir, {
-		version: "0.1.0",
+		version: "0.2.0",
 		timestamp: Date.now(),
 		pages: pageNames,
 		assets: {},

@@ -142,6 +142,150 @@ export function buildDocument(options: {
 </html>`;
 }
 
+/**
+ * Async streaming render pipeline (Suspense-like):
+ * 1. Send <head> + loading shell immediately (fast TTFB)
+ * 2. Await async data (loader, fetch, DB query)
+ * 3. Stream rendered page and swap out loading shell
+ *
+ * This gives users instant visual feedback while data loads,
+ * similar to React Suspense / Next.js loading.tsx but without client JS.
+ */
+export function renderPageAsync(options: {
+	component: (props: Record<string, unknown>) => VNode;
+	layout?: (props: { children: unknown }) => VNode;
+	dataPromise: Promise<Record<string, unknown>>;
+	meta?: MetaData;
+	/** Resolve meta from data after it arrives (for data-dependent meta) */
+	metaFn?: (data: Record<string, unknown>) => MetaData;
+	cssLinks?: string[];
+	devScript?: string;
+	/** Loading shell shown while data streams in */
+	loadingComponent?: (props: Record<string, unknown>) => VNode;
+	/** Fallback HTML if loadingComponent not provided */
+	loadingFallback?: string;
+}): Response {
+	const {
+		component,
+		layout,
+		dataPromise,
+		meta,
+		metaFn,
+		cssLinks = [],
+		devScript,
+		loadingComponent,
+		loadingFallback = '<div style="display:flex;align-items:center;justify-content:center;min-height:200px"><p>Loading...</p></div>',
+	} = options;
+
+	const encoder = new TextEncoder();
+
+	// Pre-render head (static meta can be resolved without data)
+	const metaHtml = meta ? renderMeta(meta) : "";
+	const cssLinkTags = cssLinks
+		.map((href) => `<link rel="stylesheet" href="${href}">`)
+		.join("\n    ");
+	const devScriptTag = devScript ? `\n    <script>${devScript}</script>` : "";
+
+	// Pre-render loading shell
+	const loadingHtml = loadingComponent
+		? renderToString(loadingComponent({}))
+		: loadingFallback;
+
+	const stream = new ReadableStream({
+		async start(controller) {
+			// 1. Send <head> immediately — browser starts loading CSS/fonts
+			controller.enqueue(
+				encoder.encode(
+					`<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="utf-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1">\n    ${metaHtml}\n    ${cssLinkTags}\n</head>\n<body>\n`,
+				),
+			);
+
+			// 2. Send loading shell — user sees feedback instantly
+			controller.enqueue(
+				encoder.encode(`<div id="vrx-shell">${loadingHtml}</div>\n`),
+			);
+
+			// 3. Await async data, then render page
+			try {
+				const data = await dataPromise;
+
+				// Resolve data-dependent meta and inject into head
+				if (metaFn) {
+					const resolvedMeta = metaFn(data);
+					const resolvedMetaHtml = renderMeta(resolvedMeta);
+					if (resolvedMetaHtml) {
+						controller.enqueue(
+							encoder.encode(
+								`<script>document.head.insertAdjacentHTML("beforeend",${JSON.stringify(resolvedMetaHtml)});</script>\n`,
+							),
+						);
+					}
+				}
+
+				resetHeadCollector();
+
+				let pageVNode: VNode = component(data);
+				if (layout) {
+					pageVNode = layout({ children: pageVNode });
+				}
+				const bodyHtml = renderToString(pageVNode);
+
+				// Collect any additional head tags from rendering
+				const headComponentHtml = flushHeadTags();
+				if (headComponentHtml) {
+					controller.enqueue(
+						encoder.encode(
+							`<script>document.head.insertAdjacentHTML("beforeend",${JSON.stringify(headComponentHtml)});</script>\n`,
+						),
+					);
+				}
+
+				// 4. Send hidden content + swap script
+				controller.enqueue(
+					encoder.encode(`<div id="vrx-async-content" style="display:none">`),
+				);
+
+				// Stream body in 16KB chunks
+				const CHUNK_SIZE = 16384;
+				for (let i = 0; i < bodyHtml.length; i += CHUNK_SIZE) {
+					controller.enqueue(encoder.encode(bodyHtml.slice(i, i + CHUNK_SIZE)));
+				}
+
+				// Swap: remove shell, show content (safe DOM manipulation, no innerHTML)
+				controller.enqueue(
+					encoder.encode(
+						`</div>\n<script>(function(){var s=document.getElementById("vrx-shell");var c=document.getElementById("vrx-async-content");if(s)s.remove();if(c)c.style.display="";})()</script>\n`,
+					),
+				);
+			} catch (err) {
+				// Error: replace loading shell with error message using safe DOM APIs
+				const msg =
+					process.env.NODE_ENV === "production"
+						? "An error occurred"
+						: err instanceof Error
+							? err.message
+							: String(err);
+				const safeMsg = JSON.stringify(msg);
+				controller.enqueue(
+					encoder.encode(
+						`<script>(function(){var s=document.getElementById("vrx-shell");if(s){s.textContent="";var p=document.createElement("p");p.style.color="red";p.textContent=${safeMsg};s.appendChild(p);}})()</script>\n`,
+					),
+				);
+			}
+
+			// 5. Send closing tags
+			controller.enqueue(encoder.encode(`${devScriptTag}\n</body>\n</html>`));
+			controller.close();
+		},
+	});
+
+	return new Response(stream, {
+		headers: {
+			"Content-Type": "text/html; charset=utf-8",
+		},
+	});
+}
+
 export type { ErrorBoundaryProps } from "./error-boundary";
 export { ErrorBoundary } from "./error-boundary";
 export { flushHeadTags, Head, resetHeadCollector } from "./head";
