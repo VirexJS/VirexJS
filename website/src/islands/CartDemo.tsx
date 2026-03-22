@@ -14,12 +14,13 @@ export default function CartDemo(props: { role?: string }) {
 				display: "inline-flex",
 				alignItems: "center",
 				gap: "4px",
-				padding: "4px 12px",
-				background: items.length > 0 ? "#dcfce7" : "#f1f5f9",
-				color: items.length > 0 ? "#16a34a" : "#94a3b8",
+				padding: "6px 14px",
+				background: items.length > 0 ? "rgba(34,197,94,0.15)" : "rgba(161,161,170,0.1)",
+				color: items.length > 0 ? "#4ade80" : "#71717a",
 				borderRadius: "16px",
 				fontSize: "13px",
 				fontWeight: "600",
+				border: items.length > 0 ? "1px solid rgba(34,197,94,0.2)" : "1px solid #27272a",
 			}}>
 				{items.length} item{items.length !== 1 ? "s" : ""}
 			</span>
@@ -30,17 +31,19 @@ export default function CartDemo(props: { role?: string }) {
 		return (
 			<div style={{
 				padding: "12px 16px",
-				background: "#f8fafc",
+				background: "#111113",
 				borderRadius: "8px",
-				border: "1px solid #e2e8f0",
+				border: "1px solid #27272a",
 				minHeight: "60px",
 				fontSize: "13px",
+				color: "#e4e4e7",
 			}}>
 				{items.length === 0
-					? <span style={{ color: "#94a3b8" }}>Cart empty — click buttons above</span>
+					? <span style={{ color: "#52525b" }}>Cart empty — click buttons above</span>
 					: items.map((item, i) => (
-						<div key={i} style={{ padding: "4px 0", borderBottom: "1px solid #f1f5f9" }}>
-							{item}
+						<div style={{ padding: "6px 0", borderBottom: "1px solid #1e1e23", display: "flex", justifyContent: "space-between" }}>
+							<span>{item}</span>
+							<span style={{ color: "#4ade80" }}>Added</span>
 						</div>
 					))
 				}
@@ -48,7 +51,6 @@ export default function CartDemo(props: { role?: string }) {
 		);
 	}
 
-	// Default: add button
 	const products = ["Widget ($29)", "Gadget ($49)", "Doohickey ($15)"];
 	return (
 		<div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
@@ -61,10 +63,10 @@ export default function CartDemo(props: { role?: string }) {
 					}}
 					style={{
 						padding: "8px 16px",
-						background: "#2563eb",
+						background: "#3b82f6",
 						color: "#fff",
 						border: "none",
-						borderRadius: "6px",
+						borderRadius: "8px",
 						cursor: "pointer",
 						fontSize: "13px",
 						fontWeight: "600",

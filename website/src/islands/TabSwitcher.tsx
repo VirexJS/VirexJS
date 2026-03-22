@@ -93,9 +93,10 @@ export async function POST({ request }) {
 						onClick={() => set("tab", i)}
 						style={{
 							padding: "8px 18px",
-							background: tab === i ? "#0f172a" : "#e2e8f0",
-							color: tab === i ? "#e2e8f0" : "#64748b",
-							border: "none",
+							background: tab === i ? "#18181b" : "#09090b",
+							color: tab === i ? "#fafafa" : "#52525b",
+							border: tab === i ? "1px solid #27272a" : "1px solid transparent",
+							borderBottom: tab === i ? "1px solid #18181b" : "1px solid #27272a",
 							borderRadius: "8px 8px 0 0",
 							cursor: "pointer",
 							fontSize: "13px",
@@ -107,8 +108,8 @@ export async function POST({ request }) {
 				))}
 			</div>
 			<pre style={{
-				background: "#0f172a",
-				color: "#e2e8f0",
+				background: "#18181b",
+				color: "#e4e4e7",
 				padding: "20px",
 				borderRadius: "0 8px 8px 8px",
 				fontSize: "13px",
@@ -116,6 +117,8 @@ export async function POST({ request }) {
 				overflow: "auto",
 				margin: "0",
 				minHeight: "280px",
+				border: "1px solid #27272a",
+				borderTop: "none",
 			}}>
 				<code>{tabs[tab]?.code ?? ""}</code>
 			</pre>
