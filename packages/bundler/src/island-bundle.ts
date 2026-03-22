@@ -49,9 +49,9 @@ export async function bundleIslands(options: {
 		writeFileSync(clientPath, clientSource);
 		tempFiles.push(clientPath);
 
-		// Create mount entry
+		// Create mount entry — named exactly as the island so output is {name}.js
 		const entryContent = generateClientEntry(clientPath);
-		const entryPath = join(islandsOutDir, `_entry_${name}.tsx`);
+		const entryPath = join(islandsOutDir, `${name}.tsx`);
 		writeFileSync(entryPath, entryContent);
 		entrypoints.push(entryPath);
 		tempFiles.push(entryPath);
@@ -74,8 +74,7 @@ export async function bundleIslands(options: {
 					.replace(/\\/g, "/")
 					.split("/")
 					.pop()
-					?.replace("_entry_", "")
-					.replace(".js", "");
+					?.replace(".js", "");
 				if (fileName && islands.has(fileName)) {
 					bundles.set(fileName, output.path);
 					totalSize += output.size ?? 0;
@@ -116,8 +115,7 @@ async function bundleIndividually(
 			.replace(/\\/g, "/")
 			.split("/")
 			.pop()
-			?.replace("_entry_", "")
-			.replace(".tsx", "");
+			?.replace(".tsx", "");
 		if (!name || !islands.has(name)) continue;
 
 		try {
