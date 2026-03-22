@@ -1,7 +1,7 @@
 # VirexJS — Claude Code Instructions
 
 ## Project Overview
-VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not JavaScript. Zero external npm dependencies. 1003 tests across 90 files, TypeScript strict with 0 errors, Biome lint 0 errors.
+VirexJS is a full-stack web framework built on Bun runtime. Ships HTML, not JavaScript. Zero external npm dependencies. 1025 tests across 93 files, TypeScript strict with 0 errors, Biome lint 0 errors.
 
 ## Architecture
 - **Monorepo** with Bun workspaces: `packages/*` and `playground`
@@ -80,6 +80,8 @@ loadEnv, parseEnvFile, defineEnv
 defineWSRoute, createWSServer, createSSEStream
 // Async Streaming (v0.2)
 renderPageAsync, defineParallelLoader, withETag, etagMiddleware, useIslandState
+// Resource Hints (v0.2)
+Preload, Preconnect, DNSPrefetch
 // Testing (from "virexjs/testing")
 renderComponent, createTestRequest, createTestLoaderContext, createTestMiddlewareContext, assertHTML
 ```
@@ -110,7 +112,11 @@ renderComponent, createTestRequest, createTestLoaderContext, createTestMiddlewar
 - Image optimizer: `packages/virexjs/src/server/image-optimizer.ts`
 - Island state hook: `packages/virexjs/src/render/use-island-state.ts`
 - CSS engine: `packages/bundler/src/css-engine.ts`
+- Critical CSS: `packages/bundler/src/critical-css.ts`
 - Sitemap generator: `packages/bundler/src/sitemap.ts`
+- Robots.txt generator: `packages/bundler/src/robots.ts`
+- Preload components: `packages/virexjs/src/render/preload.ts`
+- Route middleware: `packages/virexjs/src/server/route-middleware.ts`
 
 ## Documentation
 See `docs/` directory for detailed guides:
