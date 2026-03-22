@@ -2,20 +2,46 @@
 
 VirexJS supports Next.js-compatible directives for controlling where code runs.
 
-## "use client"
+## "use client" / "use island"
 
 Marks a component as a client-side island. The component ships JavaScript and hydrates interactively in the browser.
 
 ```tsx
-"use client";
+"use island";  // or "use client" — both work
+import { useIslandState } from "virexjs";
 
-export default function LikeButton() {
-  // This component hydrates on the client
-  return <button onClick={() => { /* interactive */ }}>Like</button>;
+export default function Counter(props) {
+  const { get, set } = useIslandState(props, { count: 0 });
+  return (
+    <button onClick={() => set("count", get("count") + 1)}>
+      {get("count")}
+    </button>
+  );
 }
 ```
 
-Equivalent to `"use island"` — both are supported.
+### Cross-island communication
+
+Islands can share state via `useSharedStore()`:
+
+```tsx
+"use island";
+import { useSharedStore } from "virexjs";
+
+export default function CartButton(props) {
+  const store = useSharedStore(props);
+  store.subscribe("cart.count");
+  return (
+    <button onClick={() =>
+      store.set("cart.count", (store.get("cart.count") ?? 0) + 1)
+    }>
+      Add to Cart ({store.get("cart.count") ?? 0})
+    </button>
+  );
+}
+```
+
+See [Islands Guide](./islands.md) for full details.
 
 ## "use server"
 
@@ -29,8 +55,9 @@ const saveUser = serverAction(async (data: { name: string }) => {
   return await db.insert(data);
 });
 
-// Call directly on the server
-await saveUser({ name: "Alice" });
+// Register for RPC calls
+import { registerAction } from "virexjs";
+registerAction("saveUser", saveUser);
 ```
 
 ## "use cache"
@@ -40,11 +67,9 @@ Enables ISR (Incremental Static Regeneration) for a page. Cached responses are s
 ```tsx
 "use cache";
 
-// Revalidate every 60 seconds
-export const revalidate = 60;
+export const revalidate = 60;  // seconds
 
 export async function loader() {
-  // This result is cached
   return await fetchExpensiveData();
 }
 
@@ -65,11 +90,18 @@ export default function Page(props) {
 ```ts
 import { invalidateISR } from "virexjs";
 
-// Invalidate specific path
-invalidateISR("/blog/post-1");
+invalidateISR("/blog/post-1");       // specific path
+invalidateISR(/^\/blog\//);          // pattern — all blog pages
+```
 
-// Invalidate by pattern
-invalidateISR(/^\/blog\//);  // all blog pages
+### Programmatic caching
+
+```ts
+import { withCache } from "virexjs";
+
+const data = await withCache("/api/stats", 300, async () => {
+  return await computeExpensiveStats();
+});
 ```
 
 ## Comparison with Next.js
@@ -80,3 +112,4 @@ invalidateISR(/^\/blog\//);  // all blog pages
 | `"use server"` | Server Actions | `serverAction()` + action registry |
 | `"use cache"` | `unstable_cache` | Full ISR with SWR pattern |
 | `revalidate` | ISR export | Same — `export const revalidate = 60` |
+| Cross-island | React Context (requires React) | `useSharedStore()` (zero JS overhead) |

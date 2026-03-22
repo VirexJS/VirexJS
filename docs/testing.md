@@ -1,6 +1,6 @@
 # Testing
 
-VirexJS includes built-in test utilities. Import from `virexjs/testing`.
+VirexJS includes built-in test utilities and uses `bun:test` — 1098 tests across 100 files.
 
 ## Render Components
 
@@ -20,7 +20,7 @@ expect(head).toContain("<title>");
 ## Mock Requests
 
 ```ts
-import { createTestRequest, createTestLoaderContext } from "virexjs/testing";
+import { createTestRequest } from "virexjs/testing";
 
 // GET request
 const req = createTestRequest("/api/users");
@@ -52,6 +52,21 @@ const data = await loader(ctx);
 expect(data.title).toBe("Hello World");
 ```
 
+## Mock Middleware Context
+
+```ts
+import { createTestMiddlewareContext } from "virexjs/testing";
+
+const ctx = createTestMiddlewareContext("/admin", {
+  headers: { Authorization: "Bearer valid-token" },
+});
+
+const response = await authMiddleware(ctx, () =>
+  Promise.resolve(new Response("OK"))
+);
+expect(response.status).toBe(200);
+```
+
 ## HTML Assertions
 
 ```ts
@@ -63,12 +78,86 @@ assertHTML(html).notContains("script");
 assertHTML(html).containsText("Welcome");
 ```
 
+## Testing Islands
+
+```ts
+import { describe, expect, test } from "bun:test";
+import { useIslandState } from "virexjs";
+
+describe("Counter island", () => {
+  test("initializes with defaults", () => {
+    const props = {};
+    const { get } = useIslandState(props, { count: 0 });
+    expect(get("count")).toBe(0);
+  });
+
+  test("set updates state and triggers rerender", () => {
+    let rendered = 0;
+    const state: Record<string, unknown> = {};
+    const props = { _state: state, _rerender: () => rendered++ };
+    const { set } = useIslandState(props, { count: 0 });
+    set("count", 5);
+    expect(state.count).toBe(5);
+    expect(rendered).toBe(1);
+  });
+});
+```
+
+## Testing Shared Store
+
+```ts
+import { getShared, resetSharedStore, setShared, subscribeShared } from "virexjs";
+
+afterEach(() => resetSharedStore());
+
+test("subscribers notified on set", () => {
+  let called = 0;
+  subscribeShared("key", () => called++);
+  setShared("key", "value");
+  expect(called).toBe(1);
+});
+```
+
+## Testing Middleware
+
+```ts
+import { cors } from "virexjs";
+
+test("CORS adds headers", async () => {
+  const middleware = cors({ origin: "https://example.com" });
+  const ctx = { request: new Request("http://localhost/") };
+  const response = await middleware(ctx, () =>
+    Promise.resolve(new Response("OK"))
+  );
+  expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://example.com");
+});
+```
+
 ## Running Tests
 
 ```bash
-bun test                        # All tests
+bun test                        # All tests (1098)
 bun test packages/router/       # Single package
-bun test src/tests/my.test.ts   # Single file
+bun test packages/virexjs/tests/jwt.test.ts  # Single file
 ```
 
-VirexJS uses `bun:test` — standard `describe`, `test`, `expect` API.
+## Validate Project
+
+```bash
+virex check    # Validates structure, pages, islands, API routes, TypeScript
+```
+
+Output:
+```
+  Checking VirexJS project...
+
+  ✓ virex.config.ts loaded successfully
+  ✓ Required directory exists: src/pages
+  ✓ Found 12 page(s)
+  ✓ Index page exists
+  ✓ Found 3 island(s) (3 with directive)
+  ✓ Found 4 API route(s) (4 valid)
+  ✓ TypeScript: no errors
+
+  8 checks in 450ms — 8 passed, 0 warnings, 0 errors
+```

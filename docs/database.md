@@ -83,9 +83,59 @@ const status = getMigrationStatus([m001, m002]);
 console.log(`Current: ${status.current}, Pending: ${status.pending.join(", ")}`);
 ```
 
+## Using in Loaders
+
+```tsx
+import { defineTable } from "@virexjs/db";
+
+const posts = defineTable("posts", { /* schema */ });
+
+export async function loader(ctx) {
+  const post = posts.findOne({ slug: ctx.params.slug });
+  if (!post) throw new Error("Not found");
+  return post;
+}
+```
+
+## Using in API Routes
+
+```ts
+import { defineTable } from "@virexjs/db";
+import { json, notFound } from "virexjs";
+
+const users = defineTable("users", { /* schema */ });
+
+export async function GET() {
+  return json(users.findMany({ limit: 50 }));
+}
+
+export async function POST({ request }) {
+  const body = await request.json();
+  const user = users.insert(body);
+  return json(user, { status: 201 });
+}
+```
+
+## Parallel Loading with Database
+
+Use `defineParallelLoader()` for concurrent database queries:
+
+```tsx
+import { defineParallelLoader } from "virexjs";
+
+export const loader = defineParallelLoader({
+  user:  (ctx) => users.findOne({ id: ctx.params.id }),
+  posts: (ctx) => posts.findMany({ where: { authorId: ctx.params.id } }),
+  stats: () => ({ total: posts.count() }),
+});
+```
+
+All 3 queries run concurrently instead of sequentially.
+
 ## Security
 
 - Column names validated against schema whitelist
 - ORDER BY sanitized (only known columns + ASC/DESC)
 - All values use prepared statement bindings
 - `validateIdentifier()` rejects non-alphanumeric names
+- No raw SQL exposed to user input

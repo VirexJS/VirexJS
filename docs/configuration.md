@@ -33,10 +33,55 @@ export default defineConfig({
     hmrPort: 3001,
   },
   plugins: [],
+  // URL management (like Next.js)
+  redirects: [
+    { source: "/old-page", destination: "/new-page", permanent: true },
+  ],
+  rewrites: [
+    { source: "/api/v1/:path", destination: "/api/:path" },
+  ],
+  headers: [
+    { source: "/(.*)", headers: [{ key: "X-Frame-Options", value: "DENY" }] },
+  ],
 });
 ```
 
 All options are optional — defaults are used for anything not specified.
+
+## Tailwind CSS
+
+Enable Tailwind with one config change:
+
+```ts
+export default defineConfig({
+  css: { engine: "tailwind" },
+});
+```
+
+```bash
+bun add -d tailwindcss
+```
+
+VirexJS will:
+- Auto-generate `tailwind.config.js` if missing
+- Auto-generate `src/globals.css` with `@tailwind` directives if missing
+- Build CSS via Tailwind CLI
+- Hot-swap CSS in dev mode via HMR
+
+## TypeScript Path Aliases
+
+`virex init` automatically configures `@/` aliases in `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] }
+  }
+}
+```
+
+Works in both runtime (Bun resolves it) and island bundling.
 
 ## Environment Variables
 
@@ -46,9 +91,6 @@ import { loadEnv } from "virexjs";
 // Loads in order (later overrides earlier):
 // .env → .env.production → .env.local → .env.production.local
 const env = loadEnv("production");
-
-// Variables also set on process.env (won't override existing)
-console.log(process.env.DATABASE_URL);
 ```
 
 ### .env file format
@@ -62,9 +104,19 @@ SECRET="my secret value"
 # Variable expansion
 BASE_URL=https://example.com
 API_URL=${BASE_URL}/api
+```
 
-# Escape sequences in double quotes
-MULTILINE="line1\nline2"
+### Type-safe env validation
+
+```ts
+import { defineEnv } from "virexjs";
+
+const env = defineEnv({
+  PORT: { type: "number", default: 3000 },
+  DATABASE_URL: { type: "string", required: true },
+  JWT_SECRET: { type: "string", required: true },
+  DEBUG: { type: "boolean", default: false },
+});
 ```
 
 ## Plugins
@@ -74,11 +126,18 @@ import { defineConfig, definePlugin } from "virexjs";
 
 const analytics = definePlugin({
   name: "analytics",
+  configResolved(config) {
+    console.log(`Analytics on port ${config.port}`);
+  },
+  serverCreated(info) {
+    console.log(`Tracking ${info.routeCount} routes`);
+  },
   transformHTML(html, ctx) {
     return html.replace("</body>", `<script>track("${ctx.pathname}")</script></body>`);
   },
-  serverCreated(info) {
-    console.log(`Analytics loaded (${info.routeCount} routes)`);
+  middleware: () => async (ctx, next) => {
+    console.log(`${ctx.request.method} ${new URL(ctx.request.url).pathname}`);
+    return next();
   },
 });
 
@@ -86,3 +145,14 @@ export default defineConfig({
   plugins: [analytics],
 });
 ```
+
+### Plugin hooks
+
+| Hook | When | Return |
+|------|------|--------|
+| `configResolved(config)` | After config merged | Mutate config |
+| `serverCreated(info)` | Server is ready | — |
+| `buildStart(config)` | Before production build | — |
+| `buildEnd(result)` | After production build | — |
+| `transformHTML(html, ctx)` | Before HTML response sent | Modified HTML |
+| `middleware()` | Server setup | Middleware function(s) |
