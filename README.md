@@ -2,7 +2,7 @@
 
 **Ship HTML, not JavaScript.**
 
-[![Tests](https://img.shields.io/badge/tests-987%20passing-brightgreen)](https://github.com/virexjs/virexjs)
+[![Tests](https://img.shields.io/badge/tests-1003%20passing-brightgreen)](https://github.com/virexjs/virexjs)
 [![TypeScript](https://img.shields.io/badge/typescript-strict-blue)](https://github.com/virexjs/virexjs)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-orange)](https://github.com/virexjs/virexjs)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -213,7 +213,7 @@ Production build:            60ms (19 pages)
 
 ```bash
 bun install              # Install workspace dependencies
-bun test                 # Run 987 tests
+bun test                 # Run 1003 tests (90 files)
 bun run dev              # Start playground (port 3000)
 bun run build            # Build for production
 bunx tsc --noEmit        # TypeScript check (strict, 0 errors)
@@ -245,7 +245,7 @@ VirexJS is not a drop-in Next.js replacement. Be aware of these differences:
 | **Language** | TypeScript 5.x (strict) |
 | **Server** | Bun.serve() |
 | **Database** | bun:sqlite |
-| **Tests** | bun:test — 987 tests |
+| **Tests** | bun:test — 1003 tests |
 | **Linter** | Biome 2.x |
 | **CI** | GitHub Actions |
 | **Deploy** | Docker / Fly.io / Railway |

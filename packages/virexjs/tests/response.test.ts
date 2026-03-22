@@ -21,6 +21,19 @@ describe("redirect", () => {
 		expect(redirect("/temp", 307).status).toBe(307);
 		expect(redirect("/perm", 308).status).toBe(308);
 	});
+
+	test("rejects protocol-relative URLs (open redirect)", () => {
+		expect(() => redirect("//evil.com")).toThrow("Unsafe redirect");
+	});
+
+	test("rejects absolute foreign URLs", () => {
+		expect(() => redirect("https://evil.com/steal")).toThrow("Unsafe redirect");
+	});
+
+	test("allows relative paths with query strings", () => {
+		const res = redirect("/search?q=test&page=2");
+		expect(res.headers.get("Location")).toBe("/search?q=test&page=2");
+	});
 });
 
 describe("json", () => {
@@ -126,5 +139,12 @@ describe("parseCookies", () => {
 			headers: { Cookie: "name=hello%20world" },
 		});
 		expect(parseCookies(req)).toEqual({ name: "hello world" });
+	});
+
+	test("handles cookie with = in value", () => {
+		const req = new Request("http://localhost/", {
+			headers: { Cookie: "token=abc=def=ghi" },
+		});
+		expect(parseCookies(req).token).toBe("abc=def=ghi");
 	});
 });
