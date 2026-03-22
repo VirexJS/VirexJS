@@ -78,6 +78,10 @@ export async function init(args: string[]): Promise<void> {
 					strict: true,
 					noEmit: true,
 					skipLibCheck: true,
+					baseUrl: ".",
+					paths: {
+						"@/*": ["./src/*"],
+					},
 				},
 			},
 			null,
@@ -94,6 +98,7 @@ export async function init(args: string[]): Promise<void> {
 export default defineConfig({
 \tport: 3000,
 \trender: "server",
+\t// css: { engine: "tailwind" },  // Enable Tailwind: bun add -d tailwindcss
 });
 `,
 	);

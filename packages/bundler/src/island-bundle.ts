@@ -1,5 +1,5 @@
 import { mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { extractIslands } from "./island-extract";
 
 export interface IslandBundleResult {
@@ -149,11 +149,20 @@ function rewriteForBrowser(filePath: string, shimPath: string): string {
 
 	const shimImport = shimPath.replace(/\\/g, "/");
 
-	// Replace all imports from "virexjs" with imports from the shim
-	return source.replace(
+	// Replace imports from "virexjs" with imports from the shim
+	let result = source.replace(
 		/import\s*\{([^}]+)\}\s*from\s*["']virexjs["'];?/g,
 		`import { $1 } from "${shimImport}";`,
 	);
+
+	// Resolve @/ path aliases to absolute paths
+	const srcDir = resolve(filePath, "..", "..");
+	result = result.replace(
+		/from\s*["']@\/([^"']+)["']/g,
+		(_match, path) => `from "${resolve(srcDir, path).replace(/\\/g, "/")}"`,
+	);
+
+	return result;
 }
 
 /**

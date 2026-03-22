@@ -1,6 +1,12 @@
-import { readdirSync } from "node:fs";
+import { mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { bundleIslands, extractIslands, generateHydrationRuntime } from "@virexjs/bundler";
+import {
+	bundleIslands,
+	extractIslands,
+	generateHydrationRuntime,
+	isTailwindAvailable,
+	processTailwindCSS,
+} from "@virexjs/bundler";
 import { buildTree, matchRoute, scanPages } from "@virexjs/router";
 import type { VirexConfig } from "../config/types";
 import { PluginRunner } from "../plugin/runner";
@@ -64,6 +70,37 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 			.catch((err) => {
 				console.error("  Failed to bundle islands:", err);
 			});
+	}
+
+	// Process CSS (Tailwind or passthrough)
+	const cssLinks: string[] = [];
+	if (config.css.engine === "tailwind" || config.css.engine === "both") {
+		if (isTailwindAvailable()) {
+			// Process Tailwind CSS asynchronously — don't block server startup
+			processTailwindCSS({
+				srcDir,
+				outDir,
+				minify: process.env.NODE_ENV === "production",
+			}).then((cssResult) => {
+				if (cssResult) {
+					cssLinks.push(`/_virex/${cssResult.filename}`);
+					const virexDir = join(outDir, "_virex");
+					mkdirSync(virexDir, { recursive: true });
+					writeFileSync(join(virexDir, cssResult.filename), cssResult.css);
+				}
+			}).catch(() => {
+				console.warn("  ⚠ Tailwind CSS build failed");
+			});
+		} else {
+			console.warn("  ⚠ Tailwind CSS not installed. Run: bun add -d tailwindcss");
+		}
+	}
+
+	// Collect user CSS files from src/
+	if (config.css.engine !== "tailwind") {
+		const { collectUserCSS } = require("./css-collector");
+		const userCSS = collectUserCSS(srcDir);
+		cssLinks.push(...userCSS);
 	}
 
 	// Combine dev script with hydration script
@@ -211,6 +248,7 @@ export function createServer(config: VirexConfig, options?: { devScript?: string
 			const pageOptions = {
 				devScript: combinedDevScript || undefined,
 				errorPagePath: hasErrorPage ? customErrorPath : undefined,
+				cssLinks: cssLinks.length > 0 ? cssLinks : undefined,
 			};
 
 			// Load per-route _middleware.ts files (parent → child order)
