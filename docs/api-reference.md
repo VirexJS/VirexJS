@@ -38,6 +38,11 @@ All exports available from the `"virexjs"` package.
 | `requestId(options?)` | Unique request ID header |
 | `healthCheck(options?)` | Health check endpoint (/health) |
 | `gracefulShutdown(server, opts?)` | Graceful server shutdown handler |
+| `compress(request, response)` | Gzip compress a response (v0.2) |
+| `compressionMiddleware()` | Auto-gzip all text responses (v0.2) |
+| `withETag(request, response)` | Add ETag + 304 Not Modified (v0.2) |
+| `etagMiddleware()` | Auto-ETag all GET responses (v0.2) |
+| `defineParallelLoader(loaders)` | Run multiple data sources concurrently (v0.2) |
 
 ## Response Helpers
 
@@ -91,13 +96,18 @@ Validators are chainable: `.required()`, `.min(n)`, `.max(n)`, `.pattern(regex)`
 | `Image` | `<img>` with lazy loading, responsive |
 | `Script` | Smart script loading (defer/async/lazy/idle) |
 | `Font` | Google Fonts or custom font optimization |
+| `Preload` | `<link rel="preload">` resource hint (v0.2) |
+| `Preconnect` | `<link rel="preconnect">` origin hint (v0.2) |
+| `DNSPrefetch` | `<link rel="dns-prefetch">` DNS hint (v0.2) |
 
 ## Rendering
 
 | Export | Description |
 |--------|-------------|
 | `generateOGImage(options)` | Dynamic SVG social preview image |
+| `renderPageAsync(options)` | Suspense-like async streaming render (v0.2) |
 | `cachedRender(key, props, render)` | Memoized component render |
+| `useIslandState(props, defaults)` | Island state management hook (v0.2) |
 | `route(pattern, params)` | Type-safe URL builder |
 | `defineRoute(pattern)` | Typed route builder factory |
 
@@ -238,5 +248,6 @@ virex dev                 Dev server with HMR + widget
 virex build               Production SSG build
 virex preview             Preview production build
 virex generate <type>     Scaffold page/component/api/middleware/island
+virex check               Validate project structure and TypeScript (v0.2)
 virex info                Show project statistics
 ```
