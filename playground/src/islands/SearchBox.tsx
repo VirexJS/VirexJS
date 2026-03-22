@@ -1,12 +1,5 @@
 "use client";
-
-/** Live search with filtering — demonstrates input + list state */
-
-interface SearchBoxProps {
-	query?: string;
-	_state?: Record<string, unknown>;
-	_rerender?: () => void;
-}
+import { useIslandState } from "virexjs";
 
 const ITEMS = [
 	"File-based routing",
@@ -26,12 +19,9 @@ const ITEMS = [
 	"Error boundaries",
 ];
 
-export default function SearchBox(props: SearchBoxProps) {
-	const query = (props.query as string) ?? "";
-
-	if (props._state && props._state.query === undefined) {
-		props._state.query = "";
-	}
+export default function SearchBox(props: { query?: string }) {
+	const { get, set } = useIslandState(props, { query: "" });
+	const query = get("query");
 
 	const filtered = query
 		? ITEMS.filter((item) => item.toLowerCase().includes(query.toLowerCase()))
@@ -53,16 +43,11 @@ export default function SearchBox(props: SearchBoxProps) {
 					placeholder="Search features..."
 					value={query}
 					onInput={() => {
-						if (props._state && props._rerender) {
-							const input =
-								typeof document !== "undefined"
-									? document.querySelector<HTMLInputElement>("[data-search-input]")
-									: null;
-							if (input) {
-								props._state.query = input.value;
-								props._rerender();
-							}
-						}
+						const input =
+							typeof document !== "undefined"
+								? document.querySelector<HTMLInputElement>("[data-search-input]")
+								: null;
+						if (input) set("query", input.value);
 					}}
 					style={{
 						width: "100%",

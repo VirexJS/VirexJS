@@ -1,9 +1,5 @@
 // "use island"
-
-/**
- * Todo list island — add/remove/toggle items.
- * Shows complex state management with arrays in islands.
- */
+import { useIslandState } from "virexjs";
 
 interface Todo {
 	id: number;
@@ -11,28 +7,17 @@ interface Todo {
 	done: boolean;
 }
 
-interface TodoListProps {
-	items?: Todo[];
-	nextId?: number;
-	_state?: Record<string, unknown>;
-	_rerender?: () => void;
-}
+const DEFAULTS: Todo[] = [
+	{ id: 1, text: "Learn VirexJS", done: true },
+	{ id: 2, text: "Build an app", done: false },
+	{ id: 3, text: "Ship to production", done: false },
+];
 
-export default function TodoList(props: TodoListProps) {
-	const defaultItems: Todo[] = [
-		{ id: 1, text: "Learn VirexJS", done: true },
-		{ id: 2, text: "Build an app", done: false },
-		{ id: 3, text: "Ship to production", done: false },
-	];
-	const items: Todo[] = (props.items as Todo[]) ?? defaultItems;
-	const nextId = (props.nextId as number) ?? 4;
+export default function TodoList(props: { items?: Todo[]; nextId?: number }) {
+	const { get, set } = useIslandState(props, { items: [...DEFAULTS], nextId: 4 });
+	const items = get("items") as Todo[];
+	const nextId = get("nextId") as number;
 	const remaining = items.filter((t) => !t.done).length;
-
-	// Bootstrap state on first hydration call
-	if (props._state) {
-		if (props._state.items === undefined) props._state.items = [...defaultItems];
-		if (props._state.nextId === undefined) props._state.nextId = 4;
-	}
 
 	return (
 		<div
@@ -49,8 +34,7 @@ export default function TodoList(props: TodoListProps) {
 					{remaining} remaining
 				</span>
 			</div>
-
-			<div style={{ padding: "0" }}>
+			<div>
 				{items.map((todo) => (
 					<div
 						style={{
@@ -64,12 +48,8 @@ export default function TodoList(props: TodoListProps) {
 						<button
 							type="button"
 							onClick={() => {
-								if (props._state && props._rerender) {
-									const list = props._state.items as Todo[];
-									const item = list.find((t) => t.id === todo.id);
-									if (item) item.done = !item.done;
-									props._rerender();
-								}
+								const updated = items.map((t) => (t.id === todo.id ? { ...t, done: !t.done } : t));
+								set("items", updated);
 							}}
 							style={{
 								width: "20px",
@@ -81,7 +61,6 @@ export default function TodoList(props: TodoListProps) {
 								padding: 0,
 								color: "#fff",
 								fontSize: "12px",
-								lineHeight: "16px",
 							}}
 						>
 							{todo.done ? "\u2713" : ""}
@@ -98,14 +77,12 @@ export default function TodoList(props: TodoListProps) {
 						</span>
 						<button
 							type="button"
-							onClick={() => {
-								if (props._state && props._rerender) {
-									props._state.items = (props._state.items as Todo[]).filter(
-										(t) => t.id !== todo.id,
-									);
-									props._rerender();
-								}
-							}}
+							onClick={() =>
+								set(
+									"items",
+									items.filter((t) => t.id !== todo.id),
+								)
+							}
 							style={{
 								border: "none",
 								background: "none",
@@ -120,7 +97,6 @@ export default function TodoList(props: TodoListProps) {
 					</div>
 				))}
 			</div>
-
 			<div style={{ display: "flex", padding: "8px", gap: "8px", borderTop: "1px solid #eee" }}>
 				<input
 					type="text"
@@ -137,19 +113,15 @@ export default function TodoList(props: TodoListProps) {
 				<button
 					type="button"
 					onClick={() => {
-						if (props._state && props._rerender) {
-							// Read input value directly from DOM
-							const input =
-								typeof document !== "undefined"
-									? document.querySelector<HTMLInputElement>("[data-todo-input]")
-									: null;
-							const text = input?.value?.trim() ?? "";
-							if (text) {
-								const list = props._state.items as Todo[];
-								list.push({ id: nextId, text, done: false });
-								props._state.nextId = nextId + 1;
-								props._rerender();
-							}
+						const input =
+							typeof document !== "undefined"
+								? document.querySelector<HTMLInputElement>("[data-todo-input]")
+								: null;
+						const text = input?.value?.trim() ?? "";
+						if (text) {
+							set("items", [...items, { id: nextId, text, done: false }]);
+							set("nextId", nextId + 1);
+							if (input) input.value = "";
 						}
 					}}
 					style={{

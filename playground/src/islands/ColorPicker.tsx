@@ -1,15 +1,5 @@
 // "use island"
-
-/**
- * Color picker island — interactive color selection with preview.
- * Shows how islands handle multiple state properties.
- */
-
-interface ColorPickerProps {
-	color?: string;
-	_state?: Record<string, unknown>;
-	_rerender?: () => void;
-}
+import { useIslandState } from "virexjs";
 
 const COLORS = [
 	{ name: "Red", value: "#ef4444" },
@@ -20,11 +10,9 @@ const COLORS = [
 	{ name: "Pink", value: "#ec4899" },
 ];
 
-export default function ColorPicker(props: ColorPickerProps) {
-	const selected = props.color ?? "#3b82f6";
-	if (props._state && props._state.color === undefined) {
-		props._state.color = selected;
-	}
+export default function ColorPicker(props: { color?: string }) {
+	const { get, set } = useIslandState(props, { color: "#3b82f6" });
+	const selected = get("color");
 
 	return (
 		<div
@@ -40,12 +28,8 @@ export default function ColorPicker(props: ColorPickerProps) {
 				{COLORS.map((c) => (
 					<button
 						type="button"
-						onClick={() => {
-							if (props._state && props._rerender) {
-								props._state.color = c.value;
-								props._rerender();
-							}
-						}}
+						onClick={() => set("color", c.value)}
+						title={c.name}
 						style={{
 							width: "32px",
 							height: "32px",
@@ -55,7 +39,6 @@ export default function ColorPicker(props: ColorPickerProps) {
 							cursor: "pointer",
 							padding: 0,
 						}}
-						title={c.name}
 					/>
 				))}
 			</div>

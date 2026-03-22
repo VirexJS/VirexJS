@@ -1,25 +1,9 @@
 // "use island"
+import { useIslandState } from "virexjs";
 
-/**
- * Toggle island — shows/hides content on click.
- * Server-side: renders with content visible.
- * Client-side: hydrates with interactive toggle.
- */
-
-interface ToggleProps {
-	label?: string;
-	open?: boolean;
-	_state?: Record<string, unknown>;
-	_rerender?: () => void;
-}
-
-export default function Toggle(props: ToggleProps) {
-	const isOpen = props.open ?? true;
-	const label = props.label ?? "Toggle";
-
-	if (props._state && props._state.open === undefined) {
-		props._state.open = isOpen;
-	}
+export default function Toggle(props: { label?: string; open?: boolean }) {
+	const { get, set } = useIslandState(props, { open: props.open ?? true });
+	const isOpen = get("open");
 
 	return (
 		<div
@@ -33,12 +17,7 @@ export default function Toggle(props: ToggleProps) {
 		>
 			<button
 				type="button"
-				onClick={() => {
-					if (props._state && props._rerender) {
-						props._state.open = !isOpen;
-						props._rerender();
-					}
-				}}
+				onClick={() => set("open", !isOpen)}
 				style={{
 					display: "block",
 					width: "100%",
@@ -53,12 +32,11 @@ export default function Toggle(props: ToggleProps) {
 					color: "#333",
 				}}
 			>
-				{isOpen ? "▼" : "▶"} {label}
+				{isOpen ? "\u25BC" : "\u25B6"} {props.label ?? "Toggle"}
 			</button>
 			{isOpen && (
 				<div style={{ padding: "12px 16px", fontSize: "14px", color: "#666" }}>
-					This content is toggled by the island hydration. Server-rendered as visible, then
-					interactive on the client.
+					This content is toggled by the island hydration.
 				</div>
 			)}
 		</div>

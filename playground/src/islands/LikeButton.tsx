@@ -1,36 +1,15 @@
 "use client";
+import { useIslandState } from "virexjs";
 
-/**
- * Like button — uses "use client" directive (alias for "use island").
- * Demonstrates the Next.js-compatible directive syntax.
- */
-
-interface LikeButtonProps {
-	count?: number;
-	liked?: boolean;
-	_state?: Record<string, unknown>;
-	_rerender?: () => void;
-}
-
-export default function LikeButton(props: LikeButtonProps) {
-	const count = (props.count as number) ?? 0;
-	const liked = (props.liked as boolean) ?? false;
-
-	if (props._state) {
-		if (props._state.count === undefined) props._state.count = 0;
-		if (props._state.liked === undefined) props._state.liked = false;
-	}
+export default function LikeButton(props: { count?: number; liked?: boolean }) {
+	const { get, set, update } = useIslandState(props, { count: 0, liked: false });
+	const count = get("count");
+	const liked = get("liked");
 
 	return (
 		<button
 			type="button"
-			onClick={() => {
-				if (props._state && props._rerender) {
-					props._state.liked = !liked;
-					props._state.count = liked ? count - 1 : count + 1;
-					props._rerender();
-				}
-			}}
+			onClick={() => update({ liked: !liked, count: liked ? count - 1 : count + 1 })}
 			style={{
 				display: "inline-flex",
 				alignItems: "center",
@@ -43,7 +22,6 @@ export default function LikeButton(props: LikeButtonProps) {
 				cursor: "pointer",
 				fontSize: "14px",
 				fontWeight: "500",
-				transition: "all 0.15s",
 			}}
 		>
 			{liked ? "\u2764" : "\u2661"} {count}

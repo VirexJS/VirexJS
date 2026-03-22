@@ -1,39 +1,15 @@
 "use client";
+import { useIslandState } from "virexjs";
 
-/** Modal dialog island — overlay with open/close */
-
-interface ModalProps {
-	isOpen?: boolean;
-	_state?: Record<string, unknown>;
-	_rerender?: () => void;
-}
-
-export default function Modal(props: ModalProps) {
-	const isOpen = (props.isOpen as boolean) ?? false;
-
-	if (props._state && props._state.isOpen === undefined) {
-		props._state.isOpen = false;
-	}
-
-	const open = () => {
-		if (props._state && props._rerender) {
-			props._state.isOpen = true;
-			props._rerender();
-		}
-	};
-
-	const close = () => {
-		if (props._state && props._rerender) {
-			props._state.isOpen = false;
-			props._rerender();
-		}
-	};
+export default function Modal(props: { isOpen?: boolean }) {
+	const { get, set } = useIslandState(props, { isOpen: false });
+	const isOpen = get("isOpen");
 
 	return (
 		<div>
 			<button
 				type="button"
-				onClick={open}
+				onClick={() => set("isOpen", true)}
 				style={{
 					padding: "10px 20px",
 					background: "#0066cc",
@@ -75,12 +51,12 @@ export default function Modal(props: ModalProps) {
 					>
 						<h3 style={{ margin: "0 0 8px", fontSize: "18px" }}>VirexJS Modal</h3>
 						<p style={{ color: "#6b7280", fontSize: "14px", margin: "0 0 16px" }}>
-							This modal is an island component. It renders as a button on the server, then hydrates
-							to show this overlay on click. Zero JS until interaction.
+							This modal is an island. Server-renders as a button, hydrates on click. Zero JS until
+							interaction.
 						</p>
 						<button
 							type="button"
-							onClick={close}
+							onClick={() => set("isOpen", false)}
 							style={{
 								padding: "8px 20px",
 								background: "#f3f4f6",

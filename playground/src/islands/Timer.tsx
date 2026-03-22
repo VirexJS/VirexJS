@@ -1,31 +1,20 @@
 // "use island"
+import { useIslandState } from "virexjs";
 
-/**
- * Timer island — stopwatch with start/stop/reset.
- * Shows how islands handle intervals and time-based state.
- */
-
-interface TimerProps {
+export default function Timer(props: {
 	elapsed?: number;
 	running?: boolean;
 	_state?: Record<string, unknown>;
 	_rerender?: () => void;
-}
-
-export default function Timer(props: TimerProps) {
-	const elapsed = (props.elapsed as number) ?? 0;
-	const running = (props.running as boolean) ?? false;
-
-	if (props._state) {
-		if (props._state.elapsed === undefined) props._state.elapsed = 0;
-		if (props._state.running === undefined) props._state.running = false;
-	}
-
+}) {
+	const { get, set, update } = useIslandState(props, { elapsed: 0, running: false });
+	const elapsed = get("elapsed");
+	const running = get("running");
 	const mins = Math.floor(elapsed / 60);
 	const secs = elapsed % 60;
 	const display = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
-	const btnStyle = {
+	const btn = {
 		padding: "8px 16px",
 		border: "1px solid #ddd",
 		borderRadius: "6px",
@@ -61,27 +50,23 @@ export default function Timer(props: TimerProps) {
 				<button
 					type="button"
 					onClick={() => {
-						if (props._state && props._rerender) {
-							if (running) {
-								props._state.running = false;
-								props._rerender();
-							} else {
-								props._state.running = true;
-								props._rerender();
-								// Start ticking
-								const tick = () => {
-									if (props._state!.running) {
-										props._state!.elapsed = ((props._state!.elapsed as number) ?? 0) + 1;
-										props._rerender!();
-										setTimeout(tick, 1000);
-									}
-								};
-								setTimeout(tick, 1000);
-							}
+						if (running) {
+							set("running", false);
+						} else {
+							update({ running: true });
+							const tick = () => {
+								// Read current state from props._state directly for interval
+								if (props._state?.running) {
+									props._state.elapsed = ((props._state.elapsed as number) ?? 0) + 1;
+									props._rerender?.();
+									setTimeout(tick, 1000);
+								}
+							};
+							setTimeout(tick, 1000);
 						}
 					}}
 					style={{
-						...btnStyle,
+						...btn,
 						background: running ? "#fee2e2" : "#dcfce7",
 						color: running ? "#dc2626" : "#16a34a",
 					}}
@@ -90,14 +75,8 @@ export default function Timer(props: TimerProps) {
 				</button>
 				<button
 					type="button"
-					onClick={() => {
-						if (props._state && props._rerender) {
-							props._state.elapsed = 0;
-							props._state.running = false;
-							props._rerender();
-						}
-					}}
-					style={{ ...btnStyle, background: "#f5f5f5" }}
+					onClick={() => update({ elapsed: 0, running: false })}
+					style={{ ...btn, background: "#f5f5f5" }}
 				>
 					Reset
 				</button>
