@@ -8,6 +8,7 @@ export default function Features() {
 	const categories = [
 		{
 			title: "Rendering",
+			icon: "\u26A1",
 			items: [
 				"Zero JS by default — pure server-rendered HTML",
 				"Islands architecture — only interactive parts ship JS",
@@ -20,6 +21,7 @@ export default function Features() {
 		},
 		{
 			title: "Routing",
+			icon: "\uD83D\uDD17",
 			items: [
 				"File-based routing — [slug], [...rest], (group)",
 				"SSG — getStaticPaths() for static pre-rendering",
@@ -33,6 +35,7 @@ export default function Features() {
 		},
 		{
 			title: "Islands",
+			icon: "\uD83C\uDFDD\uFE0F",
 			items: [
 				"useIslandState() — zero-boilerplate state management",
 				"useSharedStore() — cross-island reactive state",
@@ -44,6 +47,7 @@ export default function Features() {
 		},
 		{
 			title: "Built-in",
+			icon: "\uD83D\uDD12",
 			items: [
 				"Auth — JWT (HS256), sessions, route guards, CSRF",
 				"Database — SQLite ORM, typed CRUD, migrations",
@@ -57,6 +61,7 @@ export default function Features() {
 		},
 		{
 			title: "Components",
+			icon: "\uD83D\uDDBC\uFE0F",
 			items: [
 				"<Link> with native browser prefetch",
 				"<Image> with lazy loading + responsive srcset",
@@ -70,15 +75,16 @@ export default function Features() {
 		},
 		{
 			title: "DX",
+			icon: "\uD83D\uDE80",
 			items: [
 				"CLI — create, init, dev, build, preview, generate, check, info",
-				"HMR — WebSocket hot reload with dev widget + heartbeat",
+				"HMR — WebSocket hot reload with heartbeat + dev widget",
 				"Tailwind CSS — first-class integration, auto-config",
 				"TypeScript — strict mode, @/ path aliases",
-				"Test utilities — renderComponent, assertHTML, mock request",
-				"Critical CSS extraction — inline above-the-fold styles",
-				"Sitemap + robots.txt — auto-generated in builds",
-				"API docs — auto-generated endpoint documentation",
+				"Test utilities — renderComponent, assertHTML",
+				"Critical CSS extraction + async loader",
+				"Sitemap + robots.txt auto-generated in builds",
+				"Auto API docs generation",
 			],
 		},
 	];
@@ -87,22 +93,44 @@ export default function Features() {
 		<Layout title="Features — VirexJS">
 			<section class="section">
 				<div class="container">
-					<h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "8px", textAlign: "center" }}>Features</h1>
-					<p class="subtitle">75+ exports, zero external dependencies</p>
+					<div class="section-header">
+						<h2>Features</h2>
+						<p>75+ exports, zero external dependencies</p>
+					</div>
 
 					{categories.map((cat) => (
-						<div style={{ marginBottom: "40px" }}>
-							<h2 style={{ fontSize: "1.4rem", fontWeight: 700, marginBottom: "16px", paddingBottom: "8px", borderBottom: "2px solid #e2e8f0" }}>
+						<div style={{ marginBottom: "48px" }}>
+							<h3 style={{
+								fontSize: "1.25rem",
+								fontWeight: 700,
+								marginBottom: "20px",
+								paddingBottom: "12px",
+								borderBottom: "1px solid #27272a",
+								display: "flex",
+								alignItems: "center",
+								gap: "10px",
+							}}>
+								<span style={{ fontSize: "20px" }}>{cat.icon}</span>
 								{cat.title}
-							</h2>
-							<ul style={{ listStyle: "none", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+							</h3>
+							<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
 								{cat.items.map((item) => (
-									<li style={{ fontSize: "14px", color: "#374151", padding: "8px 0", paddingLeft: "20px", position: "relative" }}>
-										<span style={{ position: "absolute", left: 0, color: "#2563eb" }}>+</span>
+									<div style={{
+										fontSize: "14px",
+										color: "#a1a1aa",
+										padding: "10px 16px",
+										background: "#18181b",
+										borderRadius: "8px",
+										border: "1px solid #27272a",
+										display: "flex",
+										alignItems: "center",
+										gap: "10px",
+									}}>
+										<span style={{ color: "#3b82f6", fontWeight: 700, fontSize: "14px", flexShrink: 0 }}>+</span>
 										{item}
-									</li>
+									</div>
 								))}
-							</ul>
+							</div>
 						</div>
 					))}
 				</div>

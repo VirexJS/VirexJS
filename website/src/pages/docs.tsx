@@ -20,11 +20,12 @@ bun run dev`,
     _loading.tsx    Loading state (streaming)
     _error.tsx      Error boundary
     _404.tsx        Custom 404
+    _middleware.ts  Per-route middleware
     index.tsx       \u2192 /
     blog/[slug].tsx \u2192 /blog/:slug
   islands/          Interactive components
   api/              API routes
-  middleware/       Auto-loaded middleware
+  middleware/       Auto-loaded global middleware
   components/       Server components`,
 		},
 		{
@@ -61,7 +62,7 @@ export default function Counter(props) {
 		},
 		{
 			title: "Cross-Island Communication",
-			content: `// CartButton island
+			content: `// CartButton island — PRODUCER
 "use island";
 import { useSharedStore } from "virexjs";
 
@@ -72,20 +73,13 @@ export default function CartButton(props) {
     <button onClick={() =>
       store.set("cart.count", (store.get("cart.count") ?? 0) + 1)
     }>
-      Add to Cart
+      Add ({store.get("cart.count") ?? 0})
     </button>
   );
 }
 
-// CartBadge island (SEPARATE island, auto-synced)
-"use island";
-import { useSharedStore } from "virexjs";
-
-export default function CartBadge(props) {
-  const store = useSharedStore(props);
-  store.subscribe("cart.count");
-  return <span>Cart: {store.get("cart.count") ?? 0}</span>;
-}`,
+// CartBadge — SEPARATE island, auto-synced!
+// store.subscribe("cart.count") => re-renders`,
 		},
 		{
 			title: "API Routes",
@@ -93,8 +87,7 @@ export default function CartBadge(props) {
 import { json, notFound } from "virexjs";
 
 export async function GET({ params }) {
-  const users = await db.select("users").all();
-  return json(users);
+  return json(await db.select("users").all());
 }
 
 export async function POST({ request }) {
@@ -114,7 +107,6 @@ export default defineMiddleware(async (ctx, next) => {
   return next();
 });
 
-// Per-route: src/pages/admin/_middleware.ts
 // Built-in: cors(), rateLimit(), compress(), withETag()`,
 		},
 		{
@@ -146,21 +138,27 @@ virex info            # Show project stats`,
 		<Layout title="Documentation — VirexJS">
 			<section class="section">
 				<div class="container">
-					<h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "8px" }}>Documentation</h1>
-					<p style={{ color: "#64748b", marginBottom: "40px", fontSize: "17px" }}>
-						Everything you need to build with VirexJS.
-					</p>
+					<div class="section-header">
+						<h2>Documentation</h2>
+						<p>Everything you need to build with VirexJS.</p>
+					</div>
 
 					{sections.map((s) => (
 						<div style={{ marginBottom: "40px" }}>
-							<h2 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "12px" }}>{s.title}</h2>
+							<h3 style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "12px", color: "#fafafa" }}>{s.title}</h3>
 							<pre><code>{s.content}</code></pre>
 						</div>
 					))}
 
-					<div style={{ marginTop: "40px", padding: "24px", background: "#eff6ff", borderRadius: "12px", border: "1px solid #bfdbfe" }}>
-						<h3 style={{ margin: "0 0 8px", color: "#1e40af" }}>Full API Reference</h3>
-						<p style={{ color: "#64748b", margin: "0 0 12px", fontSize: "14px" }}>
+					<div style={{
+						marginTop: "40px",
+						padding: "24px",
+						background: "rgba(59,130,246,0.08)",
+						borderRadius: "12px",
+						border: "1px solid rgba(59,130,246,0.2)",
+					}}>
+						<h3 style={{ margin: "0 0 8px", color: "#60a5fa" }}>Full API Reference</h3>
+						<p style={{ color: "#a1a1aa", margin: "0 0 16px", fontSize: "14px" }}>
 							75+ exports covering rendering, routing, auth, validation, i18n, real-time, and more.
 						</p>
 						<a href="https://github.com/VirexJS/VirexJS/blob/main/docs/api-reference.md" class="btn btn-primary" target="_blank" rel="noopener" style={{ fontSize: "14px", padding: "10px 20px" }}>

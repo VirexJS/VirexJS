@@ -36,17 +36,26 @@ export default function Examples() {
 		<Layout title="Examples — VirexJS">
 			<section class="section">
 				<div class="container">
-					<h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "8px", textAlign: "center" }}>Examples</h1>
-					<p class="subtitle">Start with a template, customize from there</p>
+					<div class="section-header">
+						<h2>Examples</h2>
+						<p>Start with a template, customize from there</p>
+					</div>
 
-					<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "40px" }}>
+					<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "60px" }}>
 						{examples.map((ex) => (
-							<div class="feature">
+							<div class="card">
 								<h3 style={{ fontSize: "18px", marginBottom: "8px" }}>{ex.title}</h3>
-								<p style={{ marginBottom: "12px" }}>{ex.desc}</p>
-								<div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px" }}>
+								<p style={{ fontSize: "14px", color: "#a1a1aa", marginBottom: "14px" }}>{ex.desc}</p>
+								<div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "14px" }}>
 									{ex.features.map((f) => (
-										<span style={{ padding: "2px 8px", background: "#eff6ff", color: "#2563eb", borderRadius: "4px", fontSize: "12px", fontWeight: 600 }}>
+										<span style={{
+											padding: "3px 10px",
+											background: "rgba(59,130,246,0.1)",
+											color: "#60a5fa",
+											borderRadius: "6px",
+											fontSize: "12px",
+											fontWeight: 600,
+										}}>
 											{f}
 										</span>
 									))}
@@ -56,9 +65,9 @@ export default function Examples() {
 						))}
 					</div>
 
-					<div style={{ textAlign: "center", padding: "40px 0" }}>
-						<h2 style={{ marginBottom: "12px" }}>Interactive Playground</h2>
-						<p style={{ color: "#64748b", marginBottom: "20px" }}>
+					<div style={{ textAlign: "center", padding: "48px 0" }}>
+						<h2 style={{ fontSize: "2rem", fontWeight: 800, marginBottom: "12px" }}>Interactive Playground</h2>
+						<p style={{ color: "#a1a1aa", marginBottom: "24px", fontSize: "16px" }}>
 							13 islands, 27 pages, cross-island communication, async streaming, and more.
 						</p>
 						<a href="https://github.com/VirexJS/VirexJS/tree/main/playground" class="btn btn-primary" target="_blank" rel="noopener">
