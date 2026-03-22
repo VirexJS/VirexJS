@@ -2,6 +2,9 @@ import { cpSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { parseSegment, scanPages } from "@virexjs/router";
 import { processCSS } from "./css";
+import { generateHydrationRuntime } from "./hydration-runtime";
+import { bundleIslands } from "./island-bundle";
+import { extractIslands } from "./island-extract";
 import { writeBuildManifest } from "./manifest";
 import type { RobotsConfig } from "./robots";
 import { generateRobotsTxt } from "./robots";
@@ -44,10 +47,26 @@ export async function buildProduction(options: {
 	// Ensure output directory exists
 	mkdirSync(outDir, { recursive: true });
 
-	// 1. Scan pages
+	// 1. Register islands so renderToString adds hydration markers
+	const islands = extractIslands(srcDir);
+	const { registerIsland } = await import("virexjs/render/jsx");
+	for (const [name] of islands) {
+		registerIsland(name);
+	}
+
+	// Bundle islands for client-side hydration
+	let hydrationScript = "";
+	if (islands.size > 0) {
+		const bundleResult = await bundleIslands({ srcDir, outDir, minify });
+		if (bundleResult.bundles.size > 0) {
+			hydrationScript = generateHydrationRuntime("/_virex/islands/");
+		}
+	}
+
+	// 2. Scan pages
 	const routes = scanPages(pagesDir);
 
-	// 2. Render pages to HTML
+	// 3. Render pages to HTML
 	let totalSize = 0;
 	const pageNames: string[] = [];
 	const dynamicPages: string[] = [];
@@ -69,7 +88,7 @@ export async function buildProduction(options: {
 					// SSG: render each path returned by getStaticPaths
 					const paths: { params: Record<string, string> }[] = await mod.getStaticPaths();
 					for (const pathEntry of paths) {
-						const rendered = await renderStaticPage(mod, route, pathEntry.params, outDir);
+						const rendered = await renderStaticPage(mod, route, pathEntry.params, outDir, hydrationScript);
 						if (rendered) {
 							totalSize += rendered;
 							pageNames.push(
@@ -136,7 +155,11 @@ export async function buildProduction(options: {
 			}
 			const headHtml = [metaHtml, headComponentHtml].filter(Boolean).join("\n    ");
 
-			const fullHtml = buildDocument({ head: headHtml, body: bodyHtml });
+			const fullHtml = buildDocument({
+				head: headHtml,
+				body: bodyHtml,
+				devScript: hydrationScript || undefined,
+			});
 
 			// Determine output path
 			const outputPath =
@@ -219,6 +242,7 @@ async function renderStaticPage(
 	route: { absolutePath: string; segments: string[] },
 	params: Record<string, string>,
 	outDir: string,
+	hydrationScript?: string,
 ): Promise<number | null> {
 	try {
 		const component = mod.default as (props: Record<string, unknown>) => unknown;
@@ -269,7 +293,11 @@ async function renderStaticPage(
 		}
 		const headHtml = [metaHtml, headComponentHtml].filter(Boolean).join("\n    ");
 
-		const fullHtml = buildDocument({ head: headHtml, body: bodyHtml });
+		const fullHtml = buildDocument({
+			head: headHtml,
+			body: bodyHtml,
+			devScript: hydrationScript || undefined,
+		});
 
 		// Build output path: replace dynamic segments with param values
 		const resolvedSegments = route.segments.map((seg) => {
