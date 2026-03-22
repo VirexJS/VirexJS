@@ -115,7 +115,9 @@ export async function buildProduction(options: {
 
 			// Render
 			const { renderToString } = await import("virexjs/render/jsx");
-			const { buildDocument, renderMeta } = await import("virexjs/render/index");
+			const { buildDocument, renderMeta, flushHeadTags, resetHeadCollector } = await import("virexjs/render/index");
+
+			resetHeadCollector();
 
 			const pageProps = { data, params: {}, url: new URL("http://localhost/") };
 			let vnode = component(pageProps);
@@ -125,10 +127,14 @@ export async function buildProduction(options: {
 			}
 
 			const bodyHtml = renderToString(vnode);
-			let headHtml = "";
+
+			// Collect head tags from <Head> components + meta() export
+			const headComponentHtml = flushHeadTags();
+			let metaHtml = "";
 			if (mod.meta) {
-				headHtml = renderMeta(mod.meta({ data, params: {} }));
+				metaHtml = renderMeta(mod.meta({ data, params: {} }));
 			}
+			const headHtml = [metaHtml, headComponentHtml].filter(Boolean).join("\n    ");
 
 			const fullHtml = buildDocument({ head: headHtml, body: bodyHtml });
 
@@ -242,7 +248,9 @@ async function renderStaticPage(
 		}
 
 		const { renderToString } = await import("virexjs/render/jsx");
-		const { buildDocument, renderMeta } = await import("virexjs/render/index");
+		const { buildDocument, renderMeta, flushHeadTags, resetHeadCollector } = await import("virexjs/render/index");
+
+		resetHeadCollector();
 
 		const pageProps = { data, params, url: new URL("http://localhost/") };
 		let vnode = component(pageProps);
@@ -251,13 +259,15 @@ async function renderStaticPage(
 		}
 
 		const bodyHtml = renderToString(vnode as Parameters<typeof renderToString>[0]);
-		let headHtml = "";
+		const headComponentHtml = flushHeadTags();
+		let metaHtml = "";
 		const metaFn = mod.meta as
 			| ((ctx: Record<string, unknown>) => Record<string, unknown>)
 			| undefined;
 		if (metaFn) {
-			headHtml = renderMeta(metaFn({ data, params }));
+			metaHtml = renderMeta(metaFn({ data, params }));
 		}
+		const headHtml = [metaHtml, headComponentHtml].filter(Boolean).join("\n    ");
 
 		const fullHtml = buildDocument({ head: headHtml, body: bodyHtml });
 

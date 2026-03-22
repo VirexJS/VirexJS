@@ -10,50 +10,46 @@ const NAV = [
 
 export default function Layout(props: { children: unknown; title?: string }) {
 	return (
-		<html lang="en">
+		<div>
 			<Head>
-				<meta charset="utf-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<title>{props.title ?? "VirexJS — Ship HTML, not JavaScript"}</title>
 				<meta name="description" content="A full-stack web framework built on Bun. Zero client JS by default, islands architecture, 1098 tests." />
 				<link rel="icon" href="/favicon.svg" />
 				<style>{globalCSS()}</style>
 			</Head>
-			<body>
-				<nav class="nav">
-					<div class="container nav-inner">
-						<a href="/" class="logo">
-							<span class="logo-icon">V</span>
-							VirexJS
-						</a>
-						<div class="nav-links">
-							{NAV.map((item) => (
-								<a
-									href={item.href}
-									class="nav-link"
-									{...(item.href.startsWith("http") ? { target: "_blank", rel: "noopener" } : {})}
-								>
-									{item.label}
-								</a>
-							))}
-						</div>
+			<nav class="nav">
+				<div class="container nav-inner">
+					<a href="/" class="logo">
+						<span class="logo-icon">V</span>
+						VirexJS
+					</a>
+					<div class="nav-links">
+						{NAV.map((item) => (
+							<a
+								href={item.href}
+								class="nav-link"
+								{...(item.href.startsWith("http") ? { target: "_blank", rel: "noopener" } : {})}
+							>
+								{item.label}
+							</a>
+						))}
 					</div>
-				</nav>
-				<main>{props.children}</main>
-				<footer class="footer">
-					<div class="container">
-						<p>MIT License - ECOSTACK TECHNOLOGY OU</p>
-						<p class="footer-links">
-							<a href="https://github.com/VirexJS/VirexJS">GitHub</a>
-							<span> | </span>
-							<a href="https://www.npmjs.com/package/virexjs">npm</a>
-							<span> | </span>
-							<a href="/docs">Docs</a>
-						</p>
-					</div>
-				</footer>
-			</body>
-		</html>
+				</div>
+			</nav>
+			<main>{props.children}</main>
+			<footer class="footer">
+				<div class="container">
+					<p>MIT License - ECOSTACK TECHNOLOGY OU</p>
+					<p class="footer-links">
+						<a href="https://github.com/VirexJS/VirexJS">GitHub</a>
+						<span> | </span>
+						<a href="https://www.npmjs.com/package/virexjs">npm</a>
+						<span> | </span>
+						<a href="/docs">Docs</a>
+					</p>
+				</div>
+			</footer>
+		</div>
 	);
 }
 
