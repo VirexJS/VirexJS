@@ -17,6 +17,7 @@ export default function Header() {
 		{ href: "/api-demo", label: "API" },
 		{ href: "/db-demo", label: "DB" },
 		{ href: "/realtime", label: "RT" },
+		{ href: "/streaming", label: "Stream" },
 		{ href: "/i18n-demo", label: "i18n" },
 		{ href: "/api/docs", label: "Docs" },
 	];

@@ -25,7 +25,7 @@ export async function loader(_ctx: LoaderContext) {
 			},
 		],
 		serverTime: new Date().toLocaleTimeString(),
-		stats: { tests: 987, packages: 4, islands: 10, routes: 22 },
+		stats: { tests: 1069, packages: 4, islands: 10, routes: 25 },
 	};
 }
 
@@ -215,6 +215,7 @@ export default function Home(props: PageProps<HomeData>) {
 						{ href: "/api-demo", title: "API Explorer", desc: "7 endpoints" },
 						{ href: "/realtime", title: "Realtime", desc: "SSE + WebSocket" },
 						{ href: "/dashboard", title: "Dashboard", desc: "Parallel loaders" },
+						{ href: "/streaming", title: "Streaming", desc: "Async streaming" },
 					].map((item) => (
 						<a
 							href={item.href}
